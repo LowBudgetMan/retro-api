@@ -8,7 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity(name = "team_user_mapping")
@@ -22,5 +22,5 @@ public class UserMappingEntity {
     private UUID teamId;
     private String userId;
     @CreationTimestamp
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 }

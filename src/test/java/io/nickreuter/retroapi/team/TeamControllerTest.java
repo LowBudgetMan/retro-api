@@ -12,7 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 import static org.mockito.Mockito.doThrow;
@@ -42,7 +42,7 @@ class TeamControllerTest {
     void createTeam_Returns201WithLocationIncludingTeamId() throws Exception {
         var teamId = UUID.randomUUID();
         var teamName = "Team name";
-        when(service.createTeam(teamName, "user")).thenReturn(new TeamEntity(teamId, teamName, LocalDateTime.now()));
+        when(service.createTeam(teamName, "user")).thenReturn(new TeamEntity(teamId, teamName, Instant.now()));
 
         mockMvc.perform(post("/api/team")
                         .with(jwt())

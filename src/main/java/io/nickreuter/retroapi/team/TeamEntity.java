@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Getter
@@ -23,7 +23,7 @@ public class TeamEntity {
     @Column(unique = true)
     private String name;
     @CreationTimestamp
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     public TeamEntity(String name) {
         this.name = name;

@@ -5,7 +5,7 @@ import io.nickreuter.retroapi.team.usermapping.UserMappingService;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -20,7 +20,7 @@ class TeamServiceTest {
 
     @Test
     void createTeam_ShouldReturnCreatedTeam() throws TeamAlreadyExistsException {
-        var expected = new TeamEntity(UUID.randomUUID(), "expected name", LocalDateTime.now());
+        var expected = new TeamEntity(UUID.randomUUID(), "expected name", Instant.now());
         when(teamRepository.existsByName("expected name")).thenReturn(false);
         when(teamRepository.save(ArgumentMatchers.argThat((TeamEntity team) ->
                 team.getId() == null &&
@@ -40,7 +40,7 @@ class TeamServiceTest {
 
     @Test
     void createTeam_ShouldAddCreatingUserToTeam() throws TeamAlreadyExistsException {
-        var expected = new TeamEntity(UUID.randomUUID(), "expected team name", LocalDateTime.now());
+        var expected = new TeamEntity(UUID.randomUUID(), "expected team name", Instant.now());
         when(teamRepository.existsByName("expected team name")).thenReturn(false);
         when(teamRepository.save(any())).thenReturn(expected);
         var actual = service.createTeam("expected team name", "User ID");
