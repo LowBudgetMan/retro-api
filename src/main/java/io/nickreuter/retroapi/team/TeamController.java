@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.security.Principal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/team")
@@ -22,6 +23,11 @@ public class TeamController {
     public ResponseEntity<Void> createTeam(@RequestBody CreateTeamRequest request, Principal principal) throws TeamAlreadyExistsException {
         var team = teamService.createTeam(request.name(), principal.getName());
         return ResponseEntity.created(URI.create("/api/team/%s".formatted(team.getId()))).build();
+    }
+
+    @GetMapping
+    public List<TeamEntity> getTeamsForUser(Principal principal) {
+        return teamService.getTeamsForUser(principal.getName());
     }
 
     @ExceptionHandler(TeamAlreadyExistsException.class)

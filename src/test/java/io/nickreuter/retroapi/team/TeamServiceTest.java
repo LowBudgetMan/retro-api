@@ -1,12 +1,15 @@
 package io.nickreuter.retroapi.team;
 
 import io.nickreuter.retroapi.team.exception.TeamAlreadyExistsException;
+import io.nickreuter.retroapi.team.usermapping.UserMappingEntity;
 import io.nickreuter.retroapi.team.usermapping.UserMappingService;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,5 +49,21 @@ class TeamServiceTest {
         var actual = service.createTeam("expected team name", "User ID");
         assertThat(actual).isEqualTo(expected);
         verify(userMappingService).addUserToTeam("User ID", actual.getId());
+    }
+
+    @Test
+    void getTeamsForUser_ShouldReturnAllTeamsForUser() {
+        var userId = "userId";
+        var teamId1 = UUID.randomUUID();
+        var teamId2 = UUID.randomUUID();
+        var mapping1 = new UserMappingEntity(UUID.randomUUID(), teamId1, userId, Instant.now());
+        var mapping2 = new UserMappingEntity(UUID.randomUUID(), teamId2, userId, Instant.now());
+        var expected = List.of(new TeamEntity(teamId1, "Team 1", Instant.now()), new TeamEntity(teamId2, "Team 2", Instant.now()));
+        when(userMappingService.getTeamsForUser(userId)).thenReturn(Set.of(mapping1, mapping2));
+        when(teamRepository.findAllByIdInOrderByNameAsc(Set.of(mapping1.getTeamId(), mapping2.getTeamId()))).thenReturn(expected);
+
+        var actual = service.getTeamsForUser(userId);
+
+        assertThat(actual).isEqualTo(expected);
     }
 }

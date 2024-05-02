@@ -3,11 +3,13 @@ package io.nickreuter.retroapi.team.usermapping;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 
+import java.time.Instant;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
 class UserMappingServiceTest {
 
@@ -26,5 +28,16 @@ class UserMappingServiceTest {
                 Objects.equals(entity.getUserId(), userId) &&
                 entity.getCreatedAt() == null)
         );
+    }
+
+    @Test
+    public void getTeamsForUser_ReturnsSetFromRepository() {
+        var expected = Set.of(
+                new UserMappingEntity(UUID.randomUUID(), UUID.randomUUID(), "userId", Instant.now()),
+                new UserMappingEntity(UUID.randomUUID(), UUID.randomUUID(), "userId", Instant.now())
+        );
+        when(userMappingRepository.findAllByUserId("userId")).thenReturn(expected);
+        var actual = service.getTeamsForUser("userId");
+        assertThat(actual).isEqualTo(expected);
     }
 }
