@@ -4,6 +4,7 @@ import io.nickreuter.retroapi.team.exception.TeamAlreadyExistsException;
 import io.nickreuter.retroapi.team.exception.TeamNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -33,6 +34,7 @@ public class TeamController {
     }
 
     @GetMapping("/{teamId}")
+    @PreAuthorize("@userMappingAuthorizationService.isUserMemberOfTeam(authentication, #teamId)")
     public TeamEntity getTeam(@PathVariable UUID teamId) throws TeamNotFoundException {
         return teamService.getTeam(teamId).orElseThrow(TeamNotFoundException::new);
     }

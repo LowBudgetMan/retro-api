@@ -2,6 +2,8 @@ package io.nickreuter.retroapi.team;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.nickreuter.retroapi.team.exception.TeamAlreadyExistsException;
+import io.nickreuter.retroapi.team.usermapping.UserMappingAuthorizationService;
+import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -9,10 +11,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,20 +34,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @SpringBootTest
 class TeamControllerTest {
-
     @MockBean
     private JwtDecoder jwtDecoder;
-
     @MockBean
     private TeamService service;
-
     @Autowired
     private MockMvc mockMvc;
-
     @Autowired
     private ObjectMapper objectMapper;
-    @Autowired
-    private TeamService teamService;
+    @MockBean
+    private UserMappingAuthorizationService userMappingAuthorizationService;
 
     @Test
     void createTeam_Returns201WithLocationIncludingTeamId() throws Exception {
@@ -81,7 +84,7 @@ class TeamControllerTest {
     void getTeamsForUser_ReturnsListOfTeams() throws Exception {
         var team1 = new TeamEntity(UUID.fromString("7c52730b-b9e8-4db8-a8fd-4fd3a9d84809"), "Team 1", Instant.ofEpochSecond(1000000001));
         var team2 = new TeamEntity(UUID.fromString("be117b4d-b57f-4263-916a-e6933d6bf6fe"), "Team 2", Instant.ofEpochSecond(1000000002));
-        when(teamService.getTeamsForUser("user")).thenReturn(List.of(team1, team2));
+        when(service.getTeamsForUser("user")).thenReturn(List.of(team1, team2));
         mockMvc.perform(get("/api/team")
                 .with(jwt())
                 .with(csrf()))
@@ -105,7 +108,9 @@ class TeamControllerTest {
     @Test
     void getTeam_WhenTeamExists_ReturnsTeam() throws Exception {
         var teamId = UUID.randomUUID();
-        when(teamService.getTeam(teamId)).thenReturn(Optional.of(new TeamEntity(teamId, "Team 1", Instant.ofEpochMilli(20000000))));
+        var authentication = createAuthentication();
+        when(userMappingAuthorizationService.isUserMemberOfTeam(authentication, teamId)).thenReturn(true);
+        when(service.getTeam(teamId)).thenReturn(Optional.of(new TeamEntity(teamId, "Team 1", Instant.ofEpochMilli(20000000))));
         mockMvc.perform(get("/api/team/%s".formatted(teamId))
                 .with(jwt())
                 .with(csrf()))
@@ -116,12 +121,53 @@ class TeamControllerTest {
     }
 
     @Test
+    void getTeam_WhenUserNotOnTeam_Returns403() throws Exception {
+        var teamId = UUID.randomUUID();
+        var authentication = createAuthentication();
+        when(userMappingAuthorizationService.isUserMemberOfTeam(authentication, teamId)).thenReturn(false);
+        mockMvc.perform(get("/api/team/%s".formatted(teamId))
+                        .with(jwt()))
+                .andExpect(status().isForbidden());
+
+    }
+
+    @Test
+    void getTeam_WhenInvalidToken_Returns401() throws Exception {
+        mockMvc.perform(get("/api/team/%s".formatted(UUID.randomUUID()))
+                        .with(anonymous()))
+                .andExpect(status().isUnauthorized());
+
+    }
+
+    @Test
     void getTeam_WhenTeamDoesNotExist_Returns404() throws Exception {
         var teamId = UUID.randomUUID();
-        when(teamService.getTeam(teamId)).thenReturn(Optional.empty());
+        var authentication = createAuthentication();
+        when(userMappingAuthorizationService.isUserMemberOfTeam(authentication, teamId)).thenReturn(true);
+        when(service.getTeam(teamId)).thenReturn(Optional.empty());
         mockMvc.perform(get("/api/team/%s".formatted(teamId))
                         .with(jwt())
                         .with(csrf()))
                 .andExpect(status().isNotFound());
+    }
+
+    Authentication createAuthentication() {
+        var headers = new HashMap<String, Object>();
+        headers.put("alg", "none");
+        var claims = new HashMap<String, Object>();
+        claims.put("sub", "user");
+        claims.put("scope", "read");
+        var authorities = Lists.list(new SimpleGrantedAuthority("SCOPE_read"));
+        return new JwtAuthenticationToken(
+                new Jwt(
+                        "token",
+                        null,
+                        null,
+                        headers,
+                        claims
+                ),
+                authorities,
+                "user"
+        );
     }
 }
