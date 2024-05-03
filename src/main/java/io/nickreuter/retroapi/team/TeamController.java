@@ -1,6 +1,7 @@
 package io.nickreuter.retroapi.team;
 
 import io.nickreuter.retroapi.team.exception.TeamAlreadyExistsException;
+import io.nickreuter.retroapi.team.exception.TeamNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 import java.security.Principal;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/team")
@@ -30,8 +32,18 @@ public class TeamController {
         return teamService.getTeamsForUser(principal.getName());
     }
 
+    @GetMapping("/{teamId}")
+    public TeamEntity getTeam(@PathVariable UUID teamId) throws TeamNotFoundException {
+        return teamService.getTeam(teamId).orElseThrow(TeamNotFoundException::new);
+    }
+
     @ExceptionHandler(TeamAlreadyExistsException.class)
     public ResponseEntity<Void> handleTeamAlreadyExists() {
         return ResponseEntity.status(HttpStatus.CONFLICT).build();
+    }
+
+    @ExceptionHandler(TeamNotFoundException.class)
+    public ResponseEntity<Void> handleTeamNotFound() {
+        return ResponseEntity.notFound().build();
     }
 }

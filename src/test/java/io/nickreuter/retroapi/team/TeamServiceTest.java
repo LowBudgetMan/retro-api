@@ -7,10 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -63,6 +60,17 @@ class TeamServiceTest {
         when(teamRepository.findAllByIdInOrderByNameAsc(Set.of(mapping1.getTeamId(), mapping2.getTeamId()))).thenReturn(expected);
 
         var actual = service.getTeamsForUser(userId);
+
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void getTeam_ReturnsTeamOptionalFromRepository() {
+        var teamId = UUID.randomUUID();
+        var expected = Optional.of(new TeamEntity(teamId, "Team 1", Instant.now()));
+        when(teamRepository.findById(teamId)).thenReturn(expected);
+
+        var actual = service.getTeam(teamId);
 
         assertThat(actual).isEqualTo(expected);
     }

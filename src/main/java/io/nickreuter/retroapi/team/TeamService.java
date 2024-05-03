@@ -6,6 +6,8 @@ import io.nickreuter.retroapi.team.usermapping.UserMappingService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,5 +33,9 @@ public class TeamService {
                 .map(UserMappingEntity::getTeamId)
                 .collect(Collectors.toSet());
         return teamRepository.findAllByIdInOrderByNameAsc(teamIds);
+    }
+
+    public Optional<TeamEntity> getTeam(UUID teamId) {
+        return teamRepository.findById(teamId);
     }
 }

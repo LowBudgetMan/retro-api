@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.Mockito.doThrow;
@@ -91,5 +92,36 @@ class TeamControllerTest {
             .andExpect(jsonPath("$.[1].id").value("be117b4d-b57f-4263-916a-e6933d6bf6fe"))
             .andExpect(jsonPath("$.[1].name").value("Team 2"))
             .andExpect(jsonPath("$.[1].createdAt").value("2001-09-09T01:46:42Z"));
+    }
+
+    @Test
+    void getTeamsForUser_WithInvalidToken_Throws401() throws Exception {
+        mockMvc.perform(get("/api/team")
+                        .with(anonymous())
+                        .with(csrf()))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void getTeam_WhenTeamExists_ReturnsTeam() throws Exception {
+        var teamId = UUID.randomUUID();
+        when(teamService.getTeam(teamId)).thenReturn(Optional.of(new TeamEntity(teamId, "Team 1", Instant.ofEpochMilli(20000000))));
+        mockMvc.perform(get("/api/team/%s".formatted(teamId))
+                .with(jwt())
+                .with(csrf()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(teamId.toString()))
+            .andExpect(jsonPath("$.name").value("Team 1"))
+            .andExpect(jsonPath("$.createdAt").value(Instant.ofEpochMilli(20000000).toString()));
+    }
+
+    @Test
+    void getTeam_WhenTeamDoesNotExist_Returns404() throws Exception {
+        var teamId = UUID.randomUUID();
+        when(teamService.getTeam(teamId)).thenReturn(Optional.empty());
+        mockMvc.perform(get("/api/team/%s".formatted(teamId))
+                        .with(jwt())
+                        .with(csrf()))
+                .andExpect(status().isNotFound());
     }
 }
