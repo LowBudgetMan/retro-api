@@ -15,9 +15,9 @@ import java.time.Instant;
 import java.util.UUID;
 
 import static io.nickreuter.retroapi.team.TestAuthenticationCreationService.createAuthentication;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -78,5 +78,37 @@ class InviteControllerTest {
                         .with(jwt())
                         .with(csrf()))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deleteInvite_WhenSuccessful_Returns200() throws Exception {
+        var teamId = UUID.randomUUID();
+        var inviteId = UUID.randomUUID();
+        var authentication = createAuthentication();
+        when(userMappingAuthorizationService.isUserMemberOfTeam(authentication, teamId)).thenReturn(true);
+        mockMvc.perform(delete("/api/teams/%s/invites/%s".formatted(teamId.toString(), inviteId.toString()))
+                        .with(jwt())
+                        .with(csrf()))
+                .andExpect(status().isNoContent());
+        verify(inviteService).deleteInvite(inviteId);
+    }
+
+    @Test
+    void deleteInvite_WithInvalidToken_Throws401() throws Exception{
+        mockMvc.perform(delete("/api/teams/%s/invites/%s".formatted(UUID.randomUUID(), UUID.randomUUID()))
+                        .with(anonymous())
+                        .with(csrf()))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void deleteInvite_WhenUserNotOnTeam_Throws403() throws Exception {
+        UUID teamId = UUID.randomUUID();
+        var authentication = createAuthentication();
+        when(userMappingAuthorizationService.isUserMemberOfTeam(authentication, teamId)).thenReturn(false);
+        mockMvc.perform(delete("/api/teams/%s/invites/%s".formatted(teamId, UUID.randomUUID()))
+                        .with(jwt())
+                        .with(csrf()))
+                .andExpect(status().isForbidden());
     }
 }

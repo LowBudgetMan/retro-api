@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/team")
+@RequestMapping("/api/teams")
 public class TeamController {
 
     private final TeamService teamService;
@@ -25,7 +25,7 @@ public class TeamController {
     @PostMapping
     public ResponseEntity<Void> createTeam(@RequestBody CreateTeamRequest request, Principal principal) throws TeamAlreadyExistsException {
         var team = teamService.createTeam(request.name(), principal.getName());
-        return ResponseEntity.created(URI.create("/api/team/%s".formatted(team.getId()))).build();
+        return ResponseEntity.created(URI.create("/api/teams/%s".formatted(team.getId()))).build();
     }
 
     @GetMapping

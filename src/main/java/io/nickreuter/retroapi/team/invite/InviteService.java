@@ -23,4 +23,8 @@ public class InviteService {
             throw new TeamNotFoundException();
         }
     }
+
+    public void deleteInvite(UUID inviteId) {
+        inviteRepository.deleteById(inviteId);
+    }
 }

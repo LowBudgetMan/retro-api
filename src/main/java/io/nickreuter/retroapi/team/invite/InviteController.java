@@ -25,6 +25,13 @@ public class InviteController {
         return ResponseEntity.created(URI.create("/api/teams/%s/invites/%s".formatted(teamId, invite.getId()))).build();
     }
 
+    @DeleteMapping("/{inviteId}")
+    @PreAuthorize("@userMappingAuthorizationService.isUserMemberOfTeam(authentication, #teamId)")
+    public ResponseEntity<Void> deleteInvite(@PathVariable("teamId") UUID teamId, @PathVariable("inviteId") UUID inviteId) {
+        inviteService.deleteInvite(inviteId);
+        return ResponseEntity.noContent().build();
+    }
+
     @ExceptionHandler(TeamNotFoundException.class)
     public ResponseEntity<Void> handleTeamNotFoundException() {
         return ResponseEntity.notFound().build();

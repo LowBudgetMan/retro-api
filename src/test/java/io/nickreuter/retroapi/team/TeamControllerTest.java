@@ -47,17 +47,17 @@ class TeamControllerTest {
         var teamName = "Team name";
         when(service.createTeam(teamName, "user")).thenReturn(new TeamEntity(teamId, teamName, Instant.now()));
 
-        mockMvc.perform(post("/api/team")
+        mockMvc.perform(post("/api/teams")
                         .with(jwt())
                         .content(objectMapper.writeValueAsString(new CreateTeamRequest(teamName)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
-                .andExpect(header().string(HttpHeaders.LOCATION, "/api/team/%s".formatted(teamId)));
+                .andExpect(header().string(HttpHeaders.LOCATION, "/api/teams/%s".formatted(teamId)));
     }
 
     @Test
     void createTeam_WithInvalidToken_Throws401() throws Exception {
-        mockMvc.perform(post("/api/team")
+        mockMvc.perform(post("/api/teams")
                         .with(anonymous())
                         .with(csrf())
                         .content(objectMapper.writeValueAsString(new CreateTeamRequest("Team name")))
@@ -69,7 +69,7 @@ class TeamControllerTest {
     void createTeam_WhenTeamAlreadyExists_Throws409() throws Exception {
         var teamName = "Team name";
         doThrow(TeamAlreadyExistsException.class).when(service).createTeam(teamName, "user");
-        mockMvc.perform(post("/api/team")
+        mockMvc.perform(post("/api/teams")
                         .with(jwt())
                         .content(objectMapper.writeValueAsString(new CreateTeamRequest(teamName)))
                         .contentType(MediaType.APPLICATION_JSON))
@@ -81,7 +81,7 @@ class TeamControllerTest {
         var team1 = new TeamEntity(UUID.fromString("7c52730b-b9e8-4db8-a8fd-4fd3a9d84809"), "Team 1", Instant.ofEpochSecond(1000000001));
         var team2 = new TeamEntity(UUID.fromString("be117b4d-b57f-4263-916a-e6933d6bf6fe"), "Team 2", Instant.ofEpochSecond(1000000002));
         when(service.getTeamsForUser("user")).thenReturn(List.of(team1, team2));
-        mockMvc.perform(get("/api/team")
+        mockMvc.perform(get("/api/teams")
                 .with(jwt())
                 .with(csrf()))
             .andExpect(status().isOk())
@@ -95,7 +95,7 @@ class TeamControllerTest {
 
     @Test
     void getTeamsForUser_WithInvalidToken_Throws401() throws Exception {
-        mockMvc.perform(get("/api/team")
+        mockMvc.perform(get("/api/teams")
                         .with(anonymous())
                         .with(csrf()))
                 .andExpect(status().isUnauthorized());
@@ -107,7 +107,7 @@ class TeamControllerTest {
         var authentication = createAuthentication();
         when(userMappingAuthorizationService.isUserMemberOfTeam(authentication, teamId)).thenReturn(true);
         when(service.getTeam(teamId)).thenReturn(Optional.of(new TeamEntity(teamId, "Team 1", Instant.ofEpochMilli(20000000))));
-        mockMvc.perform(get("/api/team/%s".formatted(teamId))
+        mockMvc.perform(get("/api/teams/%s".formatted(teamId))
                 .with(jwt())
                 .with(csrf()))
             .andExpect(status().isOk())
@@ -121,7 +121,7 @@ class TeamControllerTest {
         var teamId = UUID.randomUUID();
         var authentication = createAuthentication();
         when(userMappingAuthorizationService.isUserMemberOfTeam(authentication, teamId)).thenReturn(false);
-        mockMvc.perform(get("/api/team/%s".formatted(teamId))
+        mockMvc.perform(get("/api/teams/%s".formatted(teamId))
                         .with(jwt()))
                 .andExpect(status().isForbidden());
 
@@ -129,7 +129,7 @@ class TeamControllerTest {
 
     @Test
     void getTeam_WhenInvalidToken_Returns401() throws Exception {
-        mockMvc.perform(get("/api/team/%s".formatted(UUID.randomUUID()))
+        mockMvc.perform(get("/api/teams/%s".formatted(UUID.randomUUID()))
                         .with(anonymous()))
                 .andExpect(status().isUnauthorized());
 
@@ -141,7 +141,7 @@ class TeamControllerTest {
         var authentication = createAuthentication();
         when(userMappingAuthorizationService.isUserMemberOfTeam(authentication, teamId)).thenReturn(true);
         when(service.getTeam(teamId)).thenReturn(Optional.empty());
-        mockMvc.perform(get("/api/team/%s".formatted(teamId))
+        mockMvc.perform(get("/api/teams/%s".formatted(teamId))
                         .with(jwt())
                         .with(csrf()))
                 .andExpect(status().isNotFound());

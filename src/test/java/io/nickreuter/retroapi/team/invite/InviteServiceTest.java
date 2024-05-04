@@ -12,8 +12,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class InviteServiceTest {
     private final TeamService teamService = mock(TeamService.class);
@@ -41,5 +40,12 @@ class InviteServiceTest {
         var teamId = UUID.randomUUID();
         when(teamService.getTeam(teamId)).thenReturn(Optional.empty());
         assertThatThrownBy(() -> subject.createInvite(teamId)).isInstanceOf(TeamNotFoundException.class);
+    }
+
+    @Test
+    void deleteInvite_PassesInviteIdToRepository() {
+        var inviteId = UUID.randomUUID();
+        subject.deleteInvite(inviteId);
+        verify(inviteRepository).deleteById(inviteId);
     }
 }
