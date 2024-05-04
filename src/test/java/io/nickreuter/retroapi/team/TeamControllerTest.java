@@ -3,7 +3,6 @@ package io.nickreuter.retroapi.team;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.nickreuter.retroapi.team.exception.TeamAlreadyExistsException;
 import io.nickreuter.retroapi.team.usermapping.UserMappingAuthorizationService;
-import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -11,19 +10,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static io.nickreuter.retroapi.team.TestAuthenticationCreationService.createAuthentication;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
@@ -38,12 +33,13 @@ class TeamControllerTest {
     private JwtDecoder jwtDecoder;
     @MockBean
     private TeamService service;
+    @MockBean
+    private UserMappingAuthorizationService userMappingAuthorizationService;
+
     @Autowired
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
-    @MockBean
-    private UserMappingAuthorizationService userMappingAuthorizationService;
 
     @Test
     void createTeam_Returns201WithLocationIncludingTeamId() throws Exception {
@@ -149,25 +145,5 @@ class TeamControllerTest {
                         .with(jwt())
                         .with(csrf()))
                 .andExpect(status().isNotFound());
-    }
-
-    Authentication createAuthentication() {
-        var headers = new HashMap<String, Object>();
-        headers.put("alg", "none");
-        var claims = new HashMap<String, Object>();
-        claims.put("sub", "user");
-        claims.put("scope", "read");
-        var authorities = Lists.list(new SimpleGrantedAuthority("SCOPE_read"));
-        return new JwtAuthenticationToken(
-                new Jwt(
-                        "token",
-                        null,
-                        null,
-                        headers,
-                        claims
-                ),
-                authorities,
-                "user"
-        );
     }
 }
