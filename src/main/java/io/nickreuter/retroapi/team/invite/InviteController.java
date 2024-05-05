@@ -20,7 +20,7 @@ public class InviteController {
 
     @PostMapping
     @PreAuthorize("@userMappingAuthorizationService.isUserMemberOfTeam(authentication, #teamId)")
-    public ResponseEntity<Void> createInvite(@PathVariable("teamId") UUID teamId) throws TeamNotFoundException {
+    public ResponseEntity<Void> createInvite(@PathVariable("teamId") UUID teamId) {
         var invite = inviteService.createInvite(teamId);
         return ResponseEntity.created(URI.create("/api/teams/%s/invites/%s".formatted(teamId, invite.getId()))).build();
     }
