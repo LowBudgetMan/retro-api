@@ -1,6 +1,9 @@
 package io.nickreuter.retroapi.team;
 
+import io.nickreuter.retroapi.team.exception.BadInviteException;
 import io.nickreuter.retroapi.team.exception.TeamAlreadyExistsException;
+import io.nickreuter.retroapi.team.invite.InviteEntity;
+import io.nickreuter.retroapi.team.invite.InviteService;
 import io.nickreuter.retroapi.team.usermapping.UserMappingEntity;
 import io.nickreuter.retroapi.team.usermapping.UserMappingService;
 import org.junit.jupiter.api.Test;
@@ -9,14 +12,15 @@ import org.mockito.ArgumentMatchers;
 import java.time.Instant;
 import java.util.*;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static java.time.temporal.ChronoUnit.HOURS;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class TeamServiceTest {
     private final TeamRepository teamRepository = mock(TeamRepository.class);
     private final UserMappingService userMappingService = mock(UserMappingService.class);
-    private final TeamService service = new TeamService(teamRepository, userMappingService);
+    private final InviteService inviteService = mock(InviteService.class);
+    private final TeamService service = new TeamService(teamRepository, userMappingService, inviteService);
 
     @Test
     void createTeam_ShouldReturnCreatedTeam() throws TeamAlreadyExistsException {
@@ -73,5 +77,37 @@ class TeamServiceTest {
         var actual = service.getTeam(teamId);
 
         assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void addUser_WhenInviteDoesNotExist_ThrowsBadInviteException() {
+        var teamId = UUID.randomUUID();
+        var userId = "userId";
+        var inviteId = UUID.randomUUID();
+        when(inviteService.getInviteForTeam(teamId, inviteId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.addUser(teamId, userId, inviteId)).isInstanceOf(BadInviteException.class);
+    }
+
+    @Test
+    void addUser_WhenInviteTimeFallsOutsideThreeHours_ThrowsBadInviteException() {
+        var teamId = UUID.randomUUID();
+        var userId = "userId";
+        var inviteId = UUID.randomUUID();
+        when(inviteService.getInviteForTeam(teamId, inviteId)).thenReturn(Optional.of(new InviteEntity(inviteId, teamId, Instant.now().minus(3, HOURS))));
+
+        assertThatThrownBy(() -> service.addUser(teamId, userId, inviteId)).isInstanceOf(BadInviteException.class);
+    }
+
+    @Test
+    void addUser_WhenInviteIsValid_AddsUserToTeam() throws Exception {
+        var teamId = UUID.randomUUID();
+        var userId = "userId";
+        var inviteId = UUID.randomUUID();
+        when(inviteService.getInviteForTeam(teamId, inviteId)).thenReturn(Optional.of(new InviteEntity(inviteId, teamId, Instant.now())));
+
+        service.addUser(teamId, userId, inviteId);
+
+        verify(userMappingService).addUserToTeam(userId, teamId);
     }
 }
