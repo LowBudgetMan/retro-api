@@ -1,6 +1,5 @@
 package io.nickreuter.retroapi.team.invite;
 
-import io.nickreuter.retroapi.team.exception.TeamNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -30,10 +29,5 @@ public class InviteController {
     public ResponseEntity<Void> deleteInvite(@PathVariable("teamId") UUID teamId, @PathVariable("inviteId") UUID inviteId) {
         inviteService.deleteInvite(inviteId);
         return ResponseEntity.noContent().build();
-    }
-
-    @ExceptionHandler(TeamNotFoundException.class)
-    public ResponseEntity<Void> handleTeamNotFoundException() {
-        return ResponseEntity.notFound().build();
     }
 }

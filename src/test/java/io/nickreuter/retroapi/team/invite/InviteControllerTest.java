@@ -1,6 +1,5 @@
 package io.nickreuter.retroapi.team.invite;
 
-import io.nickreuter.retroapi.team.exception.TeamNotFoundException;
 import io.nickreuter.retroapi.team.usermapping.UserMappingAuthorizationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,8 @@ import java.time.Instant;
 import java.util.UUID;
 
 import static io.nickreuter.retroapi.team.TestAuthenticationCreationService.createAuthentication;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -66,18 +66,6 @@ class InviteControllerTest {
                         .with(jwt())
                         .with(csrf()))
                 .andExpect(status().isForbidden());
-    }
-
-    @Test
-    void createInvite_WithInvalidTeam_Throws404() throws Exception {
-        UUID teamId = UUID.randomUUID();
-        var authentication = createAuthentication();
-        when(userMappingAuthorizationService.isUserMemberOfTeam(authentication, teamId)).thenReturn(true);
-        doThrow(TeamNotFoundException.class).when(inviteService).createInvite(teamId);
-        mockMvc.perform(post("/api/teams/%s/invites".formatted(teamId))
-                        .with(jwt())
-                        .with(csrf()))
-                .andExpect(status().isNotFound());
     }
 
     @Test
