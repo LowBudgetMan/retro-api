@@ -20,4 +20,8 @@ public class UserMappingService {
     public Set<UserMappingEntity> getTeamsForUser(String userId) {
         return userMappingRepository.findAllByUserId(userId);
     }
+
+    public void removeUserFromTeam(UUID teamId, String userId) {
+        userMappingRepository.deleteAllByTeamIdAndUserId(teamId, userId);
+    }
 }

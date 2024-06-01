@@ -46,6 +46,13 @@ public class TeamController {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/{id}/users/{userId}")
+    @PreAuthorize("@userMappingAuthorizationService.isUserMemberOfTeam(authentication, #teamId)")
+    public ResponseEntity<Void> removeUser(@PathVariable("id") UUID teamId, @PathVariable("userId") String userId) {
+        teamService.removeUser(teamId, userId);
+        return ResponseEntity.ok().build();
+    }
+
     @ExceptionHandler(TeamAlreadyExistsException.class)
     public ResponseEntity<Void> handleTeamAlreadyExists() {
         return ResponseEntity.status(HttpStatus.CONFLICT).build();

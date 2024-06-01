@@ -110,4 +110,12 @@ class TeamServiceTest {
 
         verify(userMappingService).addUserToTeam(userId, teamId);
     }
+
+    @Test
+    void removeUser_CallsUserMappingRemove() {
+        var teamId = UUID.randomUUID();
+        var userId = "user ID";
+        service.removeUser(teamId, userId);
+        verify(userMappingService).removeUserFromTeam(teamId, userId);
+    }
 }

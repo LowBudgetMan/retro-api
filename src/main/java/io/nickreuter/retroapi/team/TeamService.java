@@ -57,4 +57,8 @@ public class TeamService {
                 .isAfter(Instant.now()))
                 .orElse(false);
     }
+
+    public void removeUser(UUID teamId, String userId) {
+        userMappingService.removeUserFromTeam(teamId, userId);
+    }
 }

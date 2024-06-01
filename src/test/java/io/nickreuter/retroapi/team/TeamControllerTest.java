@@ -23,8 +23,8 @@ import java.util.UUID;
 import static io.nickreuter.retroapi.team.TestAuthenticationCreationService.createAuthentication;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @AutoConfigureMockMvc
@@ -182,5 +182,44 @@ class TeamControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new AddUserToTeamRequest(inviteId))))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void removeUser_RemovesUser() throws Exception{
+        var teamId = UUID.randomUUID();
+        var userToRemoveId = "user2";
+        var authentication = createAuthentication();
+        when(userMappingAuthorizationService.isUserMemberOfTeam(authentication, teamId)).thenReturn(true);
+
+        mockMvc.perform(delete("/api/teams/%s/users/%s".formatted(teamId.toString(), userToRemoveId))
+                        .with(csrf())
+                        .with(jwt()))
+                .andExpect(status().isOk());
+        verify(service).removeUser(teamId, userToRemoveId);
+    }
+
+    @Test
+    void removeUser_WithInvalidToken_Throws401() throws Exception{
+        var teamId = UUID.randomUUID();
+        var userToRemoveId = "user2";
+        mockMvc.perform(delete("/api/teams/%s/users/%s".formatted(teamId.toString(), userToRemoveId))
+                        .with(csrf())
+                        .with(anonymous()))
+                .andExpect(status().isUnauthorized());
+        verify(service, never()).removeUser(teamId, userToRemoveId);
+    }
+
+    @Test
+    void removeUser_WhenUserIsNotOnTeam_Throws403() throws Exception{
+        var teamId = UUID.randomUUID();
+        var userToRemoveId = "user2";
+        var authentication = createAuthentication();
+        when(userMappingAuthorizationService.isUserMemberOfTeam(authentication, teamId)).thenReturn(false);
+
+        mockMvc.perform(delete("/api/teams/%s/users/%s".formatted(teamId.toString(), userToRemoveId))
+                        .with(csrf())
+                        .with(jwt()))
+                .andExpect(status().isForbidden());
+        verify(service, never()).removeUser(teamId, userToRemoveId);
     }
 }

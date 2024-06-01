@@ -16,7 +16,6 @@ class UserMappingServiceTest {
     private final UserMappingRepository userMappingRepository = mock(UserMappingRepository.class);
     private final UserMappingService service = new UserMappingService(userMappingRepository);
 
-
     @Test
     void addUserToTeam_SavesRecordToRepositoryWithTeamAndUserId() {
         var teamId = UUID.randomUUID();
@@ -31,7 +30,7 @@ class UserMappingServiceTest {
     }
 
     @Test
-    public void getTeamsForUser_ReturnsSetFromRepository() {
+    void getTeamsForUser_ReturnsSetFromRepository() {
         var expected = Set.of(
                 new UserMappingEntity(UUID.randomUUID(), UUID.randomUUID(), "userId", Instant.now()),
                 new UserMappingEntity(UUID.randomUUID(), UUID.randomUUID(), "userId", Instant.now())
@@ -39,5 +38,13 @@ class UserMappingServiceTest {
         when(userMappingRepository.findAllByUserId("userId")).thenReturn(expected);
         var actual = service.getTeamsForUser("userId");
         assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void removeUserFromTeam_CallsRemoveOnRepository() {
+        var teamId = UUID.randomUUID();
+        var userId = "user ID";
+        service.removeUserFromTeam(teamId, userId);
+        verify(userMappingRepository).deleteAllByTeamIdAndUserId(teamId, userId);
     }
 }

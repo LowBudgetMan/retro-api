@@ -11,4 +11,5 @@ import java.util.UUID;
 public interface UserMappingRepository extends JpaRepository<UserMappingEntity, UUID> {
     Set<UserMappingEntity> findAllByUserId(String userId);
     Optional<UserMappingEntity> findByTeamIdAndUserId(UUID teamId, String userId);
+    void deleteAllByTeamIdAndUserId(UUID teamId, String userId);
 }
