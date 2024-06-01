@@ -1,6 +1,7 @@
 package io.nickreuter.retroapi.team;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.nickreuter.retroapi.team.exception.BadInviteException;
 import io.nickreuter.retroapi.team.exception.TeamAlreadyExistsException;
 import io.nickreuter.retroapi.team.usermapping.UserMappingAuthorizationService;
 import org.junit.jupiter.api.Test;
@@ -11,6 +12,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
@@ -19,8 +21,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static io.nickreuter.retroapi.team.TestAuthenticationCreationService.createAuthentication;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -145,5 +146,41 @@ class TeamControllerTest {
                         .with(jwt())
                         .with(csrf()))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void addUser_WithGoodInvite_Returns200() throws Exception {
+        var teamId = UUID.randomUUID();
+        var inviteId = UUID.randomUUID();
+        mockMvc.perform(post("/api/teams/%s/users".formatted(teamId.toString()))
+                        .with(jwt())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new AddUserToTeamRequest(inviteId))))
+                .andExpect(status().isNoContent());
+        verify(service).addUser(teamId, "user", inviteId);
+    }
+
+    @Test
+    void addUser_WithInvalidToken_Throws401() throws Exception {
+        mockMvc.perform(post("/api/teams/%s/users".formatted(UUID.randomUUID()))
+                        .with(SecurityMockMvcRequestPostProcessors.anonymous())
+                        .with(csrf())
+                        .content(objectMapper.writeValueAsString(new AddUserToTeamRequest(UUID.randomUUID())))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void addUser_WithExpiredInvite_Returns400() throws Exception {
+        var teamId = UUID.randomUUID();
+        var inviteId = UUID.randomUUID();
+        doThrow(BadInviteException.class).when(service).addUser(teamId, "user", inviteId);
+        mockMvc.perform(post("/api/teams/%s/users".formatted(teamId.toString()))
+                        .with(jwt())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new AddUserToTeamRequest(inviteId))))
+                .andExpect(status().isBadRequest());
     }
 }

@@ -1,5 +1,6 @@
 package io.nickreuter.retroapi.team;
 
+import io.nickreuter.retroapi.team.exception.BadInviteException;
 import io.nickreuter.retroapi.team.exception.TeamAlreadyExistsException;
 import io.nickreuter.retroapi.team.exception.TeamNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -39,6 +40,12 @@ public class TeamController {
         return teamService.getTeam(teamId).orElseThrow(TeamNotFoundException::new);
     }
 
+    @PostMapping("/{id}/users")
+    public ResponseEntity<Void> addUser(@PathVariable("id") UUID teamId, @RequestBody AddUserToTeamRequest request, Principal principal) throws BadInviteException {
+        teamService.addUser(teamId, principal.getName(), request.inviteId());
+        return ResponseEntity.noContent().build();
+    }
+
     @ExceptionHandler(TeamAlreadyExistsException.class)
     public ResponseEntity<Void> handleTeamAlreadyExists() {
         return ResponseEntity.status(HttpStatus.CONFLICT).build();
@@ -47,5 +54,10 @@ public class TeamController {
     @ExceptionHandler(TeamNotFoundException.class)
     public ResponseEntity<Void> handleTeamNotFound() {
         return ResponseEntity.notFound().build();
+    }
+
+    @ExceptionHandler(BadInviteException.class)
+    public ResponseEntity<Void> handleBadInvite() {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
 }
