@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -26,6 +27,19 @@ class RetroServiceTest {
         ).thenReturn(expected);
 
         var actual = subject.createRetro(teamId);
+
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void getRetros_ReturnsRetros() {
+        var teamId = UUID.randomUUID();
+        var retro1 = new RetroEntity(UUID.randomUUID(), UUID.randomUUID(), Instant.now());
+        var retro2 = new RetroEntity(UUID.randomUUID(), UUID.randomUUID(), Instant.now());
+        var expected = List.of(retro1, retro2);
+        when(retroRepository.findAllByTeamIdOrderByCreatedAtDesc(teamId)).thenReturn(expected);
+
+        var actual = subject.getRetros(teamId);
 
         assertThat(actual).isEqualTo(expected);
     }
