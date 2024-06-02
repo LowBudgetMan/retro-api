@@ -62,4 +62,22 @@
             </column>
         </createTable>
     </changeSet>
+    <changeSet id="add-retro-table" author="lowbudgetman">
+        <preConditions>
+            <not>
+                <tableExists tableName="retro"/>
+            </not>
+        </preConditions>
+        <createTable tableName="retro">
+            <column name="id" type="uuid" autoIncrement="1">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="team_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="FK_RETRO_TEAM" references="team(id)" />
+            </column>
+            <column name="created_at" type="datetime">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>
