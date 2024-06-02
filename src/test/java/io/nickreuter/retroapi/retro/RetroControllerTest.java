@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static io.nickreuter.retroapi.team.TestAuthenticationCreationService.createAuthentication;
@@ -33,6 +34,8 @@ class RetroControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private RetroAuthorizationService retroAuthorizationService;
 
     @Test
     void createRetro_Returns201WithLocation() throws Exception {
@@ -99,5 +102,41 @@ class RetroControllerTest {
                         .with(jwt())
                         .with(csrf()))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void getRetro_ReturnsRetro() throws Exception {
+        var teamId = UUID.randomUUID();
+        var retro = new RetroEntity(UUID.randomUUID(), teamId, Instant.now());
+        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), teamId, retro.getId())).thenReturn(true);
+        when(retroService.getRetro(retro.getId())).thenReturn(Optional.of(retro));
+        mockMvc.perform(get("/api/teams/%s/retros/%s".formatted(teamId, retro.getId()))
+                    .with(jwt())
+                    .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(retro.getId().toString()))
+                .andExpect(jsonPath("$.teamId").value(retro.getTeamId().toString()))
+                .andExpect(jsonPath("$.createdAt").value(retro.getCreatedAt().toString()));
+    }
+
+    @Test
+    void getRetro_WhenUserNotAllowedInRetro_Throws403() throws Exception {
+        var teamId = UUID.randomUUID();
+        var retro = new RetroEntity(UUID.randomUUID(), teamId, Instant.now());
+        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), teamId, retro.getId())).thenReturn(false);
+        mockMvc.perform(get("/api/teams/%s/retros/%s".formatted(teamId, retro.getId()))
+                        .with(jwt())
+                        .with(csrf()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void getRetro_WhenBadToken_Throws401() throws Exception {
+        var teamId = UUID.randomUUID();
+        var retro = new RetroEntity(UUID.randomUUID(), teamId, Instant.now());
+        mockMvc.perform(get("/api/teams/%s/retros/%s".formatted(teamId, retro.getId()))
+                        .with(anonymous())
+                        .with(csrf()))
+                .andExpect(status().isUnauthorized());
     }
 }

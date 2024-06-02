@@ -27,11 +27,16 @@ public class RetroController {
 
     @GetMapping
     @PreAuthorize("@userMappingAuthorizationService.isUserMemberOfTeam(authentication, #teamId)")
-    public ResponseEntity<List<RetroListItem>> getRetros(@PathVariable("teamId") UUID teamId) {
-        return ResponseEntity.ok(retroService.getRetros(teamId)
+    public List<RetroListItem> getRetros(@PathVariable("teamId") UUID teamId) {
+        return retroService.getRetros(teamId)
                 .stream()
                 .map(retro -> new RetroListItem(retro.getId(), retro.getTeamId(), retro.getCreatedAt()))
-                .toList()
-        );
+                .toList();
+    }
+
+    @GetMapping("/{retroId}")
+    @PreAuthorize("@retroAuthorizationService.isUserAllowedInRetro(authentication, #teamId, #retroId)")
+    public RetroEntity getRetro(@PathVariable("teamId") UUID teamId, @PathVariable("retroId") UUID retroId) {
+        return retroService.getRetro(retroId).orElseThrow();
     }
 }

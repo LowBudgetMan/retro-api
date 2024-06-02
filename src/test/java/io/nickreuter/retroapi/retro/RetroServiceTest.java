@@ -6,6 +6,7 @@ import org.mockito.ArgumentMatchers;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,5 +43,14 @@ class RetroServiceTest {
         var actual = subject.getRetros(teamId);
 
         assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void getRetro_ReturnsRetro() {
+        var retroId = UUID.randomUUID();
+        var expected = new RetroEntity(UUID.randomUUID(), UUID.randomUUID(), Instant.now());
+        when(retroRepository.findById(retroId)).thenReturn(Optional.of(expected));
+
+        assertThat(subject.getRetro(retroId)).contains(expected);
     }
 }
