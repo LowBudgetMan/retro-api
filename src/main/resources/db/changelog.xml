@@ -78,6 +78,9 @@
             <column name="created_at" type="datetime">
                 <constraints nullable="false" />
             </column>
+            <column name="finished" type="boolean">
+                <constraints nullable="false" />
+            </column>
         </createTable>
     </changeSet>
 </databaseChangeLog>

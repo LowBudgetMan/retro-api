@@ -20,7 +20,7 @@ class RetroServiceTest {
     @Test
     void createRetro_ReturnsCreatedRetro() {
         var teamId = UUID.randomUUID();
-        var expected = new RetroEntity(UUID.randomUUID(), teamId, Instant.now());
+        var expected = new RetroEntity(UUID.randomUUID(), teamId, false, Instant.now());
         when(retroRepository.save(ArgumentMatchers.argThat((RetroEntity retro) ->
             retro.getId() == null &&
             Objects.equals(retro.getTeamId(), teamId) &&
@@ -35,8 +35,8 @@ class RetroServiceTest {
     @Test
     void getRetros_ReturnsRetros() {
         var teamId = UUID.randomUUID();
-        var retro1 = new RetroEntity(UUID.randomUUID(), UUID.randomUUID(), Instant.now());
-        var retro2 = new RetroEntity(UUID.randomUUID(), UUID.randomUUID(), Instant.now());
+        var retro1 = new RetroEntity(UUID.randomUUID(), UUID.randomUUID(), false, Instant.now());
+        var retro2 = new RetroEntity(UUID.randomUUID(), UUID.randomUUID(), false, Instant.now());
         var expected = List.of(retro1, retro2);
         when(retroRepository.findAllByTeamIdOrderByCreatedAtDesc(teamId)).thenReturn(expected);
 
@@ -48,7 +48,7 @@ class RetroServiceTest {
     @Test
     void getRetro_ReturnsRetro() {
         var retroId = UUID.randomUUID();
-        var expected = new RetroEntity(UUID.randomUUID(), UUID.randomUUID(), Instant.now());
+        var expected = new RetroEntity(UUID.randomUUID(), UUID.randomUUID(), false, Instant.now());
         when(retroRepository.findById(retroId)).thenReturn(Optional.of(expected));
 
         assertThat(subject.getRetro(retroId)).contains(expected);

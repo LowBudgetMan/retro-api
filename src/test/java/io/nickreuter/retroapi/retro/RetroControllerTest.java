@@ -41,7 +41,7 @@ class RetroControllerTest {
     void createRetro_Returns201WithLocation() throws Exception {
         var teamId = UUID.randomUUID();
         var retroId = UUID.randomUUID();
-        when(retroService.createRetro(teamId)).thenReturn(new RetroEntity(retroId, teamId, Instant.now()));
+        when(retroService.createRetro(teamId)).thenReturn(new RetroEntity(retroId, teamId, false, Instant.now()));
         when(userMappingAuthorizationService.isUserMemberOfTeam(createAuthentication(), teamId)).thenReturn(true);
         mockMvc.perform(post("/api/teams/%s/retros".formatted(teamId))
                     .with(jwt())
@@ -70,8 +70,8 @@ class RetroControllerTest {
     @Test
     void getRetros_ReturnsRetros() throws Exception {
         var teamId = UUID.randomUUID();
-        var retro1 = new RetroEntity(UUID.randomUUID(), teamId, Instant.now());
-        var retro2 = new RetroEntity(UUID.randomUUID(), teamId, Instant.now());
+        var retro1 = new RetroEntity(UUID.randomUUID(), teamId, false, Instant.now());
+        var retro2 = new RetroEntity(UUID.randomUUID(), teamId, false, Instant.now());
         when(userMappingAuthorizationService.isUserMemberOfTeam(createAuthentication(), teamId)).thenReturn(true);
         when(retroService.getRetros(teamId)).thenReturn(List.of(retro1, retro2));
         mockMvc.perform(get("/api/teams/%s/retros".formatted(teamId))
@@ -80,9 +80,11 @@ class RetroControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0].id").value(retro1.getId().toString()))
                 .andExpect(jsonPath("$.[0].teamId").value(retro1.getTeamId().toString()))
+                .andExpect(jsonPath("$.[0].finished").value(retro1.isFinished()))
                 .andExpect(jsonPath("$.[0].createdAt").value(retro1.getCreatedAt().toString()))
                 .andExpect(jsonPath("$.[1].id").value(retro2.getId().toString()))
                 .andExpect(jsonPath("$.[1].teamId").value(retro2.getTeamId().toString()))
+                .andExpect(jsonPath("$.[1].finished").value(retro2.isFinished()))
                 .andExpect(jsonPath("$.[1].createdAt").value(retro2.getCreatedAt().toString()));
     }
 
@@ -107,7 +109,7 @@ class RetroControllerTest {
     @Test
     void getRetro_ReturnsRetro() throws Exception {
         var teamId = UUID.randomUUID();
-        var retro = new RetroEntity(UUID.randomUUID(), teamId, Instant.now());
+        var retro = new RetroEntity(UUID.randomUUID(), teamId, false, Instant.now());
         when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), teamId, retro.getId())).thenReturn(true);
         when(retroService.getRetro(retro.getId())).thenReturn(Optional.of(retro));
         mockMvc.perform(get("/api/teams/%s/retros/%s".formatted(teamId, retro.getId()))
@@ -122,7 +124,7 @@ class RetroControllerTest {
     @Test
     void getRetro_WhenUserNotAllowedInRetro_Throws403() throws Exception {
         var teamId = UUID.randomUUID();
-        var retro = new RetroEntity(UUID.randomUUID(), teamId, Instant.now());
+        var retro = new RetroEntity(UUID.randomUUID(), teamId, false, Instant.now());
         when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), teamId, retro.getId())).thenReturn(false);
         mockMvc.perform(get("/api/teams/%s/retros/%s".formatted(teamId, retro.getId()))
                         .with(jwt())
@@ -133,7 +135,7 @@ class RetroControllerTest {
     @Test
     void getRetro_WhenBadToken_Throws401() throws Exception {
         var teamId = UUID.randomUUID();
-        var retro = new RetroEntity(UUID.randomUUID(), teamId, Instant.now());
+        var retro = new RetroEntity(UUID.randomUUID(), teamId, false, Instant.now());
         mockMvc.perform(get("/api/teams/%s/retros/%s".formatted(teamId, retro.getId()))
                         .with(anonymous())
                         .with(csrf()))

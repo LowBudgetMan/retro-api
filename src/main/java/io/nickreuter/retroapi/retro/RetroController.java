@@ -30,7 +30,7 @@ public class RetroController {
     public List<RetroListItem> getRetros(@PathVariable("teamId") UUID teamId) {
         return retroService.getRetros(teamId)
                 .stream()
-                .map(retro -> new RetroListItem(retro.getId(), retro.getTeamId(), retro.getCreatedAt()))
+                .map(RetroListItem::from)
                 .toList();
     }
 

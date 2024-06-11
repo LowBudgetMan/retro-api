@@ -22,6 +22,7 @@ public class RetroEntity {
     @GeneratedValue
     private UUID id;
     private UUID teamId;
+    private boolean finished;
     @CreationTimestamp
     private Instant createdAt;
 
