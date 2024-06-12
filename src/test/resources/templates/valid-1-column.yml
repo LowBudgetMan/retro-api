@@ -1,0 +1,10 @@
+id: 1
+name: Happy
+description: Description
+categories:
+  - name: "Happy"
+    position: 1
+    lightBackgroundColor: "#ffffff"
+    lightTextColor: "#ffffff"
+    darkBackgroundColor: "#ffffff"
+    darkTextColor: "#ffffff"

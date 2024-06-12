@@ -1,0 +1,23 @@
+id: 0
+name: Happy, Confused, Sad
+description: Description
+categories:
+  - name: "Happy"
+    position: 1
+    lightBackgroundColor: "#ffffff"
+    lightTextColor: "#ffffff"
+    darkBackgroundColor: "#ffffff"
+    darkTextColor: "#ffffff"
+  - name: "Confused"
+    position: 2
+    lightBackgroundColor: "#ffffff"
+    lightTextColor: "#ffffff"
+    darkBackgroundColor: "#ffffff"
+    darkTextColor: "#ffffff"
+  - name: "Sad"
+    position: 3
+    lightBackgroundColor: "#ffffff"
+    lightTextColor: "#ffffff"
+    darkBackgroundColor: "#ffffff"
+    darkTextColor: "#ffffff"
+

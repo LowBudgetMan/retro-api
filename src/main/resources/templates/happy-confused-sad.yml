@@ -1,0 +1,34 @@
+id: 0
+name: Happy, Confused, Sad
+description: > 
+  The Happy, Confused, Sad retro format is best used to drill down into specific feelings that team members have. By
+  finding the root causes of these feelings and identifying things to try to stop/continue them, the team can start
+  turning feelings into actions. Performing this retro often helps check to see if the small, actionable changes
+  are having an impact on the emotions the team is feeling week over week.
+  
+
+  Happy: What made you feel happy? What could we do to continue that?
+  
+  Confused: What confused you? What can be done to help that confusion?
+  
+  Sad: What is something that saddened or angered you? How do we prevent that from happening again?
+categories:
+  - name: "Happy"
+    position: 1
+    lightBackgroundColor: "#2ecc71"
+    lightTextColor: "#ffffff"
+    darkBackgroundColor: "#27ae60"
+    darkTextColor: "#ffffff"
+  - name: "Confused"
+    position: 2
+    lightBackgroundColor: "#3498db"
+    lightTextColor: "#ffffff"
+    darkBackgroundColor: "#2980b9"
+    darkTextColor: "#ffffff"
+  - name: "Sad"
+    position: 3
+    lightBackgroundColor: "#e74c3c"
+    lightTextColor: "#ffffff"
+    darkBackgroundColor: "#c0392b"
+    darkTextColor: "#ffffff"
+
