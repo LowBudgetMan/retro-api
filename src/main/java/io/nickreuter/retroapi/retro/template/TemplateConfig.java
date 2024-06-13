@@ -1,8 +1,7 @@
-package io.nickreuter.retroapi.configuration;
+package io.nickreuter.retroapi.retro.template;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import io.nickreuter.retroapi.retro.template.Template;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;

@@ -1,7 +1,5 @@
-package io.nickreuter.retroapi.configuration;
+package io.nickreuter.retroapi.retro.template;
 
-import io.nickreuter.retroapi.retro.template.Category;
-import io.nickreuter.retroapi.retro.template.Template;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.ClassPathResource;
