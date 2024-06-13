@@ -41,7 +41,7 @@ class RetroAuthorizationServiceTest {
         var teamId = UUID.randomUUID();
         var retroId = UUID.randomUUID();
         when(userMappingAuthorizationService.isUserMemberOfTeam(authentication, teamId)).thenReturn(true);
-        when(retroService.getRetro(retroId)).thenReturn(Optional.of(new RetroEntity(UUID.randomUUID())));
+        when(retroService.getRetro(retroId)).thenReturn(Optional.of(new RetroEntity(UUID.randomUUID(), 0)));
 
         assertThat(retroAuthorizationService.isUserAllowedInRetro(authentication, teamId, retroId)).isFalse();
     }
@@ -51,7 +51,7 @@ class RetroAuthorizationServiceTest {
         var teamId = UUID.randomUUID();
         var retroId = UUID.randomUUID();
         when(userMappingAuthorizationService.isUserMemberOfTeam(authentication, teamId)).thenReturn(true);
-        when(retroService.getRetro(retroId)).thenReturn(Optional.of(new RetroEntity(teamId)));
+        when(retroService.getRetro(retroId)).thenReturn(Optional.of(new RetroEntity(teamId, 0)));
 
         assertThat(retroAuthorizationService.isUserAllowedInRetro(authentication, teamId, retroId)).isTrue();
     }

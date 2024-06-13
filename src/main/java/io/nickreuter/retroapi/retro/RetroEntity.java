@@ -23,10 +23,12 @@ public class RetroEntity {
     private UUID id;
     private UUID teamId;
     private boolean finished;
+    private int templateId;
     @CreationTimestamp
     private Instant createdAt;
 
-    public RetroEntity(UUID teamId) {
+    public RetroEntity(UUID teamId, int templateId) {
         this.teamId = teamId;
+        this.templateId = templateId;
     }
 }

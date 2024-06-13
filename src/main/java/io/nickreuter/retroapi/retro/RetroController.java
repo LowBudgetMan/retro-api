@@ -20,8 +20,8 @@ public class RetroController {
 
     @PostMapping
     @PreAuthorize("@userMappingAuthorizationService.isUserMemberOfTeam(authentication, #teamId)")
-    public ResponseEntity<Void> createRetro(@PathVariable("teamId") UUID teamId) {
-        var retro = retroService.createRetro(teamId);
+    public ResponseEntity<Void> createRetro(@PathVariable("teamId") UUID teamId, @RequestBody CreateRetroRequest request) throws InvalidTemplateIdException {
+        var retro = retroService.createRetro(teamId, request.retroTemplateId());
         return ResponseEntity.created(URI.create("/api/teams/%s/retros/%s".formatted(teamId, retro.getId()))).build();
     }
 
@@ -38,5 +38,10 @@ public class RetroController {
     @PreAuthorize("@retroAuthorizationService.isUserAllowedInRetro(authentication, #teamId, #retroId)")
     public RetroEntity getRetro(@PathVariable("teamId") UUID teamId, @PathVariable("retroId") UUID retroId) {
         return retroService.getRetro(retroId).orElseThrow();
+    }
+
+    @ExceptionHandler(InvalidTemplateIdException.class)
+    public ResponseEntity<Void> handleInvalidTemplateId() {
+        return ResponseEntity.badRequest().build();
     }
 }

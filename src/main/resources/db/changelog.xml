@@ -75,10 +75,13 @@
             <column name="team_id" type="uuid">
                 <constraints nullable="false" foreignKeyName="FK_RETRO_TEAM" references="team(id)" />
             </column>
-            <column name="created_at" type="datetime">
+            <column name="finished" type="boolean">
                 <constraints nullable="false" />
             </column>
-            <column name="finished" type="boolean">
+            <column name="template_id" type="int">
+                <constraints nullable="false" />
+            </column>
+            <column name="created_at" type="datetime">
                 <constraints nullable="false" />
             </column>
         </createTable>
