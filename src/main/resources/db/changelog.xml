@@ -85,5 +85,28 @@
                 <constraints nullable="false" />
             </column>
         </createTable>
+        <createTable tableName="thought">
+            <column name="id" type="uuid" autoIncrement="1">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="message" type="VARCHAR(1000)">
+                <constraints nullable="false" />
+            </column>
+            <column name="votes" type="int">
+                <constraints nullable="false" />
+            </column>
+            <column name="completed" type="boolean">
+                <constraints nullable="false" />
+            </column>
+            <column name="category" type="VARCHAR(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="retro_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="FK_THOUGHT_RETRO" references="retro(id)" />
+            </column>
+            <column name="created_at" type="datetime">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
     </changeSet>
 </databaseChangeLog>
