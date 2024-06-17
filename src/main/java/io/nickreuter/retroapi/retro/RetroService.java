@@ -1,7 +1,6 @@
 package io.nickreuter.retroapi.retro;
 
 import io.nickreuter.retroapi.retro.template.Template;
-import io.nickreuter.retroapi.retro.template.exception.TemplateNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,18 +33,10 @@ public class RetroService {
     }
 
     public Optional<Retro> getRetro(UUID retroId) {
-        Optional<Retro> maybeRetro;
         var maybeRetroEntity = retroRepository.findById(retroId);
-        if(maybeRetroEntity.isEmpty()) {
-            maybeRetro = Optional.empty();
-        } else {
-            try {
-                maybeRetro = Optional.of(Retro.from(maybeRetroEntity.get(), findTemplateBytId(maybeRetroEntity.get().getTemplateId()).orElseThrow(TemplateNotFoundException::new)));
-            } catch (TemplateNotFoundException e) {
-                maybeRetro = Optional.empty();
-            }
-        }
-        return maybeRetro;
+        return maybeRetroEntity.isEmpty() || findTemplateBytId(maybeRetroEntity.get().getTemplateId()).isEmpty()
+            ? Optional.empty()
+            : Optional.of(Retro.from(maybeRetroEntity.get(), findTemplateBytId(maybeRetroEntity.get().getTemplateId()).get()));
     }
 
     private Optional<Template> findTemplateBytId(String templateId) {
