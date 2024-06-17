@@ -24,7 +24,7 @@ class TemplateConfigTest {
         });
         assertThat(subject.templates()).containsExactly(
                 new Template(
-                    0,
+                    "valid-3-column.yml",
                     "Happy, Confused, Sad",
                     "Description",
                     List.of(
@@ -34,7 +34,7 @@ class TemplateConfigTest {
                     )
                 ),
                 new Template(
-                        1,
+                        "valid-1-column.yml",
                         "Happy",
                         "Description",
                         List.of(new Category("Happy", 1, "#ffffff", "#ffffff", "#ffffff", "#ffffff"))
@@ -50,7 +50,7 @@ class TemplateConfigTest {
         });
         assertThat(subject.templates()).containsExactly(
                 new Template(
-                        0,
+                        "valid-3-column.yml",
                         "Happy, Confused, Sad",
                         "Description",
                         List.of(

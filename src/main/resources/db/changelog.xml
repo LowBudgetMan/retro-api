@@ -78,7 +78,7 @@
             <column name="finished" type="boolean">
                 <constraints nullable="false" />
             </column>
-            <column name="template_id" type="int">
+            <column name="template_id" type="VARCHAR(255)">
                 <constraints nullable="false" />
             </column>
             <column name="created_at" type="datetime">

@@ -1,6 +1,7 @@
 package io.nickreuter.retroapi.retro;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.nickreuter.retroapi.retro.template.Template;
 import io.nickreuter.retroapi.retro.thought.ThoughtEntity;
 import io.nickreuter.retroapi.team.usermapping.UserMappingAuthorizationService;
 import org.junit.jupiter.api.Test;
@@ -44,17 +45,19 @@ class RetroControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    private final Template savedTemplate = new Template("template-id", "template-name", "description", List.of());
+
     @Test
     void createRetro_Returns201WithLocation() throws Exception {
         var teamId = UUID.randomUUID();
         var retroId = UUID.randomUUID();
-        when(retroService.createRetro(teamId, 0)).thenReturn(new RetroEntity(retroId, teamId, false, 0, Set.of(), Instant.now()));
+        when(retroService.createRetro(teamId, "template-id")).thenReturn(new RetroEntity(retroId, teamId, false, "template-id", Set.of(), Instant.now()));
         when(userMappingAuthorizationService.isUserMemberOfTeam(createAuthentication(), teamId)).thenReturn(true);
         mockMvc.perform(post("/api/teams/%s/retros".formatted(teamId))
                     .with(jwt())
                     .with(csrf())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(new CreateRetroRequest(0))))
+                    .content(objectMapper.writeValueAsString(new CreateRetroRequest("template-id"))))
                 .andExpect(status().isCreated())
                 .andExpect(header().string(HttpHeaders.LOCATION, "/api/teams/%s/retros/%s".formatted(teamId, retroId)));
     }
@@ -62,13 +65,13 @@ class RetroControllerTest {
     @Test
     void createRetro_WhenTemplateIdDoesNotExist_Returns400() throws Exception {
         var teamId = UUID.randomUUID();
-        when(retroService.createRetro(teamId, -3)).thenThrow(InvalidTemplateIdException.class);
+        when(retroService.createRetro(teamId, "oops")).thenThrow(InvalidTemplateIdException.class);
         when(userMappingAuthorizationService.isUserMemberOfTeam(createAuthentication(), teamId)).thenReturn(true);
         mockMvc.perform(post("/api/teams/%s/retros".formatted(teamId))
                         .with(jwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new CreateRetroRequest(-3))))
+                        .content(objectMapper.writeValueAsString(new CreateRetroRequest("oops"))))
                 .andExpect(status().isBadRequest());
     }
 
@@ -88,15 +91,15 @@ class RetroControllerTest {
                         .with(jwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new CreateRetroRequest(0))))
+                        .content(objectMapper.writeValueAsString(new CreateRetroRequest("id"))))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     void getRetros_ReturnsRetros() throws Exception {
         var teamId = UUID.randomUUID();
-        var retro1 = new RetroEntity(UUID.randomUUID(), teamId, false, 0, Set.of(), Instant.now());
-        var retro2 = new RetroEntity(UUID.randomUUID(), teamId, false, 0, Set.of(), Instant.now());
+        var retro1 = new RetroEntity(UUID.randomUUID(), teamId, false, "template-id", Set.of(), Instant.now());
+        var retro2 = new RetroEntity(UUID.randomUUID(), teamId, false, "template-id", Set.of(), Instant.now());
         when(userMappingAuthorizationService.isUserMemberOfTeam(createAuthentication(), teamId)).thenReturn(true);
         when(retroService.getRetros(teamId)).thenReturn(List.of(retro1, retro2));
         mockMvc.perform(get("/api/teams/%s/retros".formatted(teamId))
@@ -134,16 +137,16 @@ class RetroControllerTest {
     @Test
     void getRetro_ReturnsRetro() throws Exception {
         var teamId = UUID.randomUUID();
-        var retro = new RetroEntity(UUID.randomUUID(), teamId, false, 0, Set.of(), Instant.now());
-        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), teamId, retro.getId())).thenReturn(true);
-        when(retroService.getRetro(retro.getId())).thenReturn(Optional.of(retro));
-        mockMvc.perform(get("/api/teams/%s/retros/%s".formatted(teamId, retro.getId()))
+        var retro = new Retro(UUID.randomUUID(), teamId, false, savedTemplate, Set.of(), Instant.now());
+        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), teamId, retro.id())).thenReturn(true);
+        when(retroService.getRetro(retro.id())).thenReturn(Optional.of(retro));
+        mockMvc.perform(get("/api/teams/%s/retros/%s".formatted(teamId, retro.id()))
                     .with(jwt())
                     .with(csrf()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(retro.getId().toString()))
-                .andExpect(jsonPath("$.teamId").value(retro.getTeamId().toString()))
-                .andExpect(jsonPath("$.createdAt").value(retro.getCreatedAt().toString()));
+                .andExpect(jsonPath("$.id").value(retro.id().toString()))
+                .andExpect(jsonPath("$.teamId").value(retro.teamId().toString()))
+                .andExpect(jsonPath("$.createdAt").value(retro.createdAt().toString()));
     }
 
     @Test
@@ -152,10 +155,10 @@ class RetroControllerTest {
         var retroId = UUID.randomUUID();
         var thought1 = new ThoughtEntity(UUID.randomUUID(), "message 1", 2, true, "category 1", retroId, Instant.now());
         var thought2 = new ThoughtEntity(UUID.randomUUID(), "message 2", 0, false, "category 2", retroId, Instant.now());
-        var retro = new RetroEntity(retroId, teamId, false, 0, Set.of(thought1, thought2), Instant.now());
-        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), teamId, retro.getId())).thenReturn(true);
-        when(retroService.getRetro(retro.getId())).thenReturn(Optional.of(retro));
-        mockMvc.perform(get("/api/teams/%s/retros/%s".formatted(teamId, retro.getId()))
+        var retro = new Retro(retroId, teamId, false, savedTemplate, Set.of(thought1, thought2), Instant.now());
+        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), teamId, retro.id())).thenReturn(true);
+        when(retroService.getRetro(retro.id())).thenReturn(Optional.of(retro));
+        mockMvc.perform(get("/api/teams/%s/retros/%s".formatted(teamId, retro.id()))
                         .with(jwt())
                         .with(csrf()))
                 .andExpect(status().isOk())
@@ -171,7 +174,7 @@ class RetroControllerTest {
     @Test
     void getRetro_WhenUserNotAllowedInRetro_Throws403() throws Exception {
         var teamId = UUID.randomUUID();
-        var retro = new RetroEntity(UUID.randomUUID(), teamId, false, 0, Set.of(), Instant.now());
+        var retro = new RetroEntity(UUID.randomUUID(), teamId, false, savedTemplate.id(), Set.of(), Instant.now());
         when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), teamId, retro.getId())).thenReturn(false);
         mockMvc.perform(get("/api/teams/%s/retros/%s".formatted(teamId, retro.getId()))
                         .with(jwt())
@@ -182,7 +185,7 @@ class RetroControllerTest {
     @Test
     void getRetro_WhenBadToken_Throws401() throws Exception {
         var teamId = UUID.randomUUID();
-        var retro = new RetroEntity(UUID.randomUUID(), teamId, false, 0, Set.of(), Instant.now());
+        var retro = new RetroEntity(UUID.randomUUID(), teamId, false, savedTemplate.id(), Set.of(), Instant.now());
         mockMvc.perform(get("/api/teams/%s/retros/%s".formatted(teamId, retro.getId()))
                         .with(anonymous())
                         .with(csrf()))

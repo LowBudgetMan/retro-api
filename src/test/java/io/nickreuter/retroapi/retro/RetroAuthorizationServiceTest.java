@@ -4,7 +4,9 @@ import io.nickreuter.retroapi.team.usermapping.UserMappingAuthorizationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.Authentication;
 
+import java.time.Instant;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,7 +43,7 @@ class RetroAuthorizationServiceTest {
         var teamId = UUID.randomUUID();
         var retroId = UUID.randomUUID();
         when(userMappingAuthorizationService.isUserMemberOfTeam(authentication, teamId)).thenReturn(true);
-        when(retroService.getRetro(retroId)).thenReturn(Optional.of(new RetroEntity(UUID.randomUUID(), 0)));
+        when(retroService.getRetro(retroId)).thenReturn(Optional.of(new Retro(retroId, UUID.randomUUID(), false, null, Set.of(), Instant.now())));
 
         assertThat(retroAuthorizationService.isUserAllowedInRetro(authentication, teamId, retroId)).isFalse();
     }
@@ -51,7 +53,7 @@ class RetroAuthorizationServiceTest {
         var teamId = UUID.randomUUID();
         var retroId = UUID.randomUUID();
         when(userMappingAuthorizationService.isUserMemberOfTeam(authentication, teamId)).thenReturn(true);
-        when(retroService.getRetro(retroId)).thenReturn(Optional.of(new RetroEntity(teamId, 0)));
+        when(retroService.getRetro(retroId)).thenReturn(Optional.of(new Retro(retroId, teamId, false, null, Set.of(), Instant.now())));
 
         assertThat(retroAuthorizationService.isUserAllowedInRetro(authentication, teamId, retroId)).isTrue();
     }

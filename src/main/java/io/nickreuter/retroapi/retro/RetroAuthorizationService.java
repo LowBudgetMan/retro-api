@@ -20,7 +20,7 @@ public class RetroAuthorizationService {
     public boolean isUserAllowedInRetro(Authentication authentication, UUID teamId, UUID retroId) {
         if (userMappingAuthorizationService.isUserMemberOfTeam(authentication, teamId)) {
             var retro = retroService.getRetro(retroId);
-            return retro.isPresent() && retro.get().getTeamId().equals(teamId);
+            return retro.isPresent() && retro.get().teamId().equals(teamId);
         }
         return false;
     }

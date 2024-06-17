@@ -15,19 +15,20 @@ import static org.mockito.Mockito.when;
 
 class RetroServiceTest {
     private final RetroRepository retroRepository = mock(RetroRepository.class);
-    private final RetroService subject = new RetroService(retroRepository, List.of(new Template(0, "name", "description", List.of(new Category("column", 1, "", "", "", "")))));
+    private final Template savedTemplate = new Template("template", "name", "description", List.of(new Category("column", 1, "", "", "", "")));
+    private final RetroService subject = new RetroService(retroRepository, List.of(savedTemplate));
 
     @Test
     void createRetro_ReturnsCreatedRetro() throws InvalidTemplateIdException {
         var teamId = UUID.randomUUID();
-        var expected = new RetroEntity(UUID.randomUUID(), teamId, false, 0, Set.of(), Instant.now());
+        var expected = new RetroEntity(UUID.randomUUID(), teamId, false, "template", Set.of(), Instant.now());
         when(retroRepository.save(ArgumentMatchers.argThat((RetroEntity retro) ->
             retro.getId() == null &&
             Objects.equals(retro.getTeamId(), teamId) &&
             retro.getCreatedAt() == null))
         ).thenReturn(expected);
 
-        var actual = subject.createRetro(teamId, 0);
+        var actual = subject.createRetro(teamId, "template");
 
         assertThat(actual).isEqualTo(expected);
     }
@@ -39,14 +40,14 @@ class RetroServiceTest {
 
     @Test
     void createRetro_WhenTemplateIdDoesNotExist_ThrowsInvalidTemplateIdException() {
-        assertThatThrownBy(() -> subject.createRetro(UUID.randomUUID(), 2)).isInstanceOf(InvalidTemplateIdException.class);
+        assertThatThrownBy(() -> subject.createRetro(UUID.randomUUID(), "template2")).isInstanceOf(InvalidTemplateIdException.class);
     }
 
     @Test
     void getRetros_ReturnsRetros() {
         var teamId = UUID.randomUUID();
-        var retro1 = new RetroEntity(UUID.randomUUID(), UUID.randomUUID(), false, 0, Set.of(), Instant.now());
-        var retro2 = new RetroEntity(UUID.randomUUID(), UUID.randomUUID(), false, 0, Set.of(), Instant.now());
+        var retro1 = new RetroEntity(UUID.randomUUID(), UUID.randomUUID(), false, "template", Set.of(), Instant.now());
+        var retro2 = new RetroEntity(UUID.randomUUID(), UUID.randomUUID(), false, "template", Set.of(), Instant.now());
         var expected = List.of(retro1, retro2);
         when(retroRepository.findAllByTeamIdOrderByCreatedAtDesc(teamId)).thenReturn(expected);
 
@@ -58,8 +59,9 @@ class RetroServiceTest {
     @Test
     void getRetro_ReturnsRetro() {
         var retroId = UUID.randomUUID();
-        var expected = new RetroEntity(UUID.randomUUID(), UUID.randomUUID(), false, 0, Set.of(), Instant.now());
-        when(retroRepository.findById(retroId)).thenReturn(Optional.of(expected));
+        var savedEntity = new RetroEntity(UUID.randomUUID(), UUID.randomUUID(), false, "template", Set.of(), Instant.now());
+        var expected = Retro.from(savedEntity, savedTemplate);
+        when(retroRepository.findById(retroId)).thenReturn(Optional.of(savedEntity));
 
         assertThat(subject.getRetro(retroId)).contains(expected);
     }

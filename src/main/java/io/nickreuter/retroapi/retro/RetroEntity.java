@@ -26,13 +26,13 @@ public class RetroEntity {
     private UUID id;
     private UUID teamId;
     private boolean finished;
-    private int templateId;
+    private String templateId;
     @OneToMany(mappedBy = "retroId")
     private Set<ThoughtEntity> thoughts;
     @CreationTimestamp
     private Instant createdAt;
 
-    public RetroEntity(UUID teamId, int templateId) {
+    public RetroEntity(UUID teamId, String templateId) {
         this.teamId = teamId;
         this.templateId = templateId;
     }

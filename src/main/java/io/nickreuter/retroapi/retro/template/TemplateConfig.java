@@ -41,7 +41,8 @@ public class TemplateConfig {
 
     private Template parseTemplate(Resource resource) {
         try {
-            return new ObjectMapper(new YAMLFactory()).readValue(resource.getContentAsString(StandardCharsets.UTF_8), Template.class);
+            var template = new ObjectMapper(new YAMLFactory()).readValue(resource.getContentAsString(StandardCharsets.UTF_8), Template.class);
+            return new Template(resource.getFilename(), template.name(), template.description(), template.categories());
         } catch (IOException e) {
             logger.error("Failed to parse template %s".formatted(resource.getFilename()), e);
             return null;

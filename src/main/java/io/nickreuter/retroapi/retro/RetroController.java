@@ -36,7 +36,7 @@ public class RetroController {
 
     @GetMapping("/{retroId}")
     @PreAuthorize("@retroAuthorizationService.isUserAllowedInRetro(authentication, #teamId, #retroId)")
-    public RetroEntity getRetro(@PathVariable("teamId") UUID teamId, @PathVariable("retroId") UUID retroId) {
+    public Retro getRetro(@PathVariable("teamId") UUID teamId, @PathVariable("retroId") UUID retroId) {
         return retroService.getRetro(retroId).orElseThrow();
     }
 
