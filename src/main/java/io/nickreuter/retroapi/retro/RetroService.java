@@ -42,4 +42,10 @@ public class RetroService {
     private Optional<Template> findTemplateBytId(String templateId) {
         return templates.stream().filter(template -> Objects.equals(template.id(), templateId)).findFirst();
     }
+
+    public void setFinished(UUID retroId, boolean finished) throws RetroNotFoundException {
+        var retro = retroRepository.findById(retroId).orElseThrow(RetroNotFoundException::new);
+        retro.setFinished(finished);
+        retroRepository.save(retro);
+    }
 }

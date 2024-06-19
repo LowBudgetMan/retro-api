@@ -22,10 +22,10 @@ import java.util.UUID;
 
 import static io.nickreuter.retroapi.team.TestAuthenticationCreationService.createAuthentication;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @AutoConfigureMockMvc
@@ -37,11 +37,11 @@ class RetroControllerTest {
     private RetroService retroService;
     @MockBean
     private UserMappingAuthorizationService userMappingAuthorizationService;
+    @MockBean
+    private RetroAuthorizationService retroAuthorizationService;
 
     @Autowired
     private MockMvc mockMvc;
-    @Autowired
-    private RetroAuthorizationService retroAuthorizationService;
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -190,5 +190,46 @@ class RetroControllerTest {
                         .with(anonymous())
                         .with(csrf()))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void updateFinished_Returns204() throws Exception {
+        var teamId = UUID.randomUUID();
+        var retroId = UUID.randomUUID();
+        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), teamId, retroId)).thenReturn(true);
+        when(userMappingAuthorizationService.isUserMemberOfTeam(createAuthentication(), teamId)).thenReturn(true);
+        mockMvc.perform(put("/api/teams/%s/retros/%s/finished".formatted(teamId, retroId))
+                        .with(jwt())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new UpdateRetroFinishedRequest(true))))
+                .andExpect(status().isNoContent());
+
+        verify(retroService).setFinished(retroId, true);
+    }
+
+    @Test
+    void updateFinished_WhenBadToken_Throws401() throws Exception {
+        var teamId = UUID.randomUUID();
+        var retroId = UUID.randomUUID();
+        mockMvc.perform(put("/api/teams/%s/retros/%s/finished".formatted(teamId, retroId))
+                        .with(anonymous())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new UpdateRetroFinishedRequest(true))))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void updateFinished_WhenUserNotAllowedInRetro_Throws403() throws Exception {
+        var teamId = UUID.randomUUID();
+        var retroId = UUID.randomUUID();
+        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), teamId, retroId)).thenReturn(false);
+        mockMvc.perform(put("/api/teams/%s/retros/%s/finished".formatted(teamId, retroId))
+                        .with(jwt())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new UpdateRetroFinishedRequest(true))))
+                .andExpect(status().isForbidden());
     }
 }

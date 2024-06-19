@@ -3,6 +3,7 @@ package io.nickreuter.retroapi.retro;
 import io.nickreuter.retroapi.retro.template.Category;
 import io.nickreuter.retroapi.retro.template.Template;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 
 import java.time.Instant;
@@ -10,8 +11,7 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class RetroServiceTest {
     private final RetroRepository retroRepository = mock(RetroRepository.class);
@@ -64,5 +64,26 @@ class RetroServiceTest {
         when(retroRepository.findById(retroId)).thenReturn(Optional.of(savedEntity));
 
         assertThat(subject.getRetro(retroId)).contains(expected);
+    }
+
+    @Test
+    void setFinished_UpdatesRetro() throws RetroNotFoundException {
+        var retroId = UUID.randomUUID();
+        var savedRetro = new RetroEntity(UUID.randomUUID(), UUID.randomUUID(), false, "template", Set.of(), Instant.now());
+        when(retroRepository.findById(retroId)).thenReturn(Optional.of(savedRetro));
+
+        subject.setFinished(retroId, true);
+
+        var captor = ArgumentCaptor.forClass(RetroEntity.class);
+        verify(retroRepository).save(captor.capture());
+        assertThat(captor.getValue().isFinished()).isTrue();
+    }
+
+    @Test
+    void setFinished_WhenRetroNotFound_ThrowsRetroNotFoundException() {
+        var retroId = UUID.randomUUID();
+        when(retroRepository.findById(retroId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> subject.setFinished(retroId, true)).isInstanceOf(RetroNotFoundException.class);
     }
 }

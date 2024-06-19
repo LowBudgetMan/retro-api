@@ -40,6 +40,13 @@ public class RetroController {
         return retroService.getRetro(retroId).orElseThrow();
     }
 
+    @PutMapping("/{retroId}/finished")
+    @PreAuthorize("@retroAuthorizationService.isUserAllowedInRetro(authentication, #teamId, #retroId)")
+    public ResponseEntity<Void> updateFinished(@PathVariable("teamId") UUID teamId, @PathVariable("retroId") UUID retroId, @RequestBody UpdateRetroFinishedRequest request) throws RetroNotFoundException {
+        retroService.setFinished(retroId, request.finished());
+        return ResponseEntity.noContent().build();
+    }
+
     @ExceptionHandler(InvalidTemplateIdException.class)
     public ResponseEntity<Void> handleInvalidTemplateId() {
         return ResponseEntity.badRequest().build();
