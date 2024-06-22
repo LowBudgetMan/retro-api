@@ -28,4 +28,8 @@ public class ThoughtEntity {
     private UUID retroId;
     @CreationTimestamp
     private Instant createdAt;
+
+    static ThoughtEntity from(String message, String category, UUID retroId) {
+        return new ThoughtEntity(null, message, 0, false, category, retroId, null);
+    }
 }

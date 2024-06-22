@@ -47,8 +47,13 @@ public class RetroController {
         return ResponseEntity.noContent().build();
     }
 
-    @ExceptionHandler(InvalidTemplateIdException.class)
+    @ExceptionHandler({InvalidTemplateIdException.class})
     public ResponseEntity<Void> handleInvalidTemplateId() {
         return ResponseEntity.badRequest().build();
+    }
+
+    @ExceptionHandler({RetroNotFoundException.class})
+    public ResponseEntity<Void> handleRetroNotFound() {
+        return ResponseEntity.notFound().build();
     }
 }

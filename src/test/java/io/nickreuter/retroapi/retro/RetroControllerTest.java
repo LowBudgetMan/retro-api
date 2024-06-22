@@ -22,8 +22,7 @@ import java.util.UUID;
 
 import static io.nickreuter.retroapi.team.TestAuthenticationCreationService.createAuthentication;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -231,5 +230,21 @@ class RetroControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new UpdateRetroFinishedRequest(true))))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void updateFinished_WhenRetroNotFound_ReturnsNotFound() throws Exception {
+        var teamId = UUID.randomUUID();
+        var retroId = UUID.randomUUID();
+        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), teamId, retroId)).thenReturn(true);
+        doThrow(RetroNotFoundException.class).when(retroService).setFinished(retroId, true);
+        mockMvc.perform(put("/api/teams/%s/retros/%s/finished".formatted(teamId, retroId))
+                        .with(jwt())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new UpdateRetroFinishedRequest(true))))
+                .andExpect(status().isNotFound());
+
+        verify(retroService).setFinished(retroId, true);
     }
 }
