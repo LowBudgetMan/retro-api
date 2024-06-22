@@ -5,6 +5,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -21,5 +22,11 @@ public class ThoughtController {
     public ResponseEntity<Void> createThought(@PathVariable UUID teamId, @PathVariable UUID retroId, @RequestBody CreateThoughtRequest request) {
         var savedThought = thoughtService.createThought(retroId, request.message(), request.category());
         return ResponseEntity.created(URI.create("/api/teams/%s/retros/%s/thoughts/%s".formatted(teamId, retroId, savedThought.getId()))).build();
+    }
+
+    @GetMapping
+    @PreAuthorize("@retroAuthorizationService.isUserAllowedInRetro(authentication, #teamId, #retroId)")
+    public List<ThoughtEntity> getThoughts(@PathVariable UUID teamId, @PathVariable UUID retroId) {
+        return thoughtService.getThoughtsForRetro(retroId);
     }
 }

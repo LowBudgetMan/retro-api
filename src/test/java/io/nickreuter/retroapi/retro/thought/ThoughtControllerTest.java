@@ -12,14 +12,16 @@ import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 import static io.nickreuter.retroapi.team.TestAuthenticationCreationService.createAuthentication;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -81,6 +83,50 @@ class ThoughtControllerTest {
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void getThoughts_Returns200WithListFromService() throws Exception {
+        var teamId = UUID.randomUUID();
+        var retroId = UUID.randomUUID();
+        var expectedThought = new ThoughtEntity(UUID.randomUUID(), "message", 0, false, "category", retroId, Instant.now());
+        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), teamId, retroId)).thenReturn(true);
+        when(thoughtService.getThoughtsForRetro(retroId)).thenReturn(List.of(expectedThought));
+
+        mockMvc.perform(get("/api/teams/%s/retros/%s/thoughts".formatted(teamId, retroId))
+                        .with(jwt())
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.[0].id").value(expectedThought.getId().toString()))
+                .andExpect(jsonPath("$.[0].message").value(expectedThought.getMessage()))
+                .andExpect(jsonPath("$.[0].votes").value(expectedThought.getVotes()))
+                .andExpect(jsonPath("$.[0].completed").value(expectedThought.isCompleted()))
+                .andExpect(jsonPath("$.[0].category").value(expectedThought.getCategory()))
+                .andExpect(jsonPath("$.[0].retroId").value(expectedThought.getRetroId().toString()))
+                .andExpect(jsonPath("$.[0].createdAt").value(expectedThought.getCreatedAt().toString()));
+    }
+
+    @Test
+    void getThoughts_WhenInvalidToken_Returns401() throws Exception {
+        var teamId = UUID.randomUUID();
+        var retroId = UUID.randomUUID();
+
+        mockMvc.perform(get("/api/teams/%s/retros/%s/thoughts".formatted(teamId, retroId))
+                        .with(anonymous())
+                        .with(csrf()))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void getThoughts_WhenUserNotOnTeam_Returns403() throws Exception {
+        var teamId = UUID.randomUUID();
+        var retroId = UUID.randomUUID();
+        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), teamId, retroId)).thenReturn(false);
+
+        mockMvc.perform(get("/api/teams/%s/retros/%s/thoughts".formatted(teamId, retroId))
+                        .with(jwt())
+                        .with(csrf()))
                 .andExpect(status().isForbidden());
     }
 }

@@ -3,6 +3,7 @@ package io.nickreuter.retroapi.retro.thought;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -31,6 +32,17 @@ class ThoughtServiceTest {
         ).thenReturn(expected);
 
         var actual = subject.createThought(retroId, message, category);
+
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void getThoughtsForRetro_ReturnsListFromDatabase() {
+        var retroId = UUID.randomUUID();
+        var expected = List.of(new ThoughtEntity(null, "message", 0, false, "category", retroId, null));
+        when(thoughtRepository.findByRetroIdOrderByCreatedAtDesc(retroId)).thenReturn(expected);
+
+        var actual = subject.getThoughtsForRetro(retroId);
 
         assertThat(actual).isEqualTo(expected);
     }
