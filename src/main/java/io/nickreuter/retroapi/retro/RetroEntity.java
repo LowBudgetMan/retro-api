@@ -1,10 +1,7 @@
 package io.nickreuter.retroapi.retro;
 
 import io.nickreuter.retroapi.retro.thought.ThoughtEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,7 +24,8 @@ public class RetroEntity {
     private UUID teamId;
     private boolean finished;
     private String templateId;
-    @OneToMany(mappedBy = "retroId")
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "retroId")
     private Set<ThoughtEntity> thoughts;
     @CreationTimestamp
     private Instant createdAt;
