@@ -57,7 +57,7 @@ class ThoughtServiceTest {
         ).thenReturn(expected);
 
         subject.createThought(retroId, message, category);
-        
+
         var argCaptor = ArgumentCaptor.forClass(ThoughtEvent.class);
         verify(applicationEventPublisher).publishEvent(argCaptor.capture());
         assertThat(argCaptor.getValue().getRoute()).isEqualTo("/topic/%s/thoughts".formatted(retroId));
