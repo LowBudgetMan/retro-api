@@ -18,9 +18,9 @@ public class ThoughtService {
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
-    public ThoughtEntity createThought(UUID retroId, String message, String category) {
+    public ThoughtEntity createThought(UUID teamId, UUID retroId, String message, String category) {
         var savedRetro = thoughtRepository.save(ThoughtEntity.from(message, category, retroId));
-        applicationEventPublisher.publishEvent(new ThoughtEvent(this, ActionType.CREATE, savedRetro, retroId));
+        applicationEventPublisher.publishEvent(new ThoughtEvent(this, teamId, ActionType.CREATE, savedRetro, retroId));
         return savedRetro;
     }
 

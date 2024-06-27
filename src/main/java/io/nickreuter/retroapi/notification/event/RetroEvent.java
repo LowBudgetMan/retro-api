@@ -8,8 +8,8 @@ public class RetroEvent extends BaseEvent {
     private static final String ROUTE_STRING = "/topic/%s/thoughts";
     private final UUID retroId;
 
-    public RetroEvent(Object source, ActionType actionType, Object payload, UUID retroId) {
-        super(source, actionType, payload);
+    public RetroEvent(Object source, UUID teamId, ActionType actionType, Object payload, UUID retroId) {
+        super(source, teamId, actionType, payload);
         this.retroId = retroId;
     }
 

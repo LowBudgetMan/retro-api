@@ -23,6 +23,7 @@ class ThoughtServiceTest {
     void createThought_SavesThoughtInRepository() {
         var message = "message";
         var category = "category";
+        var teamId = UUID.randomUUID();
         var retroId = UUID.randomUUID();
         var expected = ThoughtEntity.from(message, category, retroId);
         when(thoughtRepository.save(ArgumentMatchers.argThat(entity ->
@@ -35,7 +36,7 @@ class ThoughtServiceTest {
                 entity.getCreatedAt() == null))
         ).thenReturn(expected);
 
-        var actual = subject.createThought(retroId, message, category);
+        var actual = subject.createThought(teamId, retroId, message, category);
 
         assertThat(actual).isEqualTo(expected);
     }
@@ -44,6 +45,7 @@ class ThoughtServiceTest {
     void createThought_SendsEventToApplicationEventPublisher() {
         var message = "message";
         var category = "category";
+        var teamId = UUID.randomUUID();
         var retroId = UUID.randomUUID();
         var expected = ThoughtEntity.from(message, category, retroId);
         when(thoughtRepository.save(ArgumentMatchers.argThat(entity ->
@@ -56,7 +58,7 @@ class ThoughtServiceTest {
                         entity.getCreatedAt() == null))
         ).thenReturn(expected);
 
-        subject.createThought(retroId, message, category);
+        subject.createThought(teamId, retroId, message, category);
         
         var argCaptor = ArgumentCaptor.forClass(ThoughtEvent.class);
         verify(applicationEventPublisher).publishEvent(argCaptor.capture());

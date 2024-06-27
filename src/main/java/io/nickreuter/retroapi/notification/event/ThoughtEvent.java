@@ -9,8 +9,8 @@ public class ThoughtEvent extends BaseEvent {
     private static final String ROUTE_STRING = "/topic/%s/thoughts";
     private final UUID retroId;
 
-    public ThoughtEvent(Object source, ActionType actionType, ThoughtEntity payload, UUID retroId) {
-        super(source, actionType, payload);
+    public ThoughtEvent(Object source, UUID teamId, ActionType actionType, ThoughtEntity payload, UUID retroId) {
+        super(source, teamId, actionType, payload);
         this.retroId = retroId;
     }
 

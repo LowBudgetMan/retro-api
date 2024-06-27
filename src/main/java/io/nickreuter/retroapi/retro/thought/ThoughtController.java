@@ -20,7 +20,7 @@ public class ThoughtController {
     @PostMapping
     @PreAuthorize("@retroAuthorizationService.isUserAllowedInRetro(authentication, #teamId, #retroId)")
     public ResponseEntity<Void> createThought(@PathVariable UUID teamId, @PathVariable UUID retroId, @RequestBody CreateThoughtRequest request) {
-        var savedThought = thoughtService.createThought(retroId, request.message(), request.category());
+        var savedThought = thoughtService.createThought(teamId, retroId, request.message(), request.category());
         return ResponseEntity.created(URI.create("/api/teams/%s/retros/%s/thoughts/%s".formatted(teamId, retroId, savedThought.getId()))).build();
     }
 

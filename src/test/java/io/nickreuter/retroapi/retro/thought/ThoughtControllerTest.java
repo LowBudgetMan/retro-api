@@ -46,7 +46,7 @@ class ThoughtControllerTest {
         var expected = ThoughtEntity.from(request.message(), request.category(), retroId);
         expected.setId(UUID.randomUUID());
         when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), teamId, retroId)).thenReturn(true);
-        when(thoughtService.createThought(retroId, request.message(), request.category())).thenReturn(expected);
+        when(thoughtService.createThought(teamId, retroId, request.message(), request.category())).thenReturn(expected);
 
         mockMvc.perform(post("/api/teams/%s/retros/%s/thoughts".formatted(teamId, retroId))
                     .with(jwt())
