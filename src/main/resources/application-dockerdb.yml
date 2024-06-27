@@ -1,0 +1,10 @@
+spring:
+  h2:
+    console:
+      enabled: false
+      path: /h2
+  datasource:
+    url: jdbc:postgresql://localhost:5432/retroapi
+    username: root
+    password: retroapi
+    driver-class-name: org.postgresql.Driver
