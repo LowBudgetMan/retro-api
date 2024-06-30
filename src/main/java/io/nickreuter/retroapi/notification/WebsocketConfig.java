@@ -65,11 +65,10 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
                 .simpSubscribeDestMatchers("/topic/*/retros/*/thoughts").access((authentication, object) -> {
                     var result = new AuthorizationDecision(false);
                     var destination = Optional.ofNullable((String) object.getMessage().getHeaders().get("simpDestination")).orElse("");
-                    var ids = Pattern.compile("^/topic/(?<teamId>.*)/retros/(?<retroId>.*)/thoughts$").matcher(destination);
+                    var ids = Pattern.compile("^/topic/(?<retroId>.*)/thoughts$").matcher(destination);
                     if (ids.find()) {
                         result = new AuthorizationDecision(retroAuthorizationService.isUserAllowedInRetro(
                                 authentication.get(),
-                                UUID.fromString(ids.group("teamId")),
                                 UUID.fromString(ids.group("retroId")))
                         );
                     }

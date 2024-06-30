@@ -20,22 +20,13 @@ class RetroAuthorizationServiceTest {
     private final RetroAuthorizationService retroAuthorizationService = new RetroAuthorizationService(userMappingAuthorizationService, retroService);
 
     @Test
-    void isUserAllowedInRetro_WhenUserMappingServiceReturnsFalse_ReturnsFalse() {
-        var teamId = UUID.randomUUID();
-        var userId = UUID.randomUUID();
-        when(userMappingAuthorizationService.isUserMemberOfTeam(authentication, teamId)).thenReturn(false);
-
-        assertThat(retroAuthorizationService.isUserAllowedInRetro(authentication, teamId, userId)).isFalse();
-    }
-
-    @Test
     void isUserAllowedInRetro_WhenRetroDoesNotExist_ReturnsFalse() {
         var teamId = UUID.randomUUID();
         var retroId = UUID.randomUUID();
         when(userMappingAuthorizationService.isUserMemberOfTeam(authentication, teamId)).thenReturn(true);
         when(retroService.getRetro(retroId)).thenReturn(Optional.empty());
 
-        assertThat(retroAuthorizationService.isUserAllowedInRetro(authentication, teamId, retroId)).isFalse();
+        assertThat(retroAuthorizationService.isUserAllowedInRetro(authentication, retroId)).isFalse();
     }
 
     @Test
@@ -45,7 +36,7 @@ class RetroAuthorizationServiceTest {
         when(userMappingAuthorizationService.isUserMemberOfTeam(authentication, teamId)).thenReturn(true);
         when(retroService.getRetro(retroId)).thenReturn(Optional.of(new Retro(retroId, UUID.randomUUID(), false, null, Set.of(), Instant.now())));
 
-        assertThat(retroAuthorizationService.isUserAllowedInRetro(authentication, teamId, retroId)).isFalse();
+        assertThat(retroAuthorizationService.isUserAllowedInRetro(authentication, retroId)).isFalse();
     }
 
     @Test
@@ -55,6 +46,6 @@ class RetroAuthorizationServiceTest {
         when(userMappingAuthorizationService.isUserMemberOfTeam(authentication, teamId)).thenReturn(true);
         when(retroService.getRetro(retroId)).thenReturn(Optional.of(new Retro(retroId, teamId, false, null, Set.of(), Instant.now())));
 
-        assertThat(retroAuthorizationService.isUserAllowedInRetro(authentication, teamId, retroId)).isTrue();
+        assertThat(retroAuthorizationService.isUserAllowedInRetro(authentication, retroId)).isTrue();
     }
 }

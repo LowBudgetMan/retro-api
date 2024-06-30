@@ -45,7 +45,7 @@ class ThoughtControllerTest {
         var request = new CreateThoughtRequest("message", "category");
         var expected = ThoughtEntity.from(request.message(), request.category(), retroId);
         expected.setId(UUID.randomUUID());
-        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), teamId, retroId)).thenReturn(true);
+        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), retroId)).thenReturn(true);
         when(thoughtService.createThought(retroId, request.message(), request.category())).thenReturn(expected);
 
         mockMvc.perform(post("/api/teams/%s/retros/%s/thoughts".formatted(teamId, retroId))
@@ -76,7 +76,7 @@ class ThoughtControllerTest {
         var teamId = UUID.randomUUID();
         var retroId = UUID.randomUUID();
         var request = new CreateThoughtRequest("message", "category");
-        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), teamId, retroId)).thenReturn(false);
+        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), retroId)).thenReturn(false);
 
         mockMvc.perform(post("/api/teams/%s/retros/%s/thoughts".formatted(teamId, retroId))
                         .with(jwt())
@@ -91,7 +91,7 @@ class ThoughtControllerTest {
         var teamId = UUID.randomUUID();
         var retroId = UUID.randomUUID();
         var expectedThought = new ThoughtEntity(UUID.randomUUID(), "message", 0, false, "category", retroId, Instant.now());
-        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), teamId, retroId)).thenReturn(true);
+        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), retroId)).thenReturn(true);
         when(thoughtService.getThoughtsForRetro(retroId)).thenReturn(List.of(expectedThought));
 
         mockMvc.perform(get("/api/teams/%s/retros/%s/thoughts".formatted(teamId, retroId))
@@ -122,7 +122,7 @@ class ThoughtControllerTest {
     void getThoughts_WhenUserNotOnTeam_Returns403() throws Exception {
         var teamId = UUID.randomUUID();
         var retroId = UUID.randomUUID();
-        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), teamId, retroId)).thenReturn(false);
+        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), retroId)).thenReturn(false);
 
         mockMvc.perform(get("/api/teams/%s/retros/%s/thoughts".formatted(teamId, retroId))
                         .with(jwt())
