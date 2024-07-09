@@ -25,6 +25,7 @@ dependencies {
 	implementation 'org.springframework.security:spring-security-messaging'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	implementation 'org.springframework.boot:spring-boot-starter-reactor-netty'
 	implementation 'org.liquibase:liquibase-core'
 	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
 	implementation 'org.postgresql:postgresql'

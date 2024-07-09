@@ -1,7 +1,4 @@
-version: '3.1'
-
 services:
-
   db:
     image: postgres:13
     restart: always
@@ -19,3 +16,12 @@ services:
     ports:
       - '8010:8080'
     command: start-dev
+  rabbitmq:
+    image: rabbitmq:latest
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+      - '61613:61613'
+      - '1883:1883'
+      - '15692:15692'
+      - '25672:25672'

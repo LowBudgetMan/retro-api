@@ -29,8 +29,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-import static org.springframework.messaging.simp.SimpMessageType.MESSAGE;
-import static org.springframework.messaging.simp.SimpMessageType.SUBSCRIBE;
+import static org.springframework.messaging.simp.SimpMessageType.*;
 
 @Configuration
 @EnableWebSocketMessageBroker
@@ -54,18 +53,24 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
     }
 
     @Override
-    public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/topic");
+    public void configureMessageBroker(MessageBrokerRegistry registry) {
+//        registry.enableSimpleBroker("/topic");
+        registry.setApplicationDestinationPrefixes("/topic")
+                .enableStompBrokerRelay("/topic")
+                .setRelayHost("localhost")
+                .setRelayPort(61613)
+                .setClientLogin("guest")
+                .setClientPasscode("guest");
     }
 
     @Bean
     public AuthorizationManager<Message<?>> messageAuthorizationManager(MessageMatcherDelegatingAuthorizationManager.Builder messages) {
         messages
                 .nullDestMatcher().authenticated()
-                .simpSubscribeDestMatchers("/topic/*/retros/*/thoughts").access((authentication, object) -> {
+                .simpSubscribeDestMatchers("/topic/*.thoughts").access((authentication, object) -> {
                     var result = new AuthorizationDecision(false);
                     var destination = Optional.ofNullable((String) object.getMessage().getHeaders().get("simpDestination")).orElse("");
-                    var ids = Pattern.compile("^/topic/(?<retroId>.*)/thoughts$").matcher(destination);
+                    var ids = Pattern.compile("^/topic/(?<retroId>.*)\\.thoughts$").matcher(destination);
                     if (ids.find()) {
                         result = new AuthorizationDecision(retroAuthorizationService.isUserAllowedInRetro(
                                 authentication.get(),
@@ -75,6 +80,7 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
                     return result;
                 })
                 .simpTypeMatchers(MESSAGE, SUBSCRIBE).denyAll()
+                .simpTypeMatchers(UNSUBSCRIBE, DISCONNECT).permitAll()
                 .anyMessage().denyAll();
         return messages.build();
     }

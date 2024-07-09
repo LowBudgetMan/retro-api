@@ -6,7 +6,7 @@ import io.nickreuter.retroapi.retro.thought.ThoughtEntity;
 import java.util.UUID;
 
 public class ThoughtEvent extends BaseEvent {
-    private static final String ROUTE_STRING = "/topic/%s/thoughts";
+    private static final String ROUTE_STRING = "/topic/%s.thoughts";
     private final UUID retroId;
 
     public ThoughtEvent(Object source, ActionType actionType, ThoughtEntity payload, UUID retroId) {
