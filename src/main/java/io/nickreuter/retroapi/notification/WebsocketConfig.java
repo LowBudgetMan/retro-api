@@ -66,7 +66,7 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
                     .setClientLogin(relayProperties.relayUsername())
                     .setClientPasscode(relayProperties.relayPassword());
         } else {
-            registry.enableStompBrokerRelay("/topic");
+            registry.enableSimpleBroker("/topic");
         }
     }
 
