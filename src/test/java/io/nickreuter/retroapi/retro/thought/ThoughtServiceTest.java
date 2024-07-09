@@ -60,7 +60,7 @@ class ThoughtServiceTest {
 
         var argCaptor = ArgumentCaptor.forClass(ThoughtEvent.class);
         verify(applicationEventPublisher).publishEvent(argCaptor.capture());
-        assertThat(argCaptor.getValue().getRoute()).isEqualTo("/topic/%s/thoughts".formatted(retroId));
+        assertThat(argCaptor.getValue().getRoute()).isEqualTo("/topic/%s.thoughts".formatted(retroId));
         assertThat(argCaptor.getValue().getActionType()).isEqualTo(ActionType.CREATE);
         assertThat(argCaptor.getValue().getPayload()).isEqualTo(expected);
     }

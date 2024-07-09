@@ -23,7 +23,7 @@ class WebsocketNotificationServiceTest {
 
         subject.onApplicationEvent(event);
 
-        verify(simpMessagingTemplate).convertAndSend("/topic/%s/thoughts".formatted(retroId), "value");
+        verify(simpMessagingTemplate).convertAndSend("/topic/%s.thoughts".formatted(retroId), "value");
     }
 
     @Test
