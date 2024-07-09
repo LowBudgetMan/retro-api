@@ -21,6 +21,7 @@ import org.springframework.security.messaging.access.intercept.MessageMatcherDel
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
@@ -38,10 +39,12 @@ import static org.springframework.messaging.simp.SimpMessageType.*;
 public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
     private final JwtDecoder jwtDecoder;
     private final RetroAuthorizationService retroAuthorizationService;
+    private final BrokerRelayProperties relayProperties;
 
-    public WebsocketConfig(JwtDecoder jwtDecoder, RetroAuthorizationService retroAuthorizationService) {
+    public WebsocketConfig(JwtDecoder jwtDecoder, RetroAuthorizationService retroAuthorizationService, BrokerRelayProperties relayProperties) {
         this.jwtDecoder = jwtDecoder;
         this.retroAuthorizationService = retroAuthorizationService;
+        this.relayProperties = relayProperties;
     }
 
     @Override
@@ -54,13 +57,17 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-//        registry.enableSimpleBroker("/topic");
-        registry.setApplicationDestinationPrefixes("/topic")
-                .enableStompBrokerRelay("/topic")
-                .setRelayHost("localhost")
-                .setRelayPort(61613)
-                .setClientLogin("guest")
-                .setClientPasscode("guest");
+        registry.setPathMatcher(new AntPathMatcher("."));
+        if(relayProperties.isConfigured()) {
+            registry.setApplicationDestinationPrefixes("/topic")
+                    .enableStompBrokerRelay("/topic")
+                    .setRelayHost(relayProperties.relayHost())
+                    .setRelayPort(relayProperties.relayPort())
+                    .setClientLogin(relayProperties.relayUsername())
+                    .setClientPasscode(relayProperties.relayPassword());
+        } else {
+            registry.enableStompBrokerRelay("/topic");
+        }
     }
 
     @Bean
