@@ -17,7 +17,9 @@ services:
       - '8010:8080'
     command: start-dev
   rabbitmq:
-    image: rabbitmq:latest
+    build: 
+      context: ./
+      dockerfile: RabbitMqDockerfile
     ports:
       - '5672:5672'
       - '15672:15672'
