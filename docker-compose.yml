@@ -15,7 +15,9 @@ services:
       KEYCLOAK_ADMIN_PASSWORD: 'admin'
     ports:
       - '8010:8080'
-    command: start-dev
+    volumes:
+      - ./keycloak-realm-data:/opt/keycloak/data/import
+    command: start-dev --import-realm
   rabbitmq:
     build: 
       context: ./
