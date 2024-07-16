@@ -1,0 +1,508 @@
+{
+	"info": {
+		"_postman_id": "15dae205-0e4f-41ef-abf9-3456d18a398d",
+		"name": "Retro API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "1137635"
+	},
+	"item": [
+		{
+			"name": "Teams",
+			"item": [
+				{
+					"name": "Invites",
+					"item": [
+						{
+							"name": "Create Invite for Team",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var location = pm.response.headers.get(\"Location\");",
+											"pm.collectionVariables.set(\"inviteId\", location.substring(location.lastIndexOf('/') + 1));"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/teams{{teamId}}/invites",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"teams{{teamId}}",
+										"invites"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Invite",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/teams{{teamId}}/invites/{{inviteId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"teams{{teamId}}",
+										"invites",
+										"{{inviteId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add User to Team",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"inviteId\": \"afa9ae60-b830-4142-a427-4b1d0ce2aebc\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/teams{{teamId}}/users",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"teams{{teamId}}",
+										"users"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Remove User from Team",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/teams{{teamId}}/users/{{userId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"teams{{teamId}}",
+										"users",
+										"{{userId}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Create Team",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var location = pm.response.headers.get(\"Location\");",
+									"pm.collectionVariables.set(\"teamId\", location.substring(location.lastIndexOf('/') + 1));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Team Name\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/teams",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"teams"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Teams for User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/teams",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"teams"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Team",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/teams",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"teams"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Retros",
+			"item": [
+				{
+					"name": "Create Retro",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var location = pm.response.headers.get(\"Location\");",
+									"pm.collectionVariables.set(\"retroId\", location.substring(location.lastIndexOf('/') + 1));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"retroTemplateId\": \"happy-confused-sad.yml\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/teams/{{teamId}}/retros",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"teams",
+								"{{teamId}}",
+								"retros"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Retros",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/teams/{{teamId}}/retros",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"teams",
+								"{{teamId}}",
+								"retros"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Retro",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/teams/{{teamId}}/retros/{{retroId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"teams",
+								"{{teamId}}",
+								"retros",
+								"{{retroId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Retro Finished Status",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"finished\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/teams/{{teamId}}/retros/{{retroId}}/finished",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"teams",
+								"{{teamId}}",
+								"retros",
+								"{{retroId}}",
+								"finished"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Thoughts",
+			"item": [
+				{
+					"name": "Create Thought",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var location = pm.response.headers.get(\"Location\");",
+									"pm.collectionVariables.set(\"thoughtId\", location.substring(location.lastIndexOf('/') + 1));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"message\": \"This is a happy thought\",\n    \"category\": \"Happy\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/teams/{{teamId}}/retros/{{retroId}}/thoughts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"teams",
+								"{{teamId}}",
+								"retros",
+								"{{retroId}}",
+								"thoughts"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Server Sent Events",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/teams/{{teamId}}/events",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"teams",
+						"{{teamId}}",
+						"events"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "oauth2",
+		"oauth2": [
+			{
+				"key": "accessTokenUrl",
+				"value": "http://localhost:8010/realms/myrealm/protocol/openid-connect/token",
+				"type": "string"
+			},
+			{
+				"key": "authUrl",
+				"value": "http://localhost:8010/realms/myrealm/protocol/openid-connect/auth",
+				"type": "string"
+			},
+			{
+				"key": "tokenName",
+				"value": "KeyCloak",
+				"type": "string"
+			},
+			{
+				"key": "scope",
+				"value": "offline_access",
+				"type": "string"
+			},
+			{
+				"key": "clientSecret",
+				"value": "",
+				"type": "string"
+			},
+			{
+				"key": "refreshRequestParams",
+				"value": [],
+				"type": "any"
+			},
+			{
+				"key": "tokenRequestParams",
+				"value": [],
+				"type": "any"
+			},
+			{
+				"key": "authRequestParams",
+				"value": [],
+				"type": "any"
+			},
+			{
+				"key": "challengeAlgorithm",
+				"value": "S256",
+				"type": "string"
+			},
+			{
+				"key": "useBrowser",
+				"value": true,
+				"type": "boolean"
+			},
+			{
+				"key": "grant_type",
+				"value": "authorization_code",
+				"type": "string"
+			},
+			{
+				"key": "clientId",
+				"value": "postman",
+				"type": "string"
+			},
+			{
+				"key": "addTokenTo",
+				"value": "header",
+				"type": "string"
+			},
+			{
+				"key": "client_authentication",
+				"value": "header",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "teamId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "userId",
+			"value": "something",
+			"type": "string"
+		},
+		{
+			"key": "inviteId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "retroId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "thoughtId",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
