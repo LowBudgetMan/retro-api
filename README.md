@@ -9,18 +9,17 @@ There are three external services that the API interacts with, each managed with
 * A remote STOMP broker (default is a simple broker managed by Spring)
 
 These services can be managed through the included docker-compose file and are explained more in-depth below. To start 
-the services, run `docker compose up -d`, but make sure you've built the RabbitMQ image first if you plan to use that.
+the services, run `docker compose up -d`.
 
 ### The Auth Server
 While the API will work with any OAuth2 compatible server that supports JWTs, we have included a KeyStore image in the 
-compose file so that all authentication and authorization can be managed locally. That does mean there is a little setup 
-involved in getting the Auth Server configured.
+compose file so that all authentication and authorization can be managed locally. This local KeyCloak instance uses a 
+preconfigured realm that has Postman as a client and the repository includes a postman collection with the local KeyCloak 
+already configured as a token provider. This should make using the API's authenticated endpoints much easier.
 
-Once the auth server is up and running, log into the KeyCloak admin console and create a new realm, for example `myrealm`.
-In the new realm, add a new client called `postman` with `/*` and `https://oauth.pstmn.io/v1/callback` as the valid redirect 
-urls, and `/*` as the web origins. This is so Postman can be configured to use KeyCloak to fetch tokens for use with the 
-API. Assuming the realm name is the same, using the `local` profile should be all that's needed 
-to point the application at the correct KeyCloak realm. Otherwise, just update the issuer url in `application-local.yml`.
+To use the settings for the provided KeyCloak instance in the API, just include the `local` profile when running the 
+application. To point to a different Auth server, just update the issuer url in `application-local.yml` or create your 
+own application properties file with the appropriate config replaced.
 
 ### The SQL Database
 The API will work with any SQL Server, all migrations are handled at startup using Liquibase, and by default it runs 
@@ -38,8 +37,7 @@ broker:
     relay-username: guest
     relay-password: guest
 ```
-This example config can be found in `application-remotebroker.yml` and points to the RabbitMQ instance managed by docker 
-compose. To build the RabbitMQ image used in compose, run `docker buildx build -f RabbitMqDockerfile -t rabbitmq:latest .`.
+This example config can be found in `application-remotebroker.yml` and points to the RabbitMQ instance managed by docker.
 This modified RabbitMQ instance has the `rabbitmq_mqtt`, `rabbitmq_federation_management`, and `rabbitmq_stomp` plugins 
 enabled.
 
