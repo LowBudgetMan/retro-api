@@ -35,14 +35,14 @@ public class RetroController {
     }
 
     @GetMapping("/{retroId}")
-    @PreAuthorize("@retroAuthorizationService.isUserAllowedInRetro(authentication, #teamId, #retroId)")
-    public Retro getRetro(@PathVariable("teamId") UUID teamId, @PathVariable("retroId") UUID retroId) {
+    @PreAuthorize("@retroAuthorizationService.isUserAllowedInRetro(authentication, #retroId)")
+    public Retro getRetro(@PathVariable("retroId") UUID retroId) {
         return retroService.getRetro(retroId).orElseThrow();
     }
 
     @PutMapping("/{retroId}/finished")
-    @PreAuthorize("@retroAuthorizationService.isUserAllowedInRetro(authentication, #teamId, #retroId)")
-    public ResponseEntity<Void> updateFinished(@PathVariable("teamId") UUID teamId, @PathVariable("retroId") UUID retroId, @RequestBody UpdateRetroFinishedRequest request) throws RetroNotFoundException {
+    @PreAuthorize("@retroAuthorizationService.isUserAllowedInRetro(authentication, #retroId)")
+    public ResponseEntity<Void> updateFinished(@PathVariable("retroId") UUID retroId, @RequestBody UpdateRetroFinishedRequest request) throws RetroNotFoundException {
         retroService.setFinished(retroId, request.finished());
         return ResponseEntity.noContent().build();
     }

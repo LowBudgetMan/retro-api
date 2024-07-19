@@ -1,8 +1,10 @@
 package io.nickreuter.retroapi.notification.event;
 
 import io.nickreuter.retroapi.notification.ActionType;
+import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 
+@Getter
 public abstract class BaseEvent extends ApplicationEvent {
     private final ActionType actionType;
     private final Object payload;
@@ -14,12 +16,4 @@ public abstract class BaseEvent extends ApplicationEvent {
     }
 
     public abstract String getRoute();
-
-    public ActionType getActionType() {
-        return this.actionType;
-    }
-
-    public Object getPayload() {
-        return this.payload;
-    }
 }

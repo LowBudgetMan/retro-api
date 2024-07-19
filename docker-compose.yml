@@ -1,7 +1,4 @@
-version: '3.1'
-
 services:
-
   db:
     image: postgres:13
     restart: always
@@ -18,4 +15,17 @@ services:
       KEYCLOAK_ADMIN_PASSWORD: 'admin'
     ports:
       - '8010:8080'
-    command: start-dev
+    volumes:
+      - ./keycloak-realm-data:/opt/keycloak/data/import
+    command: start-dev --import-realm
+  rabbitmq:
+    build: 
+      context: ./
+      dockerfile: RabbitMqDockerfile
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+      - '61613:61613'
+      - '1883:1883'
+      - '15692:15692'
+      - '25672:25672'

@@ -1,0 +1,6 @@
+broker:
+  relay:
+    relay-host: localhost
+    relay-port: 61613
+    relay-username: guest
+    relay-password: guest

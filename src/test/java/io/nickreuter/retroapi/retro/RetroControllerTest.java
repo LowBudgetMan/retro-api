@@ -137,7 +137,7 @@ class RetroControllerTest {
     void getRetro_ReturnsRetro() throws Exception {
         var teamId = UUID.randomUUID();
         var retro = new Retro(UUID.randomUUID(), teamId, false, savedTemplate, Set.of(), Instant.now());
-        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), teamId, retro.id())).thenReturn(true);
+        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), retro.id())).thenReturn(true);
         when(retroService.getRetro(retro.id())).thenReturn(Optional.of(retro));
         mockMvc.perform(get("/api/teams/%s/retros/%s".formatted(teamId, retro.id()))
                     .with(jwt())
@@ -155,7 +155,7 @@ class RetroControllerTest {
         var thought1 = new ThoughtEntity(UUID.randomUUID(), "message 1", 2, true, "category 1", retroId, Instant.now());
         var thought2 = new ThoughtEntity(UUID.randomUUID(), "message 2", 0, false, "category 2", retroId, Instant.now());
         var retro = new Retro(retroId, teamId, false, savedTemplate, Set.of(thought1, thought2), Instant.now());
-        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), teamId, retro.id())).thenReturn(true);
+        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), retro.id())).thenReturn(true);
         when(retroService.getRetro(retro.id())).thenReturn(Optional.of(retro));
         mockMvc.perform(get("/api/teams/%s/retros/%s".formatted(teamId, retro.id()))
                         .with(jwt())
@@ -174,7 +174,7 @@ class RetroControllerTest {
     void getRetro_WhenUserNotAllowedInRetro_Throws403() throws Exception {
         var teamId = UUID.randomUUID();
         var retro = new RetroEntity(UUID.randomUUID(), teamId, false, savedTemplate.id(), Set.of(), Instant.now());
-        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), teamId, retro.getId())).thenReturn(false);
+        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), retro.getId())).thenReturn(false);
         mockMvc.perform(get("/api/teams/%s/retros/%s".formatted(teamId, retro.getId()))
                         .with(jwt())
                         .with(csrf()))
@@ -195,7 +195,7 @@ class RetroControllerTest {
     void updateFinished_Returns204() throws Exception {
         var teamId = UUID.randomUUID();
         var retroId = UUID.randomUUID();
-        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), teamId, retroId)).thenReturn(true);
+        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), retroId)).thenReturn(true);
         when(userMappingAuthorizationService.isUserMemberOfTeam(createAuthentication(), teamId)).thenReturn(true);
         mockMvc.perform(put("/api/teams/%s/retros/%s/finished".formatted(teamId, retroId))
                         .with(jwt())
@@ -223,7 +223,7 @@ class RetroControllerTest {
     void updateFinished_WhenUserNotAllowedInRetro_Throws403() throws Exception {
         var teamId = UUID.randomUUID();
         var retroId = UUID.randomUUID();
-        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), teamId, retroId)).thenReturn(false);
+        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), retroId)).thenReturn(false);
         mockMvc.perform(put("/api/teams/%s/retros/%s/finished".formatted(teamId, retroId))
                         .with(jwt())
                         .with(csrf())
@@ -236,7 +236,7 @@ class RetroControllerTest {
     void updateFinished_WhenRetroNotFound_ReturnsNotFound() throws Exception {
         var teamId = UUID.randomUUID();
         var retroId = UUID.randomUUID();
-        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), teamId, retroId)).thenReturn(true);
+        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), retroId)).thenReturn(true);
         doThrow(RetroNotFoundException.class).when(retroService).setFinished(retroId, true);
         mockMvc.perform(put("/api/teams/%s/retros/%s/finished".formatted(teamId, retroId))
                         .with(jwt())
