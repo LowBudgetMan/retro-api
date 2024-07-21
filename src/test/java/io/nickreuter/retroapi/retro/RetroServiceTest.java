@@ -1,10 +1,13 @@
 package io.nickreuter.retroapi.retro;
 
+import io.nickreuter.retroapi.notification.ActionType;
+import io.nickreuter.retroapi.notification.event.RetroFinishedEvent;
 import io.nickreuter.retroapi.retro.template.Category;
 import io.nickreuter.retroapi.retro.template.Template;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.Instant;
 import java.util.*;
@@ -16,7 +19,8 @@ import static org.mockito.Mockito.*;
 class RetroServiceTest {
     private final RetroRepository retroRepository = mock(RetroRepository.class);
     private final Template savedTemplate = new Template("template", "name", "description", List.of(new Category("column", 1, "", "", "", "")));
-    private final RetroService subject = new RetroService(retroRepository, List.of(savedTemplate));
+    private final ApplicationEventPublisher applicationEventPublisher = mock(ApplicationEventPublisher.class);
+    private final RetroService subject = new RetroService(retroRepository, List.of(savedTemplate), applicationEventPublisher);
 
     @Test
     void createRetro_ReturnsCreatedRetro() throws InvalidTemplateIdException {
@@ -77,6 +81,21 @@ class RetroServiceTest {
         var captor = ArgumentCaptor.forClass(RetroEntity.class);
         verify(retroRepository).save(captor.capture());
         assertThat(captor.getValue().isFinished()).isTrue();
+    }
+
+    @Test
+    void setFinished_PublishesEvent() throws RetroNotFoundException {
+        var retroId = UUID.randomUUID();
+        var savedRetro = new RetroEntity(UUID.randomUUID(), UUID.randomUUID(), false, "template", Set.of(), Instant.now());
+        when(retroRepository.findById(retroId)).thenReturn(Optional.of(savedRetro));
+
+        subject.setFinished(retroId, true);
+
+        var argCaptor = ArgumentCaptor.forClass(RetroFinishedEvent.class);
+        verify(applicationEventPublisher).publishEvent(argCaptor.capture());
+        assertThat(argCaptor.getValue().getRoute()).isEqualTo("/topic/%s.finished".formatted(retroId));
+        assertThat(argCaptor.getValue().getActionType()).isEqualTo(ActionType.UPDATE);
+        assertThat(argCaptor.getValue().getPayload()).isEqualTo(true);
     }
 
     @Test

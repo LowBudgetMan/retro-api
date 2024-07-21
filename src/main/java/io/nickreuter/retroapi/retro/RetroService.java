@@ -1,6 +1,9 @@
 package io.nickreuter.retroapi.retro;
 
+import io.nickreuter.retroapi.notification.ActionType;
+import io.nickreuter.retroapi.notification.event.RetroFinishedEvent;
 import io.nickreuter.retroapi.retro.template.Template;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,10 +15,12 @@ import java.util.UUID;
 public class RetroService {
     private final RetroRepository retroRepository;
     private final List<Template> templates;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
-    public RetroService(RetroRepository retroRepository, List<Template> templates) {
+    public RetroService(RetroRepository retroRepository, List<Template> templates, ApplicationEventPublisher applicationEventPublisher) {
         this.retroRepository = retroRepository;
         this.templates = templates;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     public RetroEntity createRetro(UUID teamId, String retroTemplateId) throws InvalidTemplateIdException{
@@ -47,5 +52,6 @@ public class RetroService {
         var retro = retroRepository.findById(retroId).orElseThrow(RetroNotFoundException::new);
         retro.setFinished(finished);
         retroRepository.save(retro);
+        applicationEventPublisher.publishEvent(new RetroFinishedEvent(this, ActionType.UPDATE, finished, retroId));
     }
 }
