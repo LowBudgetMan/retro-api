@@ -9,6 +9,7 @@ import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -74,5 +75,28 @@ class ThoughtServiceTest {
         var actual = subject.getThoughtsForRetro(retroId);
 
         assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void addVote_UpdatesVoteCount() {
+        var thoughtId = UUID.randomUUID();
+        when(thoughtRepository.findById(thoughtId)).thenReturn(Optional.of(new ThoughtEntity(thoughtId, null, 2, false, "category", null, null)));
+        subject.addVote(thoughtId);
+        verify(thoughtRepository).incrementVotes(thoughtId);
+    }
+
+    @Test
+    void addVote_WhenCountUpdated_PublishesEvent() {
+        var thoughtId = UUID.randomUUID();
+        var expected = new ThoughtEntity(thoughtId, null, 2, false, "category", UUID.randomUUID(), null);
+        when(thoughtRepository.findById(thoughtId)).thenReturn(Optional.of(expected));
+
+        subject.addVote(thoughtId);
+
+        var argCaptor = ArgumentCaptor.forClass(ThoughtEvent.class);
+        verify(applicationEventPublisher).publishEvent(argCaptor.capture());
+        assertThat(argCaptor.getValue().getRoute()).isEqualTo("/topic/%s.thoughts".formatted(expected.getRetroId()));
+        assertThat(argCaptor.getValue().getActionType()).isEqualTo(ActionType.UPDATE);
+        assertThat(argCaptor.getValue().getPayload()).isEqualTo(expected);
     }
 }

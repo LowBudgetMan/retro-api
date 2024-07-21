@@ -19,9 +19,15 @@ public class ThoughtService {
     }
 
     public ThoughtEntity createThought(UUID retroId, String message, String category) {
-        var savedRetro = thoughtRepository.save(ThoughtEntity.from(message, category, retroId));
-        applicationEventPublisher.publishEvent(new ThoughtEvent(this, ActionType.CREATE, savedRetro, retroId));
-        return savedRetro;
+        var savedThought = thoughtRepository.save(ThoughtEntity.from(message, category, retroId));
+        applicationEventPublisher.publishEvent(new ThoughtEvent(this, ActionType.CREATE, savedThought, retroId));
+        return savedThought;
+    }
+
+    public void addVote(UUID thoughtId) {
+        thoughtRepository.incrementVotes(thoughtId);
+        var thought = thoughtRepository.findById(thoughtId).orElseThrow();
+        applicationEventPublisher.publishEvent(new ThoughtEvent(this, ActionType.UPDATE, thought, thought.getRetroId()));
     }
 
     public List<ThoughtEntity> getThoughtsForRetro(UUID retroId) {

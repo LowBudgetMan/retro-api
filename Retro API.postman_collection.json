@@ -178,13 +178,14 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/teams",
+							"raw": "{{baseUrl}}/api/teams/{{teamId}}",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
-								"teams"
+								"teams",
+								"{{teamId}}"
 							]
 						}
 					},
@@ -357,28 +358,32 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Vote for Thought",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/teams/{{teamId}}/retros/{{retroId}}/thoughts/{{thoughtId}}/votes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"teams",
+								"{{teamId}}",
+								"retros",
+								"{{retroId}}",
+								"thoughts",
+								"{{thoughtId}}",
+								"votes"
+							]
+						}
+					},
+					"response": []
 				}
 			]
-		},
-		{
-			"name": "Server Sent Events",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{baseUrl}}/api/teams/{{teamId}}/events",
-					"host": [
-						"{{baseUrl}}"
-					],
-					"path": [
-						"api",
-						"teams",
-						"{{teamId}}",
-						"events"
-					]
-				}
-			},
-			"response": []
 		}
 	],
 	"auth": {

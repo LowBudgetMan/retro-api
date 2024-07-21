@@ -29,4 +29,11 @@ public class ThoughtController {
     public List<ThoughtEntity> getThoughts(@PathVariable UUID retroId) {
         return thoughtService.getThoughtsForRetro(retroId);
     }
+
+    @PutMapping("/{thoughtId}/votes")
+    @PreAuthorize("@retroAuthorizationService.isUserAllowedInRetro(authentication, #retroId)")
+    public ResponseEntity<Void> vote(@PathVariable UUID teamId, @PathVariable UUID retroId, @PathVariable UUID thoughtId) {
+        thoughtService.addVote(thoughtId);
+        return ResponseEntity.noContent().build();
+    }
 }

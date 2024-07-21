@@ -19,8 +19,7 @@ import java.util.UUID;
 import static io.nickreuter.retroapi.team.TestAuthenticationCreationService.createAuthentication;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -125,6 +124,41 @@ class ThoughtControllerTest {
         when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), retroId)).thenReturn(false);
 
         mockMvc.perform(get("/api/teams/%s/retros/%s/thoughts".formatted(teamId, retroId))
+                        .with(jwt())
+                        .with(csrf()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void vote_Returns204WhenSuccessful() throws Exception {
+        var teamId = UUID.randomUUID();
+        var retroId = UUID.randomUUID();
+        var thoughtId = UUID.randomUUID();
+        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), retroId)).thenReturn(true);
+        mockMvc.perform(put("/api/teams/%s/retros/%s/thoughts/%s/votes".formatted(teamId, retroId, thoughtId))
+                        .with(jwt())
+                        .with(csrf()))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void vote_WhenNoTokenProvided_Throws401() throws Exception {
+        var teamId = UUID.randomUUID();
+        var retroId = UUID.randomUUID();
+        var thoughtId = UUID.randomUUID();
+        mockMvc.perform(put("/api/teams/%s/retros/%s/thoughts/%s/votes".formatted(teamId, retroId, thoughtId))
+                        .with(anonymous())
+                        .with(csrf()))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void vote_WhenUserNotAllowedInRetro_Throws403() throws Exception {
+        var teamId = UUID.randomUUID();
+        var retroId = UUID.randomUUID();
+        var thoughtId = UUID.randomUUID();
+        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), retroId)).thenReturn(false);
+        mockMvc.perform(put("/api/teams/%s/retros/%s/thoughts/%s/votes".formatted(teamId, retroId, thoughtId))
                         .with(jwt())
                         .with(csrf()))
                 .andExpect(status().isForbidden());
