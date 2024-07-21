@@ -41,3 +41,8 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+bootBuildImage {
+	builder='dashaun/builder:tiny'
+	imageName='retro-api'
+}
