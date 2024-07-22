@@ -139,4 +139,36 @@ class ThoughtServiceTest {
         assertThat(argCaptor.getValue().getActionType()).isEqualTo(ActionType.UPDATE);
         assertThat(argCaptor.getValue().getPayload()).isEqualTo(expected);
     }
+
+    @Test
+    void setCategory_SavesUpdatedCategoryToDatabase() {
+        var thoughtId = UUID.randomUUID();
+        var savedThought = new ThoughtEntity(thoughtId, null, 2, false, "category", UUID.randomUUID(), null);
+        var expected = new ThoughtEntity(thoughtId, null, 2, true, "category2", UUID.randomUUID(), null);
+        when(thoughtRepository.findById(thoughtId)).thenReturn(Optional.of(savedThought));
+        when(thoughtRepository.save(any())).thenReturn(expected);
+
+        subject.setCategory(thoughtId, "category2");
+
+        var argCaptor = ArgumentCaptor.forClass(ThoughtEntity.class);
+        verify(thoughtRepository).save(argCaptor.capture());
+        assertThat(argCaptor.getValue().getCategory()).isEqualTo("category2");
+    }
+
+    @Test
+    void setCategory_PublishesEvent() {
+        var thoughtId = UUID.randomUUID();
+        var savedThought = new ThoughtEntity(thoughtId, null, 2, false, "category", UUID.randomUUID(), null);
+        var expected = new ThoughtEntity(thoughtId, null, 2, true, "category2", UUID.randomUUID(), null);
+        when(thoughtRepository.findById(thoughtId)).thenReturn(Optional.of(savedThought));
+        when(thoughtRepository.save(any())).thenReturn(expected);
+
+        subject.setCategory(thoughtId, "category2");
+
+        var argCaptor = ArgumentCaptor.forClass(ThoughtEvent.class);
+        verify(applicationEventPublisher).publishEvent(argCaptor.capture());
+        assertThat(argCaptor.getValue().getRoute()).isEqualTo("/topic/%s.thoughts".formatted(expected.getRetroId()));
+        assertThat(argCaptor.getValue().getActionType()).isEqualTo(ActionType.UPDATE);
+        assertThat(argCaptor.getValue().getPayload()).isEqualTo(expected);
+    }
 }

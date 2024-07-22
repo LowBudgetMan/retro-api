@@ -43,4 +43,11 @@ public class ThoughtController {
         thoughtService.setCompleted(thoughtId, request.completed());
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/{thoughtId}/category")
+    @PreAuthorize("@thoughtAuthorizationService.canUserModifyThought(authentication, #thoughtId)")
+    public ResponseEntity<Void> setCategory(@PathVariable UUID teamId, @PathVariable UUID retroId, @PathVariable UUID thoughtId, @RequestBody UpdateThoughtCategoryRequest request) {
+        thoughtService.setCategory(thoughtId, request.category());
+        return ResponseEntity.noContent().build();
+    }
 }

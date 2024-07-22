@@ -202,11 +202,53 @@ class ThoughtControllerTest {
         var retroId = UUID.randomUUID();
         var thoughtId = UUID.randomUUID();
         when(thoughtAuthorizationService.canUserModifyThought(createAuthentication(), thoughtId)).thenReturn(false);
-        mockMvc.perform(put("/api/teams/%s/retros/%s/thoughts/%s/votes".formatted(teamId, retroId, thoughtId))
+        mockMvc.perform(put("/api/teams/%s/retros/%s/thoughts/%s/completed".formatted(teamId, retroId, thoughtId))
                         .with(jwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new UpdateThoughtCompletionRequest(true))))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void setCategory_WhenSuccessful_Returns204() throws Exception {
+        var teamId = UUID.randomUUID();
+        var retroId = UUID.randomUUID();
+        var thoughtId = UUID.randomUUID();
+        when(thoughtAuthorizationService.canUserModifyThought(createAuthentication(), thoughtId)).thenReturn(true);
+        mockMvc.perform(put("/api/teams/%s/retros/%s/thoughts/%s/category".formatted(teamId, retroId, thoughtId))
+                        .with(jwt())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new UpdateThoughtCategoryRequest("category 2"))))
+                .andExpect(status().isNoContent());
+        verify(thoughtService).setCategory(thoughtId, "category 2");
+    }
+
+    @Test
+    void setCategory_WhenBadToken_Throws401() throws Exception {
+        var teamId = UUID.randomUUID();
+        var retroId = UUID.randomUUID();
+        var thoughtId = UUID.randomUUID();
+        mockMvc.perform(put("/api/teams/%s/retros/%s/thoughts/%s/category".formatted(teamId, retroId, thoughtId))
+                        .with(anonymous())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new UpdateThoughtCategoryRequest("category 2"))))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void setCategory_WhenUserNotInRetro_Throws403() throws Exception {
+        var teamId = UUID.randomUUID();
+        var retroId = UUID.randomUUID();
+        var thoughtId = UUID.randomUUID();
+        when(thoughtAuthorizationService.canUserModifyThought(createAuthentication(), thoughtId)).thenReturn(false);
+        mockMvc.perform(put("/api/teams/%s/retros/%s/thoughts/%s/category".formatted(teamId, retroId, thoughtId))
+                        .with(jwt())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new UpdateThoughtCategoryRequest("category 2"))))
                 .andExpect(status().isForbidden());
     }
 }
