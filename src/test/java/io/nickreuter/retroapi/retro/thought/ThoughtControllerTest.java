@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static io.nickreuter.retroapi.team.TestAuthenticationCreationService.createAuthentication;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -29,6 +30,8 @@ class ThoughtControllerTest {
     private JwtDecoder jwtDecoder;
     @MockBean
     private RetroAuthorizationService retroAuthorizationService;
+    @MockBean
+    private ThoughtAuthorizationService thoughtAuthorizationService;
     @MockBean
     private ThoughtService thoughtService;
 
@@ -134,11 +137,12 @@ class ThoughtControllerTest {
         var teamId = UUID.randomUUID();
         var retroId = UUID.randomUUID();
         var thoughtId = UUID.randomUUID();
-        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), retroId)).thenReturn(true);
+        when(thoughtAuthorizationService.canUserModifyThought(createAuthentication(), thoughtId)).thenReturn(true);
         mockMvc.perform(put("/api/teams/%s/retros/%s/thoughts/%s/votes".formatted(teamId, retroId, thoughtId))
                         .with(jwt())
                         .with(csrf()))
                 .andExpect(status().isNoContent());
+        verify(thoughtService).addVote(thoughtId);
     }
 
     @Test
@@ -157,10 +161,52 @@ class ThoughtControllerTest {
         var teamId = UUID.randomUUID();
         var retroId = UUID.randomUUID();
         var thoughtId = UUID.randomUUID();
-        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), retroId)).thenReturn(false);
+        when(thoughtAuthorizationService.canUserModifyThought(createAuthentication(), thoughtId)).thenReturn(false);
         mockMvc.perform(put("/api/teams/%s/retros/%s/thoughts/%s/votes".formatted(teamId, retroId, thoughtId))
                         .with(jwt())
                         .with(csrf()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void setCompleted_WhenSuccessful_Returns204() throws Exception {
+        var teamId = UUID.randomUUID();
+        var retroId = UUID.randomUUID();
+        var thoughtId = UUID.randomUUID();
+        when(thoughtAuthorizationService.canUserModifyThought(createAuthentication(), thoughtId)).thenReturn(true);
+        mockMvc.perform(put("/api/teams/%s/retros/%s/thoughts/%s/completed".formatted(teamId, retroId, thoughtId))
+                        .with(jwt())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new UpdateThoughtCompletionRequest(true))))
+                .andExpect(status().isNoContent());
+        verify(thoughtService).setCompleted(thoughtId, true);
+    }
+
+    @Test
+    void setCompleted_WhenNoTokenProvided_Throws401() throws Exception {
+        var teamId = UUID.randomUUID();
+        var retroId = UUID.randomUUID();
+        var thoughtId = UUID.randomUUID();
+        mockMvc.perform(put("/api/teams/%s/retros/%s/thoughts/%s/completed".formatted(teamId, retroId, thoughtId))
+                        .with(anonymous())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new UpdateThoughtCompletionRequest(true))))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void setCompleted_WhenUserNotAllowedInRetro_Throws403() throws Exception {
+        var teamId = UUID.randomUUID();
+        var retroId = UUID.randomUUID();
+        var thoughtId = UUID.randomUUID();
+        when(thoughtAuthorizationService.canUserModifyThought(createAuthentication(), thoughtId)).thenReturn(false);
+        mockMvc.perform(put("/api/teams/%s/retros/%s/thoughts/%s/votes".formatted(teamId, retroId, thoughtId))
+                        .with(jwt())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new UpdateThoughtCompletionRequest(true))))
                 .andExpect(status().isForbidden());
     }
 }

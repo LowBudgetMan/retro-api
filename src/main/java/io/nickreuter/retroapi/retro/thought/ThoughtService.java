@@ -6,6 +6,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -24,10 +25,21 @@ public class ThoughtService {
         return savedThought;
     }
 
+    public Optional<ThoughtEntity> getThought(UUID thoughtId) {
+        return thoughtRepository.findById(thoughtId);
+    }
+
     public void addVote(UUID thoughtId) {
         thoughtRepository.incrementVotes(thoughtId);
         var thought = thoughtRepository.findById(thoughtId).orElseThrow();
         applicationEventPublisher.publishEvent(new ThoughtEvent(this, ActionType.UPDATE, thought, thought.getRetroId()));
+    }
+
+    public void setCompleted(UUID thoughtId, boolean completed) {
+        var thought = thoughtRepository.findById(thoughtId).orElseThrow();
+        thought.setCompleted(completed);
+        var updatedThought = thoughtRepository.save(thought);
+        applicationEventPublisher.publishEvent(new ThoughtEvent(this, ActionType.UPDATE, updatedThought, updatedThought.getRetroId()));
     }
 
     public List<ThoughtEntity> getThoughtsForRetro(UUID retroId) {

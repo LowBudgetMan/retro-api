@@ -67,6 +67,15 @@ class ThoughtServiceTest {
     }
 
     @Test
+    void getThought_ReturnsValueFromRepository() {
+        var thoughtId = UUID.randomUUID();
+        var expected = ThoughtEntity.from("message", "category", thoughtId);
+        when(thoughtRepository.findById(thoughtId)).thenReturn(Optional.of(expected));
+        var actual = subject.getThought(thoughtId);
+        assertThat(actual).contains(expected);
+    }
+
+    @Test
     void getThoughtsForRetro_ReturnsListFromDatabase() {
         var retroId = UUID.randomUUID();
         var expected = List.of(new ThoughtEntity(null, "message", 0, false, "category", retroId, null));
@@ -92,6 +101,37 @@ class ThoughtServiceTest {
         when(thoughtRepository.findById(thoughtId)).thenReturn(Optional.of(expected));
 
         subject.addVote(thoughtId);
+
+        var argCaptor = ArgumentCaptor.forClass(ThoughtEvent.class);
+        verify(applicationEventPublisher).publishEvent(argCaptor.capture());
+        assertThat(argCaptor.getValue().getRoute()).isEqualTo("/topic/%s.thoughts".formatted(expected.getRetroId()));
+        assertThat(argCaptor.getValue().getActionType()).isEqualTo(ActionType.UPDATE);
+        assertThat(argCaptor.getValue().getPayload()).isEqualTo(expected);
+    }
+
+    @Test
+    void setCompleted_SavedTheUpdatedCompleted() {
+        var thoughtId = UUID.randomUUID();
+        var savedThought = new ThoughtEntity(thoughtId, null, 2, false, "category", UUID.randomUUID(), null);
+        when(thoughtRepository.findById(thoughtId)).thenReturn(Optional.of(savedThought));
+        when(thoughtRepository.save(any())).thenReturn(savedThought);
+
+        subject.setCompleted(thoughtId, true);
+
+        var argCaptor = ArgumentCaptor.forClass(ThoughtEntity.class);
+        verify(thoughtRepository).save(argCaptor.capture());
+        assertThat(argCaptor.getValue().isCompleted()).isTrue();
+    }
+
+    @Test
+    void setCompleted_PublishesEvent() {
+        var thoughtId = UUID.randomUUID();
+        var savedThought = new ThoughtEntity(thoughtId, null, 2, false, "category", UUID.randomUUID(), null);
+        var expected = new ThoughtEntity(thoughtId, null, 2, true, "category", UUID.randomUUID(), null);
+        when(thoughtRepository.findById(thoughtId)).thenReturn(Optional.of(savedThought));
+        when(thoughtRepository.save(any())).thenReturn(expected);
+
+        subject.setCompleted(thoughtId, true);
 
         var argCaptor = ArgumentCaptor.forClass(ThoughtEvent.class);
         verify(applicationEventPublisher).publishEvent(argCaptor.capture());

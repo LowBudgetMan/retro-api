@@ -31,9 +31,16 @@ public class ThoughtController {
     }
 
     @PutMapping("/{thoughtId}/votes")
-    @PreAuthorize("@retroAuthorizationService.isUserAllowedInRetro(authentication, #retroId)")
+    @PreAuthorize("@thoughtAuthorizationService.canUserModifyThought(authentication, #thoughtId)")
     public ResponseEntity<Void> vote(@PathVariable UUID teamId, @PathVariable UUID retroId, @PathVariable UUID thoughtId) {
         thoughtService.addVote(thoughtId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{thoughtId}/completed")
+    @PreAuthorize("@thoughtAuthorizationService.canUserModifyThought(authentication, #thoughtId)")
+    public ResponseEntity<Void> setCompleted(@PathVariable UUID teamId, @PathVariable UUID retroId, @PathVariable UUID thoughtId, @RequestBody UpdateThoughtCompletionRequest request) {
+        thoughtService.setCompleted(thoughtId, request.completed());
         return ResponseEntity.noContent().build();
     }
 }

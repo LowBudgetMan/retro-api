@@ -74,6 +74,7 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
     public AuthorizationManager<Message<?>> messageAuthorizationManager(MessageMatcherDelegatingAuthorizationManager.Builder messages) {
         messages
                 .nullDestMatcher().authenticated()
+                // TODO: Add destination matchers for other retro events
                 .simpSubscribeDestMatchers("/topic/*.thoughts").access((authentication, object) -> {
                     var result = new AuthorizationDecision(false);
                     var destination = Optional.ofNullable((String) object.getMessage().getHeaders().get("simpDestination")).orElse("");
