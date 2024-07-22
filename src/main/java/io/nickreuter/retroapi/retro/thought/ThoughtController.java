@@ -57,4 +57,11 @@ public class ThoughtController {
         thoughtService.setMessage(thoughtId, request.message());
         return ResponseEntity.noContent().build();
     }
+
+    @DeleteMapping("/{thoughtId}")
+    @PreAuthorize("@thoughtAuthorizationService.canUserModifyThought(authentication, #thoughtId)")
+    public ResponseEntity<Void> deleteThought(@PathVariable UUID teamId, @PathVariable UUID retroId, @PathVariable UUID thoughtId) {
+        thoughtService.deleteThought(thoughtId);
+        return ResponseEntity.noContent().build();
+    }
 }

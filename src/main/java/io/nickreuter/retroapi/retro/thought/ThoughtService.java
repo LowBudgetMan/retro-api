@@ -56,6 +56,12 @@ public class ThoughtService {
         applicationEventPublisher.publishEvent(new ThoughtEvent(this, ActionType.UPDATE, updatedThought, updatedThought.getRetroId()));
     }
 
+    public void deleteThought(UUID thoughtId) {
+        var thought = thoughtRepository.findById(thoughtId).orElseThrow();
+        thoughtRepository.deleteById(thoughtId);
+        applicationEventPublisher.publishEvent(new ThoughtEvent(this, ActionType.DELETE, thought, thought.getRetroId()));
+    }
+
     public List<ThoughtEntity> getThoughtsForRetro(UUID retroId) {
         return thoughtRepository.findByRetroIdOrderByCreatedAtDesc(retroId);
     }

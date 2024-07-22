@@ -203,4 +203,30 @@ class ThoughtServiceTest {
         assertThat(argCaptor.getValue().getActionType()).isEqualTo(ActionType.UPDATE);
         assertThat(argCaptor.getValue().getPayload()).isEqualTo(expected);
     }
+
+    @Test
+    void deleteThought_RemovesThoughtFromDatabase() {
+        var thoughtId = UUID.randomUUID();
+        var savedThought = new ThoughtEntity(thoughtId, "message", 2, false, "category", UUID.randomUUID(), null);
+        when(thoughtRepository.findById(thoughtId)).thenReturn(Optional.of(savedThought));
+
+        subject.deleteThought(thoughtId);
+
+        verify(thoughtRepository).deleteById(thoughtId);
+    }
+
+    @Test
+    void deleteThought_PublishesEvent() {
+        var thoughtId = UUID.randomUUID();
+        var savedThought = new ThoughtEntity(thoughtId, "message", 2, false, "category", UUID.randomUUID(), null);
+        when(thoughtRepository.findById(thoughtId)).thenReturn(Optional.of(savedThought));
+
+        subject.deleteThought(thoughtId);
+
+        var argCaptor = ArgumentCaptor.forClass(ThoughtEvent.class);
+        verify(applicationEventPublisher).publishEvent(argCaptor.capture());
+        assertThat(argCaptor.getValue().getRoute()).isEqualTo("/topic/%s.thoughts".formatted(savedThought.getRetroId()));
+        assertThat(argCaptor.getValue().getActionType()).isEqualTo(ActionType.DELETE);
+        assertThat(argCaptor.getValue().getPayload()).isEqualTo(savedThought);
+    }
 }

@@ -293,4 +293,40 @@ class ThoughtControllerTest {
                         .content(objectMapper.writeValueAsString(new UpdateThoughtMessageRequest("message!"))))
                 .andExpect(status().isForbidden());
     }
+
+    @Test
+    void deleteThought_WhenSuccessful_Returns204() throws Exception {
+        var teamId = UUID.randomUUID();
+        var retroId = UUID.randomUUID();
+        var thoughtId = UUID.randomUUID();
+        when(thoughtAuthorizationService.canUserModifyThought(createAuthentication(), thoughtId)).thenReturn(true);
+        mockMvc.perform(delete("/api/teams/%s/retros/%s/thoughts/%s".formatted(teamId, retroId, thoughtId))
+                        .with(jwt())
+                        .with(csrf()))
+                .andExpect(status().isNoContent());
+        verify(thoughtService).deleteThought(thoughtId);
+    }
+
+    @Test
+    void deleteThought_WhenBadToken_Throws401() throws Exception {
+        var teamId = UUID.randomUUID();
+        var retroId = UUID.randomUUID();
+        var thoughtId = UUID.randomUUID();
+        mockMvc.perform(delete("/api/teams/%s/retros/%s/thoughts/%s".formatted(teamId, retroId, thoughtId))
+                        .with(anonymous())
+                        .with(csrf()))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void deleteThought_WhenUserNotPartOfRetro_Throws403() throws Exception {
+        var teamId = UUID.randomUUID();
+        var retroId = UUID.randomUUID();
+        var thoughtId = UUID.randomUUID();
+        when(thoughtAuthorizationService.canUserModifyThought(createAuthentication(), thoughtId)).thenReturn(false);
+        mockMvc.perform(delete("/api/teams/%s/retros/%s/thoughts/%s".formatted(teamId, retroId, thoughtId))
+                        .with(jwt())
+                        .with(csrf()))
+                .andExpect(status().isForbidden());
+    }
 }
