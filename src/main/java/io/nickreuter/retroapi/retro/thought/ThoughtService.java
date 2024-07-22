@@ -49,6 +49,13 @@ public class ThoughtService {
         applicationEventPublisher.publishEvent(new ThoughtEvent(this, ActionType.UPDATE, updatedThought, updatedThought.getRetroId()));
     }
 
+    public void setMessage(UUID thoughtId, String message) {
+        var thought = thoughtRepository.findById(thoughtId).orElseThrow();
+        thought.setMessage(message);
+        var updatedThought = thoughtRepository.save(thought);
+        applicationEventPublisher.publishEvent(new ThoughtEvent(this, ActionType.UPDATE, updatedThought, updatedThought.getRetroId()));
+    }
+
     public List<ThoughtEntity> getThoughtsForRetro(UUID retroId) {
         return thoughtRepository.findByRetroIdOrderByCreatedAtDesc(retroId);
     }
