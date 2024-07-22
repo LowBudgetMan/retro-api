@@ -17,6 +17,8 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.config.annotation.web.socket.EnableWebSocketSecurity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.messaging.access.intercept.MessageAuthorizationContext;
 import org.springframework.security.messaging.access.intercept.MessageMatcherDelegatingAuthorizationManager;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthenticationToken;
@@ -28,6 +30,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import static org.springframework.messaging.simp.SimpMessageType.*;
@@ -74,19 +77,8 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
     public AuthorizationManager<Message<?>> messageAuthorizationManager(MessageMatcherDelegatingAuthorizationManager.Builder messages) {
         messages
                 .nullDestMatcher().authenticated()
-                // TODO: Add destination matchers for other retro events
-                .simpSubscribeDestMatchers("/topic/*.thoughts").access((authentication, object) -> {
-                    var result = new AuthorizationDecision(false);
-                    var destination = Optional.ofNullable((String) object.getMessage().getHeaders().get("simpDestination")).orElse("");
-                    var ids = Pattern.compile("^/topic/(?<retroId>.*)\\.thoughts$").matcher(destination);
-                    if (ids.find()) {
-                        result = new AuthorizationDecision(retroAuthorizationService.isUserAllowedInRetro(
-                                authentication.get(),
-                                UUID.fromString(ids.group("retroId")))
-                        );
-                    }
-                    return result;
-                })
+                .simpSubscribeDestMatchers("/topic/*.thoughts").access((authentication, object) -> isAuthorizedRetroSubscription(authentication, object, "^/topic/(?<retroId>.*)\\.thoughts$", "retroId"))
+                .simpSubscribeDestMatchers("/topic/*.finished").access((authentication, object) -> isAuthorizedRetroSubscription(authentication, object, "^/topic/(?<retroId>.*)\\.finished$", "retroId"))
                 .simpTypeMatchers(MESSAGE, SUBSCRIBE).denyAll()
                 .simpTypeMatchers(UNSUBSCRIBE, DISCONNECT).permitAll()
                 .anyMessage().denyAll();
@@ -114,6 +106,19 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
     @Bean(name = "csrfChannelInterceptor")
     ChannelInterceptor csrfChannelInterceptor() {
         return new ChannelInterceptor() {};
+    }
+
+    private AuthorizationDecision isAuthorizedRetroSubscription(Supplier<Authentication> authentication, MessageAuthorizationContext<?> object, String regex, String groupName) {
+        var result = new AuthorizationDecision(false);
+        var destination = Optional.ofNullable((String) object.getMessage().getHeaders().get("simpDestination")).orElse("");
+        var ids = Pattern.compile(regex).matcher(destination);
+        if (ids.find()) {
+            result = new AuthorizationDecision(retroAuthorizationService.isUserAllowedInRetro(
+                    authentication.get(),
+                    UUID.fromString(ids.group(groupName)))
+            );
+        }
+        return result;
     }
 }
 
