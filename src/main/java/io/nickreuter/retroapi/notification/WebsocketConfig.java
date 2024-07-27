@@ -1,6 +1,7 @@
 package io.nickreuter.retroapi.notification;
 
 import io.nickreuter.retroapi.retro.RetroAuthorizationService;
+import io.nickreuter.retroapi.team.usermapping.UserMappingAuthorizationService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -31,6 +32,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.springframework.messaging.simp.SimpMessageType.*;
@@ -43,11 +45,13 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
     private final JwtDecoder jwtDecoder;
     private final RetroAuthorizationService retroAuthorizationService;
     private final BrokerRelayProperties relayProperties;
+    private final UserMappingAuthorizationService userMappingAuthorizationService;
 
-    public WebsocketConfig(JwtDecoder jwtDecoder, RetroAuthorizationService retroAuthorizationService, BrokerRelayProperties relayProperties) {
+    public WebsocketConfig(JwtDecoder jwtDecoder, RetroAuthorizationService retroAuthorizationService, BrokerRelayProperties relayProperties, UserMappingAuthorizationService userMappingAuthorizationService) {
         this.jwtDecoder = jwtDecoder;
         this.retroAuthorizationService = retroAuthorizationService;
         this.relayProperties = relayProperties;
+        this.userMappingAuthorizationService = userMappingAuthorizationService;
     }
 
     @Override
@@ -77,8 +81,9 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
     public AuthorizationManager<Message<?>> messageAuthorizationManager(MessageMatcherDelegatingAuthorizationManager.Builder messages) {
         messages
                 .nullDestMatcher().authenticated()
-                .simpSubscribeDestMatchers("/topic/*.thoughts").access((authentication, object) -> isAuthorizedRetroSubscription(authentication, object, "^/topic/(?<retroId>.*)\\.thoughts$", "retroId"))
-                .simpSubscribeDestMatchers("/topic/*.finished").access((authentication, object) -> isAuthorizedRetroSubscription(authentication, object, "^/topic/(?<retroId>.*)\\.finished$", "retroId"))
+                .simpSubscribeDestMatchers("/topic/*.thoughts").access(this::isAuthorizedRetroSubscription)
+                .simpSubscribeDestMatchers("/topic/*.finished").access(this::isAuthorizedRetroSubscription)
+                .simpSubscribeDestMatchers("/topic/*.action-items").access((this::isAuthorizedTeamSubscription))
                 .simpTypeMatchers(MESSAGE, SUBSCRIBE).denyAll()
                 .simpTypeMatchers(UNSUBSCRIBE, DISCONNECT).permitAll()
                 .anyMessage().denyAll();
@@ -108,17 +113,23 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
         return new ChannelInterceptor() {};
     }
 
-    private AuthorizationDecision isAuthorizedRetroSubscription(Supplier<Authentication> authentication, MessageAuthorizationContext<?> object, String regex, String groupName) {
-        var result = new AuthorizationDecision(false);
+    private AuthorizationDecision isAuthorizedRetroSubscription(Supplier<Authentication> authentication, MessageAuthorizationContext<?> object) {
+        var ids = getIdFromTopic(object, "^/topic/(?<retroId>.*)\\.*$");
+        return ids.find()
+                ? new AuthorizationDecision(retroAuthorizationService.isUserAllowedInRetro(authentication.get(), UUID.fromString(ids.group("retroId"))))
+                : new AuthorizationDecision(false);
+    }
+
+    private AuthorizationDecision isAuthorizedTeamSubscription(Supplier<Authentication> authentication, MessageAuthorizationContext<?> object) {
+        var ids = getIdFromTopic(object, "^/topic/(?<teamId>.*)\\.*$");
+        return ids.find()
+                ? new AuthorizationDecision(userMappingAuthorizationService.isUserMemberOfTeam(authentication.get(), UUID.fromString(ids.group("teamId"))))
+                : new AuthorizationDecision(false);
+    }
+
+    private Matcher getIdFromTopic(MessageAuthorizationContext<?> object, String regex) {
         var destination = Optional.ofNullable((String) object.getMessage().getHeaders().get("simpDestination")).orElse("");
-        var ids = Pattern.compile(regex).matcher(destination);
-        if (ids.find()) {
-            result = new AuthorizationDecision(retroAuthorizationService.isUserAllowedInRetro(
-                    authentication.get(),
-                    UUID.fromString(ids.group(groupName)))
-            );
-        }
-        return result;
+        return Pattern.compile(regex).matcher(destination);
     }
 }
 

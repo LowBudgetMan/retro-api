@@ -66,6 +66,7 @@
         <preConditions>
             <not>
                 <tableExists tableName="retro"/>
+                <tableExists tableName="thought"/>
             </not>
         </preConditions>
         <createTable tableName="retro">
@@ -103,6 +104,36 @@
             </column>
             <column name="retro_id" type="uuid">
                 <constraints nullable="false" foreignKeyName="FK_THOUGHT_RETRO" references="retro(id)" />
+            </column>
+            <column name="created_at" type="datetime">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="add-action-item-table" author="lowbudgetman">
+        <preConditions>
+            <not>
+                <tableExists tableName="action_item"/>
+            </not>
+        </preConditions>
+        <createTable tableName="action_item">
+            <column name="id" type="uuid" autoIncrement="1">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="action" type="VARCHAR(1000)">
+                <constraints nullable="false" />
+            </column>
+            <column name="completed" type="boolean">
+                <constraints nullable="false" />
+            </column>
+            <column name="category" type="VARCHAR(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="team_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="FK_TEAM_ACTION_ITEM" references="team(id)" />
+            </column>
+            <column name="assignee" type="VARCHAR(1000)">
+                <constraints nullable="false" />
             </column>
             <column name="created_at" type="datetime">
                 <constraints nullable="false" />
