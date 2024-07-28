@@ -117,4 +117,43 @@ class ActionItemControllerTest {
                         .content(objectMapper.writeValueAsString(new UpdateActionItemActionRequest("new action"))))
                 .andExpect(status().isForbidden());
     }
+
+    @Test
+    void setAssignee_Returns204() throws Exception {
+        var teamId = UUID.randomUUID();
+        var actionItemId = UUID.randomUUID();
+        when(actionItemAuthorizationService.canUserModifyActionItem(createAuthentication(), actionItemId)).thenReturn(true);
+        mockMvc.perform(put("/api/teams/%s/action-items/%s/assignee".formatted(teamId, actionItemId))
+                        .with(jwt())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new UpdateActionItemAssigneeRequest("new assignee"))))
+                .andExpect(status().isNoContent());
+        verify(actionItemService).setAssignee(actionItemId, "new assignee");
+    }
+
+    @Test
+    void setAssignee_WithBadToken_Throws401() throws Exception {
+        var teamId = UUID.randomUUID();
+        var actionItemId = UUID.randomUUID();
+        mockMvc.perform(put("/api/teams/%s/action-items/%s/assignee".formatted(teamId, actionItemId))
+                        .with(anonymous())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new UpdateActionItemAssigneeRequest("new assignee"))))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void setAssignee_WhenUserNotMemberOfTeam_Throws403() throws Exception {
+        var teamId = UUID.randomUUID();
+        var actionItemId = UUID.randomUUID();
+        when(actionItemAuthorizationService.canUserModifyActionItem(createAuthentication(), actionItemId)).thenReturn(false);
+        mockMvc.perform(put("/api/teams/%s/action-items/%s/assignee".formatted(teamId, actionItemId))
+                        .with(jwt())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new UpdateActionItemAssigneeRequest("new assignee"))))
+                .andExpect(status().isForbidden());
+    }
 }

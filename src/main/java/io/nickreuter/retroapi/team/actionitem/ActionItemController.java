@@ -29,4 +29,11 @@ public class ActionItemController {
         actionItemService.setAction(actionItemId, request.action());
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/{actionItemId}/assignee")
+    @PreAuthorize("@actionItemAuthorizationService.canUserModifyActionItem(authentication, #actionItemId)")
+    public ResponseEntity<Void> setAssignee(@PathVariable UUID teamId, @PathVariable UUID actionItemId, @RequestBody UpdateActionItemAssigneeRequest request) {
+        actionItemService.setAssignee(actionItemId, request.assignee());
+        return ResponseEntity.noContent().build();
+    }
 }
