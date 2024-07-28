@@ -16,9 +16,11 @@ import java.time.Instant;
 import java.util.UUID;
 
 import static io.nickreuter.retroapi.team.TestAuthenticationCreationService.createAuthentication;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -31,6 +33,8 @@ class ActionItemControllerTest {
     private UserMappingAuthorizationService userMappingAuthorizationService;
     @MockBean
     private ActionItemService actionItemService;
+    @MockBean
+    private ActionItemAuthorizationService actionItemAuthorizationService;
 
     @Autowired
     private MockMvc mockMvc;
@@ -72,6 +76,45 @@ class ActionItemControllerTest {
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new CreateActionItemRequest("action", "assignee", teamId))))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void setAction_Returns204() throws Exception {
+        var teamId = UUID.randomUUID();
+        var actionItemId = UUID.randomUUID();
+        when(actionItemAuthorizationService.canUserModifyActionItem(createAuthentication(), actionItemId)).thenReturn(true);
+        mockMvc.perform(put("/api/teams/%s/action-items/%s/action".formatted(teamId, actionItemId))
+                    .with(jwt())
+                    .with(csrf())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(new UpdateActionItemActionRequest("new action"))))
+                .andExpect(status().isNoContent());
+        verify(actionItemService).setAction(actionItemId, "new action");
+    }
+
+    @Test
+    void setAction_WithBadToken_Throws401() throws Exception {
+        var teamId = UUID.randomUUID();
+        var actionItemId = UUID.randomUUID();
+        mockMvc.perform(put("/api/teams/%s/action-items/%s/action".formatted(teamId, actionItemId))
+                        .with(anonymous())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new UpdateActionItemActionRequest("new action"))))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void setAction_WhenUserNotMemberOfTeam_Throws403() throws Exception {
+        var teamId = UUID.randomUUID();
+        var actionItemId = UUID.randomUUID();
+        when(actionItemAuthorizationService.canUserModifyActionItem(createAuthentication(), actionItemId)).thenReturn(false);
+        mockMvc.perform(put("/api/teams/%s/action-items/%s/action".formatted(teamId, actionItemId))
+                        .with(jwt())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new UpdateActionItemActionRequest("new action"))))
                 .andExpect(status().isForbidden());
     }
 }
