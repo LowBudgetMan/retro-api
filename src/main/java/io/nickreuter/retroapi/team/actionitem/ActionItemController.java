@@ -43,4 +43,11 @@ public class ActionItemController {
         actionItemService.setCompleted(actionItemId, request.completed());
         return ResponseEntity.noContent().build();
     }
+
+    @DeleteMapping("/{actionItemId}")
+    @PreAuthorize("@actionItemAuthorizationService.canUserModifyActionItem(authentication, #actionItemId)")
+    public ResponseEntity<Void> deleteActionItem(@PathVariable UUID teamId, @PathVariable UUID actionItemId) {
+        actionItemService.deleteActionItem(actionItemId);
+        return ResponseEntity.noContent().build();
+    }
 }

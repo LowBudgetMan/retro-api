@@ -19,8 +19,7 @@ import static io.nickreuter.retroapi.team.TestAuthenticationCreationService.crea
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -193,6 +192,40 @@ class ActionItemControllerTest {
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new UpdateActionItemCompletedRequest(true))))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void deleteActionItem_Returns204() throws Exception {
+        var teamId = UUID.randomUUID();
+        var actionItemId = UUID.randomUUID();
+        when(actionItemAuthorizationService.canUserModifyActionItem(createAuthentication(), actionItemId)).thenReturn(true);
+        mockMvc.perform(delete("/api/teams/%s/action-items/%s".formatted(teamId, actionItemId))
+                        .with(jwt())
+                        .with(csrf()))
+                .andExpect(status().isNoContent());
+        verify(actionItemService).deleteActionItem(actionItemId);
+    }
+
+    @Test
+    void deleteActionItem_WithBadToken_Throws401() throws Exception {
+        var teamId = UUID.randomUUID();
+        var actionItemId = UUID.randomUUID();
+        when(actionItemAuthorizationService.canUserModifyActionItem(createAuthentication(), actionItemId)).thenReturn(true);
+        mockMvc.perform(delete("/api/teams/%s/action-items/%s".formatted(teamId, actionItemId))
+                        .with(anonymous())
+                        .with(csrf()))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void deleteActionItem_WhenUserNotMemberOfTeam_Throws403() throws Exception {
+        var teamId = UUID.randomUUID();
+        var actionItemId = UUID.randomUUID();
+        when(actionItemAuthorizationService.canUserModifyActionItem(createAuthentication(), actionItemId)).thenReturn(false);
+        mockMvc.perform(delete("/api/teams/%s/action-items/%s".formatted(teamId, actionItemId))
+                        .with(jwt())
+                        .with(csrf()))
                 .andExpect(status().isForbidden());
     }
 }
