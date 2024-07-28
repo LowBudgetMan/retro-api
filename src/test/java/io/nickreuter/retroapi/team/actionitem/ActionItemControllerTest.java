@@ -156,4 +156,43 @@ class ActionItemControllerTest {
                         .content(objectMapper.writeValueAsString(new UpdateActionItemAssigneeRequest("new assignee"))))
                 .andExpect(status().isForbidden());
     }
+
+    @Test
+    void setCompleted_Returns204() throws Exception {
+        var teamId = UUID.randomUUID();
+        var actionItemId = UUID.randomUUID();
+        when(actionItemAuthorizationService.canUserModifyActionItem(createAuthentication(), actionItemId)).thenReturn(true);
+        mockMvc.perform(put("/api/teams/%s/action-items/%s/completed".formatted(teamId, actionItemId))
+                        .with(jwt())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new UpdateActionItemCompletedRequest(true))))
+                .andExpect(status().isNoContent());
+        verify(actionItemService).setCompleted(actionItemId, true);
+    }
+
+    @Test
+    void setCompleted_WithBadToken_Throws401() throws Exception {
+        var teamId = UUID.randomUUID();
+        var actionItemId = UUID.randomUUID();
+        mockMvc.perform(put("/api/teams/%s/action-items/%s/completed".formatted(teamId, actionItemId))
+                        .with(anonymous())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new UpdateActionItemCompletedRequest(true))))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void setCompleted_WhenUserNotMemberOfTeam_Throws403() throws Exception {
+        var teamId = UUID.randomUUID();
+        var actionItemId = UUID.randomUUID();
+        when(actionItemAuthorizationService.canUserModifyActionItem(createAuthentication(), actionItemId)).thenReturn(false);
+        mockMvc.perform(put("/api/teams/%s/action-items/%s/completed".formatted(teamId, actionItemId))
+                        .with(jwt())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new UpdateActionItemCompletedRequest(true))))
+                .andExpect(status().isForbidden());
+    }
 }

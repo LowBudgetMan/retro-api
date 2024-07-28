@@ -36,4 +36,11 @@ public class ActionItemController {
         actionItemService.setAssignee(actionItemId, request.assignee());
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/{actionItemId}/completed")
+    @PreAuthorize("@actionItemAuthorizationService.canUserModifyActionItem(authentication, #actionItemId)")
+    public ResponseEntity<Void> setCompleted(@PathVariable UUID teamId, @PathVariable UUID actionItemId, @RequestBody UpdateActionItemCompletedRequest request) {
+        actionItemService.setCompleted(actionItemId, request.completed());
+        return ResponseEntity.noContent().build();
+    }
 }
