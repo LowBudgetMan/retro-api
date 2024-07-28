@@ -203,4 +203,15 @@ class ActionItemServiceTest {
         assertThat(argCaptor.getValue().getActionType()).isEqualTo(ActionType.DELETE);
         assertThat(argCaptor.getValue().getPayload()).isEqualTo(savedActionItem);
     }
+
+    @Test
+    void getActionItem_ReturnsActionItemInRepository() {
+        var id = UUID.randomUUID();
+        var expected = new ActionItemEntity(id, "action", false, UUID.randomUUID(), "assignee", Instant.now());
+        when(actionItemRepository.findById(id)).thenReturn(Optional.of(expected));
+
+        var actual = subject.getActionItem(id);
+
+        assertThat(actual).contains(expected);
+    }
 }

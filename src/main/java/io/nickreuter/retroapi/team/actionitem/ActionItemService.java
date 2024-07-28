@@ -5,6 +5,7 @@ import io.nickreuter.retroapi.notification.event.ActionItemEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -48,5 +49,9 @@ public class ActionItemService {
         var actionItem = actionItemRepository.findById(actionItemId).orElseThrow();
         actionItemRepository.delete(actionItem);
         applicationEventPublisher.publishEvent(new ActionItemEvent(this, ActionType.DELETE, actionItem, actionItem.getTeamId()));
+    }
+
+    public Optional<ActionItemEntity> getActionItem(UUID actionItemId) {
+        return actionItemRepository.findById(actionItemId);
     }
 }
