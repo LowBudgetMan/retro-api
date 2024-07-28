@@ -22,4 +22,31 @@ public class ActionItemService {
         applicationEventPublisher.publishEvent(new ActionItemEvent(this, ActionType.CREATE, actionItem, teamId));
         return actionItem;
     }
+
+    public void setAction(UUID actionItemId, String action) {
+        var actionItem = actionItemRepository.findById(actionItemId).orElseThrow();
+        actionItem.setAction(action);
+        var updatedActionItem = actionItemRepository.save(actionItem);
+        applicationEventPublisher.publishEvent(new ActionItemEvent(this, ActionType.UPDATE, updatedActionItem, updatedActionItem.getTeamId()));
+    }
+
+    public void setAssignee(UUID actionItemId, String assignee) {
+        var actionItem = actionItemRepository.findById(actionItemId).orElseThrow();
+        actionItem.setAssignee(assignee);
+        var updatedActionItem = actionItemRepository.save(actionItem);
+        applicationEventPublisher.publishEvent(new ActionItemEvent(this, ActionType.UPDATE, updatedActionItem, updatedActionItem.getTeamId()));
+    }
+
+    public void setCompleted(UUID actionItemId, boolean completed) {
+        var actionItem = actionItemRepository.findById(actionItemId).orElseThrow();
+        actionItem.setCompleted(completed);
+        var updatedActionItem = actionItemRepository.save(actionItem);
+        applicationEventPublisher.publishEvent(new ActionItemEvent(this, ActionType.UPDATE, updatedActionItem, updatedActionItem.getTeamId()));
+    }
+
+    public void deleteActionItem(UUID actionItemId) {
+        var actionItem = actionItemRepository.findById(actionItemId).orElseThrow();
+        actionItemRepository.delete(actionItem);
+        applicationEventPublisher.publishEvent(new ActionItemEvent(this, ActionType.DELETE, actionItem, actionItem.getTeamId()));
+    }
 }
