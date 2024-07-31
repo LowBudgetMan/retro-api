@@ -115,6 +115,167 @@
 					]
 				},
 				{
+					"name": "Action Items",
+					"item": [
+						{
+							"name": "Create Action Item",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var location = pm.response.headers.get(\"Location\");",
+											"pm.collectionVariables.set(\"actionItemId\", location.substring(location.lastIndexOf('/') + 1));"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"action\": \"Action to take\",\n    \"assignee\": \"Assign E.\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/teams/{{teamId}}/action-items",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"teams",
+										"{{teamId}}",
+										"action-items"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Action",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"action\": \"This is a new Action\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/teams/{{teamId}}/action-items/{{actionItemId}}/action",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"teams",
+										"{{teamId}}",
+										"action-items",
+										"{{actionItemId}}",
+										"action"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Assignee",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"assignee\": \"This is a new assignee\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/teams/{{teamId}}/action-items/{{actionItemId}}/assignee",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"teams",
+										"{{teamId}}",
+										"action-items",
+										"{{actionItemId}}",
+										"assignee"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Completion Status",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"completed\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/teams/{{teamId}}/action-items/{{actionItemId}}/completed",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"teams",
+										"{{teamId}}",
+										"action-items",
+										"{{actionItemId}}",
+										"completed"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Action Item",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/teams/{{teamId}}/action-items/{{actionItemId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"teams",
+										"{{teamId}}",
+										"action-items",
+										"{{actionItemId}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
 					"name": "Create Team",
 					"event": [
 						{
@@ -196,6 +357,201 @@
 		{
 			"name": "Retros",
 			"item": [
+				{
+					"name": "Thoughts",
+					"item": [
+						{
+							"name": "Create Thought",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var location = pm.response.headers.get(\"Location\");",
+											"pm.collectionVariables.set(\"thoughtId\", location.substring(location.lastIndexOf('/') + 1));"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"message\": \"This is a happy thought\",\n    \"category\": \"Happy\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/teams/{{teamId}}/retros/{{retroId}}/thoughts",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"teams",
+										"{{teamId}}",
+										"retros",
+										"{{retroId}}",
+										"thoughts"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Vote for Thought",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/teams/{{teamId}}/retros/{{retroId}}/thoughts/{{thoughtId}}/votes",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"teams",
+										"{{teamId}}",
+										"retros",
+										"{{retroId}}",
+										"thoughts",
+										"{{thoughtId}}",
+										"votes"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Completed",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"completed\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/teams/{{teamId}}/retros/{{retroId}}/thoughts/{{thoughtId}}/completed",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"teams",
+										"{{teamId}}",
+										"retros",
+										"{{retroId}}",
+										"thoughts",
+										"{{thoughtId}}",
+										"completed"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Category",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"category\": \"Sad\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/teams/{{teamId}}/retros/{{retroId}}/thoughts/{{thoughtId}}/category",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"teams",
+										"{{teamId}}",
+										"retros",
+										"{{retroId}}",
+										"thoughts",
+										"{{thoughtId}}",
+										"category"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Message",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"message\": \"This is a sad thought\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/teams/{{teamId}}/retros/{{retroId}}/thoughts/{{thoughtId}}/message",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"teams",
+										"{{teamId}}",
+										"retros",
+										"{{retroId}}",
+										"thoughts",
+										"{{thoughtId}}",
+										"message"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Thought",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/teams/{{teamId}}/retros/{{retroId}}/thoughts/{{thoughtId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"teams",
+										"{{teamId}}",
+										"retros",
+										"{{retroId}}",
+										"thoughts",
+										"{{thoughtId}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
 				{
 					"name": "Create Retro",
 					"event": [
@@ -305,201 +661,6 @@
 								"retros",
 								"{{retroId}}",
 								"finished"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Thoughts",
-			"item": [
-				{
-					"name": "Create Thought",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"var location = pm.response.headers.get(\"Location\");",
-									"pm.collectionVariables.set(\"thoughtId\", location.substring(location.lastIndexOf('/') + 1));"
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"message\": \"This is a happy thought\",\n    \"category\": \"Happy\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/teams/{{teamId}}/retros/{{retroId}}/thoughts",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"teams",
-								"{{teamId}}",
-								"retros",
-								"{{retroId}}",
-								"thoughts"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Vote for Thought",
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/teams/{{teamId}}/retros/{{retroId}}/thoughts/{{thoughtId}}/votes",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"teams",
-								"{{teamId}}",
-								"retros",
-								"{{retroId}}",
-								"thoughts",
-								"{{thoughtId}}",
-								"votes"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update Completed",
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"completed\": true\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/teams/{{teamId}}/retros/{{retroId}}/thoughts/{{thoughtId}}/completed",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"teams",
-								"{{teamId}}",
-								"retros",
-								"{{retroId}}",
-								"thoughts",
-								"{{thoughtId}}",
-								"completed"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update Category",
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"category\": \"Sad\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/teams/{{teamId}}/retros/{{retroId}}/thoughts/{{thoughtId}}/category",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"teams",
-								"{{teamId}}",
-								"retros",
-								"{{retroId}}",
-								"thoughts",
-								"{{thoughtId}}",
-								"category"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update Message",
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"message\": \"This is a sad thought\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/teams/{{teamId}}/retros/{{retroId}}/thoughts/{{thoughtId}}/message",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"teams",
-								"{{teamId}}",
-								"retros",
-								"{{retroId}}",
-								"thoughts",
-								"{{thoughtId}}",
-								"message"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete Thought",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/teams/{{teamId}}/retros/{{retroId}}/thoughts/{{thoughtId}}",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"teams",
-								"{{teamId}}",
-								"retros",
-								"{{retroId}}",
-								"thoughts",
-								"{{thoughtId}}"
 							]
 						}
 					},
@@ -628,6 +789,11 @@
 		},
 		{
 			"key": "thoughtId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "actionItemId",
 			"value": "",
 			"type": "string"
 		}

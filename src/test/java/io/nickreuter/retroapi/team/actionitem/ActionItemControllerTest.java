@@ -50,7 +50,7 @@ class ActionItemControllerTest {
                         .with(jwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new CreateActionItemRequest("action", "assignee", teamId))))
+                        .content(objectMapper.writeValueAsString(new CreateActionItemRequest("action", "assignee"))))
                 .andExpect(status().isCreated())
                 .andExpect(header().string(HttpHeaders.LOCATION, "/api/teams/%s/action-items/%s".formatted(teamId, actionItemId)));
     }
@@ -62,7 +62,7 @@ class ActionItemControllerTest {
                         .with(anonymous())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new CreateActionItemRequest("action", "assignee", teamId))))
+                        .content(objectMapper.writeValueAsString(new CreateActionItemRequest("action", "assignee"))))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -74,7 +74,7 @@ class ActionItemControllerTest {
                         .with(jwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new CreateActionItemRequest("action", "assignee", teamId))))
+                        .content(objectMapper.writeValueAsString(new CreateActionItemRequest("action", "assignee"))))
                 .andExpect(status().isForbidden());
     }
 

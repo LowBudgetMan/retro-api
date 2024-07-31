@@ -18,8 +18,8 @@ public class ActionItemController {
 
     @PostMapping
     @PreAuthorize("@userMappingAuthorizationService.isUserMemberOfTeam(authentication, #teamId)")
-    public ResponseEntity<Void> createActionItem(@PathVariable("teamId") String teamId, @RequestBody CreateActionItemRequest request) {
-        var actionItem = actionItemService.createActionItem(request.action(), request.assignee(), request.teamId());
+    public ResponseEntity<Void> createActionItem(@PathVariable("teamId") UUID teamId, @RequestBody CreateActionItemRequest request) {
+        var actionItem = actionItemService.createActionItem(request.action(), request.assignee(), teamId);
         return ResponseEntity.created(URI.create("/api/teams/%s/action-items/%s".formatted(teamId, actionItem.getId()))).build();
     }
 
