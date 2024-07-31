@@ -20,7 +20,7 @@ public class SecurityConfig implements WebMvcConfigurer {
                 .csrf(Customizer.withDefaults())
                 .authorizeHttpRequests(authorize -> {
                     authorize.requestMatchers("/h2/**").permitAll();
-                    authorize.requestMatchers("/api/config").permitAll();
+                    authorize.requestMatchers("/api/configuration").permitAll();
                     authorize.requestMatchers("/websocket/**").permitAll();
                     authorize.anyRequest().authenticated();
                 })

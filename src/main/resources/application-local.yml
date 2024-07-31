@@ -13,3 +13,7 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://localhost:8010/realms/myrealm
+web:
+  authentication:
+    authority: http://localhost:8010/realms/myrealm
+    clientId: retroquest-web
