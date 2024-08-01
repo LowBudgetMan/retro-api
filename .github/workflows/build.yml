@@ -21,6 +21,8 @@ jobs:
             ${{ runner.os }}-gradle-
       - name: build application JAR
         run: ./gradlew build
+      - name: build application image
+        run: ./gradlew bootBuildImage
       - name: cleanup gradle cache
         run: |
           rm -f ~/.gradle/caches/modules-2/modules-2.lock
