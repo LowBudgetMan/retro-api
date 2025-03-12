@@ -114,7 +114,7 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
     }
 
     private AuthorizationDecision isAuthorizedRetroSubscription(Supplier<Authentication> authentication, MessageAuthorizationContext<?> object) {
-        var ids = getIdFromTopic(object, "^/topic/(?<retroId>.*)\\.*$");
+        var ids = getIdFromTopic(object, "^/topic/(?<retroId>.*)\\.thoughts$");
         return ids.find()
                 ? new AuthorizationDecision(retroAuthorizationService.isUserAllowedInRetro(authentication.get(), UUID.fromString(ids.group("retroId"))))
                 : new AuthorizationDecision(false);
