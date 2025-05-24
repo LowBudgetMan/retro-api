@@ -57,6 +57,24 @@ class TeamControllerTest {
     }
 
     @Test
+    void createTeam_WhenTeamNameNull_Return400() throws Exception {
+        mockMvc.perform(post("/api/teams")
+                        .with(jwt())
+                        .content(objectMapper.writeValueAsString(new CreateTeamRequest(null)))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void createTeam_WhenTeamNameEmptyString_Return400() throws Exception {
+        mockMvc.perform(post("/api/teams")
+                        .with(jwt())
+                        .content(objectMapper.writeValueAsString(new CreateTeamRequest("")))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void createTeam_WithInvalidToken_Throws401() throws Exception {
         mockMvc.perform(post("/api/teams")
                         .with(anonymous())

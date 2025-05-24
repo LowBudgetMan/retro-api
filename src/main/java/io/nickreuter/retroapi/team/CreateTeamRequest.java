@@ -1,3 +1,5 @@
 package io.nickreuter.retroapi.team;
 
-public record CreateTeamRequest(String name) {}
+import jakarta.validation.constraints.NotBlank;
+
+public record CreateTeamRequest(@NotBlank() String name) {}

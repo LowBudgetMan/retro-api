@@ -3,6 +3,7 @@ package io.nickreuter.retroapi.team;
 import io.nickreuter.retroapi.team.exception.BadInviteException;
 import io.nickreuter.retroapi.team.exception.TeamAlreadyExistsException;
 import io.nickreuter.retroapi.team.exception.TeamNotFoundException;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,7 +25,7 @@ public class TeamController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> createTeam(@RequestBody CreateTeamRequest request, Principal principal) throws TeamAlreadyExistsException {
+    public ResponseEntity<Void> createTeam(@Valid @RequestBody CreateTeamRequest request, Principal principal) throws TeamAlreadyExistsException {
         var team = teamService.createTeam(request.name(), principal.getName());
         return ResponseEntity.created(URI.create("/api/teams/%s".formatted(team.getId()))).build();
     }
