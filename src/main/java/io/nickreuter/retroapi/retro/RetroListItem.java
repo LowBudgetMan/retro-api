@@ -7,9 +7,10 @@ public record RetroListItem(
         UUID id,
         UUID teamId,
         boolean finished,
-        Instant createdAt
+        Instant createdAt,
+        String templateId
 ) {
     static RetroListItem from(RetroEntity retro) {
-        return new RetroListItem(retro.getId(), retro.getTeamId(), retro.isFinished(), retro.getCreatedAt());
+        return new RetroListItem(retro.getId(), retro.getTeamId(), retro.isFinished(), retro.getCreatedAt(), retro.getTemplateId());
     }
 }

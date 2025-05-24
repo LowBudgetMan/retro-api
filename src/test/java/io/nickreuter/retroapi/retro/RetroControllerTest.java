@@ -109,10 +109,12 @@ class RetroControllerTest {
                 .andExpect(jsonPath("$.[0].teamId").value(retro1.getTeamId().toString()))
                 .andExpect(jsonPath("$.[0].finished").value(retro1.isFinished()))
                 .andExpect(jsonPath("$.[0].createdAt").value(retro1.getCreatedAt().toString()))
+                .andExpect(jsonPath("$.[0].templateId").value(retro1.getTemplateId()))
                 .andExpect(jsonPath("$.[1].id").value(retro2.getId().toString()))
                 .andExpect(jsonPath("$.[1].teamId").value(retro2.getTeamId().toString()))
                 .andExpect(jsonPath("$.[1].finished").value(retro2.isFinished()))
-                .andExpect(jsonPath("$.[1].createdAt").value(retro2.getCreatedAt().toString()));
+                .andExpect(jsonPath("$.[1].createdAt").value(retro2.getCreatedAt().toString()))
+                .andExpect(jsonPath("$.[1].templateId").value(retro2.getTemplateId()));
     }
 
     @Test
