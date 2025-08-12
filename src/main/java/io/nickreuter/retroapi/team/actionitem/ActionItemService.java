@@ -5,6 +5,7 @@ import io.nickreuter.retroapi.notification.event.ActionItemEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -16,6 +17,10 @@ public class ActionItemService {
     public ActionItemService(ActionItemRepository actionItemRepository, ApplicationEventPublisher applicationEventPublisher) {
         this.actionItemRepository = actionItemRepository;
         this.applicationEventPublisher = applicationEventPublisher;
+    }
+
+    public List<ActionItemEntity> getActionItemsForTeam(UUID teamId) {
+        return actionItemRepository.findAllByTeamId(teamId);
     }
 
     public ActionItemEntity createActionItem(String action, String assignee, UUID teamId) {

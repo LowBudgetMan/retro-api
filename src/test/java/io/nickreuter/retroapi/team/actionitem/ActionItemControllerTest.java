@@ -13,6 +13,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 import static io.nickreuter.retroapi.team.TestAuthenticationCreationService.createAuthentication;
@@ -20,8 +21,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @AutoConfigureMockMvc
 @SpringBootTest
@@ -39,6 +40,46 @@ class ActionItemControllerTest {
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Test
+    void getActionItems_ReturnsListOfActionItems() throws Exception {
+        var teamId = UUID.randomUUID();
+        var expectedActionItems = List.of(new ActionItemEntity(UUID.randomUUID(), "action", false, teamId, "assignee", Instant.now()));
+        when(userMappingAuthorizationService.isUserMemberOfTeam(createAuthentication(), teamId)).thenReturn(true);
+        when(actionItemService.getActionItemsForTeam(teamId)).thenReturn(expectedActionItems);
+
+        mockMvc.perform(get("/api/teams/%s/action-items".formatted(teamId))
+                        .with(jwt())
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.[0].id").value(expectedActionItems.getFirst().getId().toString()))
+                .andExpect(jsonPath("$.[0].action").value(expectedActionItems.getFirst().getAction()))
+                .andExpect(jsonPath("$.[0].teamId").value(expectedActionItems.getFirst().getTeamId().toString()))
+                .andExpect(jsonPath("$.[0].completed").value(expectedActionItems.getFirst().isCompleted()))
+                .andExpect(jsonPath("$.[0].assignee").value(expectedActionItems.getFirst().getAssignee()))
+                .andExpect(jsonPath("$.[0].createdAt").value(expectedActionItems.getFirst().getCreatedAt().toString()));
+    }
+
+    @Test
+    void getActionItems_WhenBadTokenUsed_Returns401() throws Exception {
+        var teamId = UUID.randomUUID();
+
+        mockMvc.perform(get("/api/teams/%s/action-items".formatted(teamId))
+                        .with(anonymous())
+                        .with(csrf()))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void getActionItems_WhenUserNotMemberOfTeam_Returns403() throws Exception {
+        var teamId = UUID.randomUUID();
+        when(userMappingAuthorizationService.isUserMemberOfTeam(createAuthentication(), teamId)).thenReturn(false);
+
+        mockMvc.perform(get("/api/teams/%s/action-items".formatted(teamId))
+                        .with(jwt())
+                        .with(csrf()))
+                .andExpect(status().isForbidden());
+    }
 
     @Test
     void createActionItem_Returns201() throws Exception {

@@ -5,6 +5,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -14,6 +15,12 @@ public class ActionItemController {
 
     public ActionItemController(ActionItemService actionItemService) {
         this.actionItemService = actionItemService;
+    }
+
+    @GetMapping
+    @PreAuthorize("@userMappingAuthorizationService.isUserMemberOfTeam(authentication, #teamId)")
+    public ResponseEntity<List<ActionItemEntity>> getActionItems(@PathVariable("teamId") UUID teamId) {
+        return ResponseEntity.ok(actionItemService.getActionItemsForTeam(teamId));
     }
 
     @PostMapping

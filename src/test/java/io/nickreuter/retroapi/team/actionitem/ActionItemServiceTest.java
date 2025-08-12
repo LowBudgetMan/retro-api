@@ -7,6 +7,7 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -19,6 +20,15 @@ class ActionItemServiceTest {
     private final ActionItemRepository actionItemRepository = mock(ActionItemRepository.class);
     private final ApplicationEventPublisher applicationEventPublisher = mock(ApplicationEventPublisher.class);
     private final ActionItemService subject = new ActionItemService(actionItemRepository, applicationEventPublisher);
+
+    @Test
+    void getActionItemsForTeam_ReturnsActionItemsFromRepositoryForTeam() {
+        var teamId = UUID.randomUUID();
+        var expected = List.of(new ActionItemEntity());
+        when(actionItemRepository.findAllByTeamId(teamId)).thenReturn(expected);
+
+        assertThat(subject.getActionItemsForTeam(teamId)).isEqualTo(expected);
+    }
 
     @Test
     void createActionItem_SavesActionItemInRepository() {
