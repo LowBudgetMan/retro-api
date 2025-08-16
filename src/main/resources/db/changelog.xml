@@ -140,4 +140,10 @@
             </column>
         </createTable>
     </changeSet>
+    <changeSet id="remove-category-from-action-item" author="lowbudgetman">
+        <preConditions>
+            <columnExists columnName="category" tableName="action_item"/>
+        </preConditions>
+        <dropColumn tableName="action_item" columnName="category" />
+    </changeSet>
 </databaseChangeLog>
