@@ -121,10 +121,12 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
     }
 
     private AuthorizationDecision isAuthorizedTeamSubscription(Supplier<Authentication> authentication, MessageAuthorizationContext<?> object) {
-        var ids = getIdFromTopic(object, "^/topic/(?<teamId>.*)\\.*$");
-        return ids.find()
+        var ids = getIdFromTopic(object, "^/topic/(?<teamId>.*)\\..*$");
+        AuthorizationDecision isAuthorized = ids.find()
+                // TODO: Ad error handling for when this fails because the UUID is too big
                 ? new AuthorizationDecision(userMappingAuthorizationService.isUserMemberOfTeam(authentication.get(), UUID.fromString(ids.group("teamId"))))
                 : new AuthorizationDecision(false);
+        return isAuthorized;
     }
 
     private Matcher getIdFromTopic(MessageAuthorizationContext<?> object, String regex) {
