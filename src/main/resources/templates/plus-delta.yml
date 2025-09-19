@@ -1,0 +1,16 @@
+name: Plus Delta
+description: Template used for quick, small sessions to gain feedback on a specific idea or action. Examples include after pairing, after a meeting, after an event
+categories:
+  - name: "Plus"
+    position: 1
+    lightBackgroundColor: "#2ecc71"
+    lightTextColor: "#ffffff"
+    darkBackgroundColor: "#27ae60"
+    darkTextColor: "#ffffff"
+  - name: "Delta"
+    position: 2
+    lightBackgroundColor: "#3498db"
+    lightTextColor: "#ffffff"
+    darkBackgroundColor: "#2980b9"
+    darkTextColor: "#ffffff"
+

@@ -1,0 +1,27 @@
+name: Sailboat
+description: Useful on a more infrequent basis, and is meant to get participants to take a step back and look at the project as a whole.
+categories:
+  - name: "Wind in our sails"
+    position: 1
+    lightBackgroundColor: "#2ecc71"
+    lightTextColor: "#ffffff"
+    darkBackgroundColor: "#27ae60"
+    darkTextColor: "#ffffff"
+  - name: "Anchor dragging us down"
+    position: 2
+    lightBackgroundColor: "#3498db"
+    lightTextColor: "#ffffff"
+    darkBackgroundColor: "#2980b9"
+    darkTextColor: "#ffffff"
+  - name: "Hazards ahead"
+    position: 3
+    lightBackgroundColor: "#3498db"
+    lightTextColor: "#ffffff"
+    darkBackgroundColor: "#2980b9"
+    darkTextColor: "#ffffff"
+  - name: "What we are moving towards"
+    position: 4
+    lightBackgroundColor: "#3498db"
+    lightTextColor: "#ffffff"
+    darkBackgroundColor: "#2980b9"
+    darkTextColor: "#ffffff"

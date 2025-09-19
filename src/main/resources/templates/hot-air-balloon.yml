@@ -1,0 +1,17 @@
+name: Hot Air Balloon
+description: >
+  The Hot Air Balloon retro is meant to help us identify the things that lift us up and the things that drag us down as we try to soar to effectiveness.
+categories:
+  - name: "What makes us fly towards our goals?"
+    position: 1
+    lightBackgroundColor: "#2ecc71"
+    lightTextColor: "#ffffff"
+    darkBackgroundColor: "#27ae60"
+    darkTextColor: "#ffffff"
+  - name: "What pushes us back?"
+    position: 2
+    lightBackgroundColor: "#3498db"
+    lightTextColor: "#ffffff"
+    darkBackgroundColor: "#2980b9"
+    darkTextColor: "#ffffff"
+
