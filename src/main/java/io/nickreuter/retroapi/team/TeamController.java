@@ -41,6 +41,7 @@ public class TeamController {
         return teamService.getTeam(teamId).orElseThrow(TeamNotFoundException::new);
     }
 
+    //TODO: Return 409 Conflict if user already member of team
     @PostMapping("/{id}/users")
     public ResponseEntity<Void> addUser(@PathVariable("id") UUID teamId, @RequestBody AddUserToTeamRequest request, Principal principal) throws BadInviteException {
         teamService.addUser(teamId, principal.getName(), request.inviteId());

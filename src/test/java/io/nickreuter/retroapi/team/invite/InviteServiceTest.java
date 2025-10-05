@@ -4,11 +4,11 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 class InviteServiceTest {
@@ -27,7 +27,7 @@ class InviteServiceTest {
 
         var actual = subject.createInvite(teamId);
 
-        assertEquals(expected, actual);
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -37,7 +37,7 @@ class InviteServiceTest {
         var expected = Optional.of(new InviteEntity(inviteId, teamId, Instant.now()));
         when(inviteRepository.findByIdAndTeamId(inviteId, teamId)).thenReturn(expected);
 
-        var actual = subject.getInviteForTeam(inviteId, teamId);
+        var actual = subject.getInviteForTeam(teamId, inviteId);
 
         assertThat(actual).isEqualTo(expected);
     }
@@ -48,7 +48,7 @@ class InviteServiceTest {
         var inviteId = UUID.randomUUID();
         when(inviteRepository.findByIdAndTeamId(inviteId, teamId)).thenReturn(Optional.empty());
 
-        var actual = subject.getInviteForTeam(inviteId, teamId);
+        var actual = subject.getInviteForTeam(teamId, inviteId);
 
         assertThat(actual).isEmpty();
     }
