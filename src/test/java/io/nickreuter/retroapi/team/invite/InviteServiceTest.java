@@ -31,6 +31,17 @@ class InviteServiceTest {
     }
 
     @Test
+    void getInvitesForTeam_WhenTeamExists_ShouldReturnInvites() {
+        var teamId = UUID.randomUUID();
+        var expected = List.of(new InviteEntity(UUID.randomUUID(), teamId, Instant.now()));
+        when(inviteRepository.findAllByTeamId(teamId)).thenReturn(expected);
+
+        var actual = subject.getInvitesForTeam(teamId);
+
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
     void getInviteForTeam_WhenInviteForTeamExists_ReturnsInvite() {
         var teamId = UUID.randomUUID();
         var inviteId = UUID.randomUUID();

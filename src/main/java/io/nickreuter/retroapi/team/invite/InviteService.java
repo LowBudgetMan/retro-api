@@ -18,6 +18,10 @@ public class InviteService {
         return inviteRepository.save(new InviteEntity(null, teamId, null));
     }
 
+    public List<InviteEntity> getInvitesForTeam(UUID teamId) {
+        return inviteRepository.findAllByTeamId(teamId);
+    }
+
     public Optional<InviteEntity> getInviteForTeam(UUID teamId, UUID inviteId) {
         return inviteRepository.findByIdAndTeamId(inviteId, teamId);
     }

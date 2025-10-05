@@ -5,6 +5,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -22,6 +23,12 @@ public class InviteController {
     public ResponseEntity<Void> createInvite(@PathVariable("teamId") UUID teamId) {
         var invite = inviteService.createInvite(teamId);
         return ResponseEntity.created(URI.create("/api/teams/%s/invites/%s".formatted(teamId, invite.getId()))).build();
+    }
+
+    @GetMapping
+    @PreAuthorize("@userMappingAuthorizationService.isUserMemberOfTeam(authentication, #teamId)")
+    public ResponseEntity<List<InviteEntity>> getInvitesForTeam(@PathVariable("teamId") UUID teamId) {
+        return ResponseEntity.ok(inviteService.getInvitesForTeam(teamId));
     }
 
     @DeleteMapping("/{inviteId}")

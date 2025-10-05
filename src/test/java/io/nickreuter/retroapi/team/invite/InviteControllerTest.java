@@ -11,6 +11,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 import static io.nickreuter.retroapi.team.TestAuthenticationCreationService.createAuthentication;
@@ -19,8 +20,8 @@ import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @AutoConfigureMockMvc
 @SpringBootTest
@@ -63,6 +64,46 @@ class InviteControllerTest {
         var authentication = createAuthentication();
         when(userMappingAuthorizationService.isUserMemberOfTeam(authentication, teamId)).thenReturn(false);
         mockMvc.perform(post("/api/teams/%s/invites".formatted(teamId))
+                        .with(jwt())
+                        .with(csrf()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void getInvites_ReturnsListOfInvites() throws Exception {
+        var teamId = UUID.randomUUID();
+        var authentication = createAuthentication();
+        var expectedInvites = List.of(new InviteEntity(UUID.randomUUID(), teamId, Instant.now()), new InviteEntity(UUID.randomUUID(), teamId, Instant.now()));
+        when(userMappingAuthorizationService.isUserMemberOfTeam(authentication, teamId)).thenReturn(true);
+        when(inviteService.getInvitesForTeam(teamId)).thenReturn(expectedInvites);
+        mockMvc.perform(get("/api/teams/%s/invites".formatted(teamId))
+                        .with(jwt())
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(expectedInvites.size()))
+                .andExpect(jsonPath("$.[0].id").value(expectedInvites.get(0).getId().toString()))
+                .andExpect(jsonPath("$.[0].teamId").value(expectedInvites.get(0).getTeamId().toString()))
+                .andExpect(jsonPath("$.[0].createdAt").value(expectedInvites.get(0).getCreatedAt().toString()))
+                .andExpect(jsonPath("$.[1].id").value(expectedInvites.get(1).getId().toString()))
+                .andExpect(jsonPath("$.[1].teamId").value(expectedInvites.get(1).getTeamId().toString()))
+                .andExpect(jsonPath("$.[1].createdAt").value(expectedInvites.get(1).getCreatedAt().toString()));
+    }
+
+    @Test
+    void getInvites_WithInvalidToken_Throws401() throws Exception {
+        var teamId = UUID.randomUUID();
+        mockMvc.perform(get("/api/teams/%s/invites".formatted(teamId))
+                        .with(anonymous())
+                        .with(csrf()))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void getInvites_WhenUserNotOnTeam_Throws403() throws Exception {
+        var teamId = UUID.randomUUID();
+        var authentication = createAuthentication();
+        when(userMappingAuthorizationService.isUserMemberOfTeam(authentication, teamId)).thenReturn(false);
+        mockMvc.perform(get("/api/teams/%s/invites".formatted(teamId))
                         .with(jwt())
                         .with(csrf()))
                 .andExpect(status().isForbidden());
