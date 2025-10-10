@@ -63,6 +63,8 @@ jobs:
           OWNER: ${{ github.repository_owner }}
       - name: build application image
         run: ./gradlew bootBuildImage --imageName ghcr.io/${{ env.OWNER_LC }}/retro-api:latest
+      - name: Push image to GHCR
+        run: docker push ghcr.io/${{ env.OWNER_LC }}/retro-api:latest
       - name: cleanup gradle cache
         run: |
           rm -f ~/.gradle/caches/modules-2/modules-2.lock
