@@ -26,8 +26,6 @@ jobs:
         with:
          name: retro-api.jar
          path: build/libs/retro-api-*-SNAPSHOT.jar
-      - name: build application image
-        run: ./gradlew bootBuildImage
       - name: cleanup gradle cache
         run: |
           rm -f ~/.gradle/caches/modules-2/modules-2.lock
@@ -62,11 +60,7 @@ jobs:
         env:
           OWNER: ${{ github.repository_owner }}
       - name: build application image
-        run: |
-          ./gradlew bootBuildImage \
-                --imageName ghcr.io/${{ env.OWNER_LC }}/retro-api:latest \
-                --publish \
-                -Dorg.gradle.daemon=false
+        run: ./gradlew bootBuildImage --imageName ghcr.io/${{ env.OWNER_LC }}/retro-api:latest
       - name: cleanup gradle cache
         run: |
           rm -f ~/.gradle/caches/modules-2/modules-2.lock
