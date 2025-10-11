@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: retro-api
+  data:
+    jpa:
+      repositories:
+        enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    show-sql: false
+  liquibase:
+    change-log: db/changelog.xml
+  threads:
+    virtual:
+      enabled: true
+  h2:
+    console:
+      enabled: false
+      path: /h2
+  datasource:
+    url: jdbc:postgresql://db:5432/retroapi
+    username: root
+    password: retroapi
+    driver-class-name: org.postgresql.Driver
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://auth-server:8080/realms/myrealm
+web:
+  authentication:
+    authority: http://auth-server:8080/realms/myrealm
+    clientId: retroquest-web
+broker:
+  relay:
+    relay-host: rabbitmq
+    relay-port: 61613
+    relay-username: guest
+    relay-password: guest

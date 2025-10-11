@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: retroapi
+      POSTGRES_DB: retroapi
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  auth-server:
+    image: quay.io/keycloak/keycloak:22.0.0
+    environment:
+      KEYCLOAK_ADMIN: 'admin'
+      KEYCLOAK_ADMIN_PASSWORD: 'admin'
+    ports:
+      - '8010:8080'
+    volumes:
+      - ./keycloak-realm-data:/opt/keycloak/data/import
+    command: start-dev --import-realm
+
+  rabbitmq:
+    build:
+      context: ./
+      dockerfile: RabbitMqDockerfile
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+      - '61613:61613'
+      - '1883:1883'
+      - '15692:15692'
+      - '25672:25672'
+
+  api:
+    image: ghcr.io/lowbudgetman/retro-api:latest
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      - db
+      - auth-server
+      - rabbitmq
+
+volumes:
+  postgres_data:
