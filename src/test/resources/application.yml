@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: retro-api
+  data:
+    jpa:
+      repositories:
+        enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    show-sql: false
+  liquibase:
+    change-log: db/changelog.xml
+  threads:
+    virtual:
+      enabled: true
+websocket:
+  base-url: "ws://localhost:8080"
