@@ -38,8 +38,22 @@ broker:
     relay-password: guest
 ```
 This example config can be found in `application-remotebroker.yml` and points to the RabbitMQ instance managed by docker.
-This modified RabbitMQ instance has the `rabbitmq_mqtt`, `rabbitmq_federation_management`, and `rabbitmq_stomp` plugins 
+This modified RabbitMQ instance has the `rabbitmq_mqtt`, `rabbitmq_federation_management`, and `rabbitmq_stomp` plugins
 enabled.
+
+### The Websocket Base URL
+
+The API requires a `websocket.base-url` property to be configured in all running instances. This property specifies the 
+base URL for websocket connections and is used by the application to handle real-time notifications. When using the built-in 
+STOMP broker (default configuration), set this property to the application's own hostname and port, e.g., `ws://your-hostname:8080` 
+or `ws://localhost:8080` for local development.
+
+Example configuration:
+
+```yaml
+websocket:
+  base-url: ws://localhost:8080
+```
 
 ### Running the application
 
