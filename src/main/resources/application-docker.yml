@@ -39,3 +39,5 @@ broker:
     relay-port: 61613
     relay-username: guest
     relay-password: guest
+websocket:
+  base-url: ws://localhost:8080
