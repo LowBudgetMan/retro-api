@@ -21,7 +21,8 @@ public class SecurityConfig implements WebMvcConfigurer {
                 .authorizeHttpRequests(authorize -> {
                     authorize.requestMatchers("/h2/**").permitAll();
                     authorize.requestMatchers("/api/configuration").permitAll();
-                    authorize.requestMatchers("/websocket/**").permitAll();
+                    authorize.requestMatchers("/api/websocket/**").permitAll();
+                    authorize.requestMatchers("/api/websocket").permitAll();
                     authorize.anyRequest().authenticated();
                 })
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()));
