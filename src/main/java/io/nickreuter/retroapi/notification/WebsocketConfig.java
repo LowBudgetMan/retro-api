@@ -57,7 +57,7 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry
-                .addEndpoint("/websocket")
+                .addEndpoint("/api")
                 .setAllowedOriginPatterns("*")
                 .withSockJS();
     }
@@ -134,4 +134,3 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
         return Pattern.compile(regex).matcher(destination);
     }
 }
-
