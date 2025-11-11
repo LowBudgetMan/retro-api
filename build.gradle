@@ -57,9 +57,10 @@ tasks.named('nativeCompile').configure {
 bootBuildImage {
 //	builder='dashaun/builder:tiny'
 //	imageName='retro-api'
-    builder = 'paketobuildpacks/builder:base'
+    builder = 'paketobuildpacks/builder-jammy-tiny'
     imageName = 'retro-api-native'
     environment = [
-            'BP_NATIVE_IMAGE': 'true'
+            'BP_NATIVE_IMAGE': 'true',
+            'BP_JVM_VERSION': '21',
     ]
 }
