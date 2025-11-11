@@ -1,3 +1,0 @@
-jpa:
-  properties:
-    hibernate.bytecode.provider: none
