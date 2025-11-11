@@ -54,6 +54,14 @@ tasks.named('nativeCompile').configure {
     enabled = false
 }
 
+graalvmNative {
+    binaries.configureEach {
+        hints {
+            enable()
+        }
+    }
+}
+
 bootBuildImage {
 //	builder='dashaun/builder:tiny'
 //	imageName='retro-api'
@@ -62,6 +70,6 @@ bootBuildImage {
     environment = [
             'BP_NATIVE_IMAGE': 'true',
             'BP_JVM_VERSION': '21',
-            'BP_NATIVE_IMAGE_BUILD_ARGUMENTS': '--enable-https -H:IncludeResources=".*" --initialize-at-run-time=org.hibernate.bytecode'
+            'BP_NATIVE_IMAGE_BUILD_ARGUMENTS': '--enable-https --initialize-at-run-time=org.hibernate.bytecode'
     ]
 }
