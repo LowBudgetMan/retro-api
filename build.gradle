@@ -62,5 +62,6 @@ bootBuildImage {
     environment = [
             'BP_NATIVE_IMAGE': 'true',
             'BP_JVM_VERSION': '21',
+            'BP_NATIVE_IMAGE_BUILD_ARGUMENTS': '--enable-https -H:IncludeResources=".*"'
     ]
 }
