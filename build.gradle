@@ -49,11 +49,17 @@ tasks.named('processTestAot') {
 }
 
 tasks.named('nativeCompile').configure {
-    options '--enable-https'
-    classpathJar.set(true)
+//    options '--enable-https'
+//    classpathJar.set(true)
+    enabled = false
 }
 
 bootBuildImage {
-	builder='dashaun/builder:tiny'
-	imageName='retro-api'
+//	builder='dashaun/builder:tiny'
+//	imageName='retro-api'
+    builder = 'paketobuildpacks/builder:base'
+    imageName = 'retro-api-native'
+    environment = [
+            'BP_NATIVE_IMAGE': 'true'
+    ]
 }
