@@ -43,11 +43,15 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
-//
-//tasks.named('nativeCompile').configure {
-//    options '--enable-https'
-//    classpathJar.set(true)
-//}
+
+tasks.named('processTestAot') {
+    enabled = false
+}
+
+tasks.named('nativeCompile').configure {
+    options '--enable-https'
+    classpathJar.set(true)
+}
 
 bootBuildImage {
 	builder='dashaun/builder:tiny'
