@@ -141,9 +141,9 @@
         </createTable>
     </changeSet>
     <changeSet id="remove-category-from-action-item" author="lowbudgetman">
-        <preConditions>
-            <columnExists columnName="category" tableName="action_item"/>
-        </preConditions>
-        <dropColumn tableName="action_item" columnName="category" />
+        <dropColumn tableName="action_item" columnName="category"  />
     </changeSet>
+<!--    <changeSet id="remove-category-from-action-item" author="lowbudgetman">-->
+<!--        <sql>ALTER TABLE action_item DROP COLUMN IF EXISTS category;</sql>-->
+<!--    </changeSet>-->
 </databaseChangeLog>
