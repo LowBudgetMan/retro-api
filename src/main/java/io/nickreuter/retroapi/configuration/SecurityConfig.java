@@ -1,5 +1,6 @@
 package io.nickreuter.retroapi.configuration;
 
+import io.nickreuter.retroapi.configuration.environment.CorsConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -14,6 +15,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig implements WebMvcConfigurer {
+
+    private final CorsConfig corsConfig;
+
+    public SecurityConfig(CorsConfig corsConfig) {
+        this.corsConfig = corsConfig;
+    }
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -31,9 +38,8 @@ public class SecurityConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-
         registry.addMapping("/api/**")
-                .allowedOrigins("http://localhost:3000")
+                .allowedOrigins(corsConfig.allowedOrigins().toArray(new String[0]))
                 .allowedMethods("*")
                 .allowedHeaders("*")
                 .exposedHeaders("*")

@@ -17,5 +17,8 @@ web:
   authentication:
     authority: http://localhost:8010/realms/myrealm
     clientId: retroquest-web
+  cors:
+    allowed-origins:
+      - http://localhost:3000
 websocket:
   base-url: 'ws://localhost:8080'
