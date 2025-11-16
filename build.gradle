@@ -47,15 +47,15 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
-tasks.named('processTestAot') {
-    enabled = false
-}
+//tasks.named('processTestAot') {
+//    enabled = false
+//}
 
-tasks.named('nativeCompile').configure {
-//    options '--enable-https'
-//    classpathJar.set(true)
-    enabled = false
-}
+//tasks.named('nativeCompile').configure {
+////    options '--enable-https'
+////    classpathJar.set(true)
+//    enabled = false
+//}
 
 bootBuildImage {
 //    builder = 'paketobuildpacks/builder-jammy-base:latest'
