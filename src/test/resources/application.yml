@@ -15,5 +15,8 @@ spring:
   threads:
     virtual:
       enabled: true
+web:
+  cors:
+    allowed-origins:
 websocket:
   base-url: "ws://localhost:8080"
