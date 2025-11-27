@@ -25,10 +25,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
 	implementation 'com.nimbusds:nimbus-jose-jwt'
 	implementation 'org.springframework.security:spring-security-messaging'
-    implementation("org.springframework.boot:spring-boot-starter-web") {
-        exclude group: "org.springframework.boot", module: "spring-boot-starter-tomcat"
-    }
-    implementation("org.springframework.boot:spring-boot-starter-jetty")
+    implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 	implementation 'org.springframework.boot:spring-boot-starter-reactor-netty'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
@@ -48,22 +45,6 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
-//tasks.named('processTestAot') {
-//    enabled = false
-//}
-
-//tasks.named('nativeCompile').configure {
-////    options '--enable-https'
-////    classpathJar.set(true)
-//    enabled = false
-//}
-
 bootBuildImage {
-//    builder = 'paketobuildpacks/builder-jammy-base:latest'
     imageName = 'retro-api'
-//    environment = [
-//            'BP_NATIVE_IMAGE': 'true',
-//            'BP_JVM_VERSION': '21',
-//            'BP_NATIVE_IMAGE_BUILD_ARGUMENTS': '-H:IncludeResources="./" -H:ServiceLoaderFeatureExcludeServices=org.hibernate.bytecode.spi.BytecodeProvider'
-//    ]
 }
