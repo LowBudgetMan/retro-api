@@ -1,4 +1,4 @@
-<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
@@ -142,6 +142,42 @@
     </changeSet>
     <changeSet id="remove-category-from-action-item" author="lowbudgetman">
         <dropColumn tableName="action_item" columnName="category"  />
+    </changeSet>
+    <changeSet id="add-share-tokens-table" author="lowbudgetman">
+        <preConditions>
+            <not>
+                <tableExists tableName="share_tokens"/>
+            </not>
+        </preConditions>
+        <createTable tableName="share_tokens">
+            <column name="id" type="uuid" autoIncrement="1">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="token" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="retro_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="FK_SHARE_TOKEN_RETRO" references="retro(id)" />
+            </column>
+            <column name="created_by" type="VARCHAR(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="created_at" type="datetime">
+                <constraints nullable="false" />
+            </column>
+            <column name="expires_at" type="datetime">
+                <constraints nullable="true" />
+            </column>
+            <column name="max_uses" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="uses" type="int">
+                <constraints nullable="false" />
+            </column>
+            <column name="active" type="boolean">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
     </changeSet>
 <!--    <changeSet id="remove-category-from-action-item" author="lowbudgetman">-->
 <!--        <sql>ALTER TABLE action_item DROP COLUMN IF EXISTS category;</sql>-->

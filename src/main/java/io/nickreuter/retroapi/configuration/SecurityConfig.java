@@ -3,8 +3,11 @@ package io.nickreuter.retroapi.configuration;
 import io.nickreuter.retroapi.configuration.environment.CorsConfig;
 import io.nickreuter.retroapi.configuration.jwt.AllTypeJwtDecoderFactory;
 import io.nickreuter.retroapi.configuration.jwt.UniversalJwtDecoder;
+import io.nickreuter.retroapi.share.ShareTokenService;
+import io.nickreuter.retroapi.share.authentication.ShareTokenAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -12,6 +15,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -25,10 +29,12 @@ public class SecurityConfig {
 
     private final CorsConfig corsConfig;
     private final AllTypeJwtDecoderFactory decoderFactory;
+    private final ShareTokenService shareTokenService;
 
-    public SecurityConfig(CorsConfig corsConfig, AllTypeJwtDecoderFactory decoderFactory) {
+    public SecurityConfig(CorsConfig corsConfig, AllTypeJwtDecoderFactory decoderFactory, ShareTokenService shareTokenService) {
         this.corsConfig = corsConfig;
         this.decoderFactory = decoderFactory;
+        this.shareTokenService = shareTokenService;
     }
 
     @Bean
@@ -48,6 +54,14 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        // Create authentication manager for share token filter
+        AuthenticationManager authenticationManager = authentication -> {
+            // Let the share token filter handle its own authentication
+            return null;
+        };
+        
+        ShareTokenAuthenticationFilter shareTokenFilter = new ShareTokenAuthenticationFilter(authenticationManager, shareTokenService);
+        
         http
                 .csrf(Customizer.withDefaults())
                 .cors(Customizer.withDefaults())
@@ -60,7 +74,9 @@ public class SecurityConfig {
                 })
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(jwt -> {
                     jwt.jwtAuthenticationConverter(jwtAuthenticationConverter());
-                }));
+                }))
+                .addFilterBefore(shareTokenFilter, UsernamePasswordAuthenticationFilter.class);
+        
         return http.build();
     }
 

@@ -1,6 +1,8 @@
 package io.nickreuter.retroapi.notification;
 
 import io.nickreuter.retroapi.retro.RetroAuthorizationService;
+import io.nickreuter.retroapi.share.ShareTokenService;
+import io.nickreuter.retroapi.share.authentication.ShareTokenAuthentication;
 import io.nickreuter.retroapi.team.usermapping.UserMappingAuthorizationService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,12 +48,16 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
     private final RetroAuthorizationService retroAuthorizationService;
     private final BrokerRelayProperties relayProperties;
     private final UserMappingAuthorizationService userMappingAuthorizationService;
+    private final ShareTokenService shareTokenService;
 
-    public WebsocketConfig(JwtDecoder jwtDecoder, RetroAuthorizationService retroAuthorizationService, BrokerRelayProperties relayProperties, UserMappingAuthorizationService userMappingAuthorizationService) {
+    public WebsocketConfig(JwtDecoder jwtDecoder, RetroAuthorizationService retroAuthorizationService, 
+                         BrokerRelayProperties relayProperties, UserMappingAuthorizationService userMappingAuthorizationService,
+                         ShareTokenService shareTokenService) {
         this.jwtDecoder = jwtDecoder;
         this.retroAuthorizationService = retroAuthorizationService;
         this.relayProperties = relayProperties;
         this.userMappingAuthorizationService = userMappingAuthorizationService;
+        this.shareTokenService = shareTokenService;
     }
 
     @Override
@@ -97,10 +103,36 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
             public Message<?> preSend(@NonNull Message<?> message, @NonNull MessageChannel channel) {
                 StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
                 if (accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
-                    var token = String.valueOf(accessor.getFirstNativeHeader("Authorization")).substring(7);
-                    var provider = new JwtAuthenticationProvider(jwtDecoder);
-                    var authentication = provider.authenticate(new BearerTokenAuthenticationToken(token));
-                    accessor.setUser(authentication);
+                    // Try JWT authentication first
+                    String authHeader = accessor.getFirstNativeHeader("Authorization");
+                    if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                        try {
+                            var token = authHeader.substring(7);
+                            var provider = new JwtAuthenticationProvider(jwtDecoder);
+                            var authentication = provider.authenticate(new BearerTokenAuthenticationToken(token));
+                            accessor.setUser(authentication);
+                            return message;
+                        } catch (Exception e) {
+                            // JWT authentication failed, continue to try share token
+                        }
+                    }
+                    
+                    // Try share token authentication
+                    String shareToken = accessor.getFirstNativeHeader("X-Share-Token");
+                    if (shareToken != null && !shareToken.trim().isEmpty()) {
+                        try {
+                            var tokenEntity = shareTokenService.validateTokenWithoutUsage(shareToken);
+                            ShareTokenAuthentication shareAuth = new ShareTokenAuthentication(
+                                shareToken,
+                                tokenEntity.getRetroId(),
+                                true,
+                                "anonymous_user_" + tokenEntity.getRetroId()
+                            );
+                            accessor.setUser(shareAuth);
+                        } catch (Exception e) {
+                            // Share token authentication failed
+                        }
+                    }
                 }
                 return message;
             }
@@ -114,7 +146,7 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
     }
 
     private AuthorizationDecision isAuthorizedRetroSubscription(Supplier<Authentication> authentication, MessageAuthorizationContext<?> object) {
-        var ids = getIdFromTopic(object, "^/topic/(?<retroId>.*)\\.thoughts$");
+        var ids = getIdFromTopic(object, "^/topic/(?<retroId>.*)\\..*");
         return ids.find()
                 ? new AuthorizationDecision(retroAuthorizationService.isUserAllowedInRetro(authentication.get(), UUID.fromString(ids.group("retroId"))))
                 : new AuthorizationDecision(false);
@@ -123,7 +155,7 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
     private AuthorizationDecision isAuthorizedTeamSubscription(Supplier<Authentication> authentication, MessageAuthorizationContext<?> object) {
         var ids = getIdFromTopic(object, "^/topic/(?<teamId>.*)\\..*$");
         AuthorizationDecision isAuthorized = ids.find()
-                // TODO: Ad error handling for when this fails because the UUID is too big
+                // TODO: Add error handling for when this fails because the UUID is too big
                 ? new AuthorizationDecision(userMappingAuthorizationService.isUserMemberOfTeam(authentication.get(), UUID.fromString(ids.group("teamId"))))
                 : new AuthorizationDecision(false);
         return isAuthorized;
