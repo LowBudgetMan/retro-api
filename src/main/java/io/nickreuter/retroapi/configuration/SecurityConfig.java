@@ -3,7 +3,7 @@ package io.nickreuter.retroapi.configuration;
 import io.nickreuter.retroapi.configuration.environment.CorsConfig;
 import io.nickreuter.retroapi.configuration.jwt.AllTypeJwtDecoderFactory;
 import io.nickreuter.retroapi.configuration.jwt.UniversalJwtDecoder;
-import io.nickreuter.retroapi.share.ShareTokenService;
+//import io.nickreuter.retroapi.share.ShareTokenService;
 import io.nickreuter.retroapi.share.authentication.ShareTokenAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,12 +29,12 @@ public class SecurityConfig {
 
     private final CorsConfig corsConfig;
     private final AllTypeJwtDecoderFactory decoderFactory;
-    private final ShareTokenService shareTokenService;
+//    private final ShareTokenService shareTokenService;
 
-    public SecurityConfig(CorsConfig corsConfig, AllTypeJwtDecoderFactory decoderFactory, ShareTokenService shareTokenService) {
+    public SecurityConfig(CorsConfig corsConfig, AllTypeJwtDecoderFactory decoderFactory) {
         this.corsConfig = corsConfig;
         this.decoderFactory = decoderFactory;
-        this.shareTokenService = shareTokenService;
+//        this.shareTokenService = shareTokenService;
     }
 
     @Bean
@@ -60,7 +60,7 @@ public class SecurityConfig {
             return null;
         };
         
-        ShareTokenAuthenticationFilter shareTokenFilter = new ShareTokenAuthenticationFilter(authenticationManager, shareTokenService);
+//        ShareTokenAuthenticationFilter shareTokenFilter = new ShareTokenAuthenticationFilter(authenticationManager, shareTokenService);
         
         http
                 .csrf(Customizer.withDefaults())
@@ -74,8 +74,8 @@ public class SecurityConfig {
                 })
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(jwt -> {
                     jwt.jwtAuthenticationConverter(jwtAuthenticationConverter());
-                }))
-                .addFilterBefore(shareTokenFilter, UsernamePasswordAuthenticationFilter.class);
+                }));
+//                .addFilterBefore(shareTokenFilter, UsernamePasswordAuthenticationFilter.class);
         
         return http.build();
     }
