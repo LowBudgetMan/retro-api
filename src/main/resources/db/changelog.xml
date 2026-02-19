@@ -150,7 +150,7 @@
             </not>
         </preConditions>
         <createTable tableName="share_token">
-            <column name="id" type="uuid" autoIncrement="1">
+            <column name="id" type="bigint" autoIncrement="1">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
             <column name="token" type="VARCHAR(255)">

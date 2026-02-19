@@ -19,7 +19,7 @@ class ShareTokenServiceTest {
     @Test
     void createShareToken_ReturnsObjectWithSecureStringIdAndRetroId() {
         var retroId = UUID.randomUUID();
-        var expected = new ShareTokenEntity(UUID.randomUUID(), "AAABAQEBAQEBAAAAAAAAAAAAAAAAAAAAAAEBAQEBAQEBAQEBAQEBAQEBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", retroId);
+        var expected = new ShareTokenEntity(1L, "AAABAQEBAQEBAAAAAAAAAAAAAAAAAAAAAAEBAQEBAQEBAQEBAQEBAQEBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", retroId);
         doAnswer((Answer<Void>) invocation -> {
             var expectedByteArray = new byte[]{0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
             byte[] argArray = invocation.getArgument(0);

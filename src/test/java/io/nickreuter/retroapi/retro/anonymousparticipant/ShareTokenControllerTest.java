@@ -1,10 +1,6 @@
 package io.nickreuter.retroapi.retro.anonymousparticipant;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.nickreuter.retroapi.retro.CreateRetroRequest;
 import io.nickreuter.retroapi.retro.RetroAuthorizationService;
-import io.nickreuter.retroapi.retro.RetroService;
-import io.nickreuter.retroapi.retro.UpdateRetroFinishedRequest;
 import io.nickreuter.retroapi.team.usermapping.UserMappingAuthorizationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +15,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.UUID;
 
 import static io.nickreuter.retroapi.team.TestAuthenticationCreationService.createAuthentication;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -66,12 +59,13 @@ class ShareTokenControllerTest {
     void createShareToken_Returns201WithTokenValueInLocation() throws Exception {
         var teamId = UUID.randomUUID();
         var retroId = UUID.randomUUID();
-        var expected = new ShareToken(UUID.randomUUID(), "This is a token", retroId);
+        var expected = new ShareToken(1L, "Thisisatoken", retroId);
         when(userMappingAuthorizationService.isUserMemberOfTeam(createAuthentication(), teamId)).thenReturn(true);
         when(shareTokenService.createShareToken(retroId)).thenReturn(expected);
         mockMvc.perform(post("/api/teams/%s/retros/%s/share-tokens".formatted(teamId, retroId))
                         .with(jwt())
-                        .with(csrf()))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
                 .andExpect(header().string(HttpHeaders.LOCATION, expected.token()));
     }
