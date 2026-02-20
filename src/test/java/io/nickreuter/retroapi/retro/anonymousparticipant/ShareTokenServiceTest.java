@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.stubbing.Answer;
 
 import java.security.SecureRandom;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -47,5 +48,18 @@ class ShareTokenServiceTest {
         var token = "This is a token";
         when(mockShareTokenRepository.findByToken(token)).thenReturn(Optional.empty());
         assertThat(subject.isTokenValid(token)).isFalse();
+    }
+
+    @Test
+    void getShareTokensForRetro_ReturnsListOfTokensFromRepository() {
+        var retroId = UUID.randomUUID();
+        var token1 = new ShareTokenEntity(1L, "token1", retroId);
+        var token2 = new ShareTokenEntity(2L, "token2", retroId);
+        var savedTokens = List.of(token1, token2);
+        var expected = List.of(token1.toShareToken(), token2.toShareToken());
+        when(mockShareTokenRepository.findAllByRetroId(retroId)).thenReturn(savedTokens);
+
+        var actual = subject.getShareTokensForRetro(retroId);
+        assertThat(actual).containsExactlyElementsOf(expected);
     }
 }

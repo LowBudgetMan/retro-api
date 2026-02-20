@@ -23,7 +23,7 @@ public class ShareTokenController {
 
     @PostMapping
     @PreAuthorize("@userMappingAuthorizationService.isUserMemberOfTeam(authentication, #teamId)")
-    public ResponseEntity<Void> createShareToken(@PathVariable("teamId") UUID teamId, @PathVariable("retroId") UUID retroId) throws Exception {
+    public ResponseEntity<Void> createShareToken(@PathVariable UUID teamId, @PathVariable UUID retroId) throws Exception {
         return ResponseEntity.created(new URI(shareTokenService.createShareToken(retroId).token())).build();
     }
 }

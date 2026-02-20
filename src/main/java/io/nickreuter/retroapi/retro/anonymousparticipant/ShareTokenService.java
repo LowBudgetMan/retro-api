@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -20,6 +21,10 @@ public class ShareTokenService {
 
     public ShareToken createShareToken(UUID retroId) {
         return shareTokenRepository.save(new ShareTokenEntity(null, generateSecureToken(), retroId)).toShareToken();
+    }
+
+    public List<ShareToken> getShareTokensForRetro(UUID retroId) {
+        return shareTokenRepository.findAllByRetroId(retroId).stream().map(ShareTokenEntity::toShareToken).toList();
     }
 
     public boolean isTokenValid(String token) {
