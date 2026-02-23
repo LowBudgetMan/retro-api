@@ -20,18 +20,19 @@ class ShareTokenServiceTest {
     @Test
     void createShareToken_ReturnsObjectWithSecureStringIdAndRetroId() {
         var retroId = UUID.randomUUID();
-        var expected = new ShareTokenEntity(1L, "AAABAQEBAQEBAAAAAAAAAAAAAAAAAAAAAAEBAQEBAQEBAQEBAQEBAQEBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", retroId);
+        var expectedId = UUID.randomUUID();
+        var expected = new ShareTokenEntity(expectedId, "AAABAQEBAQEBAAAAAAAAAAAAAAAAAAAAAAEBAQEBAQEBAQEBAQEBAQEBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", retroId);
         doAnswer((Answer<Void>) invocation -> {
             var expectedByteArray = new byte[]{0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
             byte[] argArray = invocation.getArgument(0);
             System.arraycopy(expectedByteArray, 0, argArray, 0, expectedByteArray.length);
             return null;
         }).when(mockSecureRandom).nextBytes(any(byte[].class));
-        when(mockShareTokenRepository.save(new ShareTokenEntity(null,"AAABAQEBAQEBAAAAAAAAAAAAAAAAAAAAAAEBAQEBAQEBAQEBAQEBAQEBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", retroId))).thenReturn(expected);
+        when(mockShareTokenRepository.save(new ShareTokenEntity("AAABAQEBAQEBAAAAAAAAAAAAAAAAAAAAAAEBAQEBAQEBAQEBAQEBAQEBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", retroId))).thenReturn(expected);
 
         var actual = subject.createShareToken(retroId);
 
-        assertThat(actual.id()).isEqualTo(expected.getId());
+        assertThat(actual.id()).isEqualTo(expectedId);
         assertThat(actual.token()).isEqualTo(expected.getToken());
         assertThat(actual.retroId()).isEqualTo(expected.getRetroId());
     }
@@ -51,10 +52,32 @@ class ShareTokenServiceTest {
     }
 
     @Test
+    void getShareToken_WhenTokenExists_ReturnsShareToken() {
+        var retroId = UUID.randomUUID();
+        var entity = new ShareTokenEntity(UUID.randomUUID(), "test-token", retroId);
+        when(mockShareTokenRepository.findByToken("test-token")).thenReturn(Optional.of(entity));
+
+        var actual = subject.getShareToken("test-token");
+
+        assertThat(actual).isPresent();
+        assertThat(actual.get().token()).isEqualTo("test-token");
+        assertThat(actual.get().retroId()).isEqualTo(retroId);
+    }
+
+    @Test
+    void getShareToken_WhenTokenDoesNotExist_ReturnsEmpty() {
+        when(mockShareTokenRepository.findByToken("nonexistent")).thenReturn(Optional.empty());
+
+        var actual = subject.getShareToken("nonexistent");
+
+        assertThat(actual).isEmpty();
+    }
+
+    @Test
     void getShareTokensForRetro_ReturnsListOfTokensFromRepository() {
         var retroId = UUID.randomUUID();
-        var token1 = new ShareTokenEntity(1L, "token1", retroId);
-        var token2 = new ShareTokenEntity(2L, "token2", retroId);
+        var token1 = new ShareTokenEntity(UUID.randomUUID(), "token1", retroId);
+        var token2 = new ShareTokenEntity(UUID.randomUUID(), "token2", retroId);
         var savedTokens = List.of(token1, token2);
         var expected = List.of(token1.toShareToken(), token2.toShareToken());
         when(mockShareTokenRepository.findAllByRetroId(retroId)).thenReturn(savedTokens);

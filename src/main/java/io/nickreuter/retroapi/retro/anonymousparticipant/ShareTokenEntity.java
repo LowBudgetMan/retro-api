@@ -16,12 +16,17 @@ import java.util.UUID;
 @Table(name = "share_token")
 public class ShareTokenEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue
+    private UUID id;
     @Column(unique = true)
     private String token;
     @Column(unique = true)
     private UUID retroId;
+
+    public ShareTokenEntity(String token, UUID retroId) {
+        this.token = token;
+        this.retroId = retroId;
+    }
 
     public ShareToken toShareToken() {
         return new ShareToken(id, token, retroId);

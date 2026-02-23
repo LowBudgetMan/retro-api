@@ -1,7 +1,7 @@
 package io.nickreuter.retroapi.notification;
 
 import io.nickreuter.retroapi.retro.RetroAuthorizationService;
-//import io.nickreuter.retroapi.share.ShareTokenService;
+import io.nickreuter.retroapi.retro.anonymousparticipant.ShareTokenService;
 import io.nickreuter.retroapi.share.authentication.ShareTokenAuthentication;
 import io.nickreuter.retroapi.team.usermapping.UserMappingAuthorizationService;
 import org.springframework.context.annotation.Bean;
@@ -48,15 +48,16 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
     private final RetroAuthorizationService retroAuthorizationService;
     private final BrokerRelayProperties relayProperties;
     private final UserMappingAuthorizationService userMappingAuthorizationService;
-//    private final ShareTokenService shareTokenService;
+    private final ShareTokenService shareTokenService;
 
-    public WebsocketConfig(JwtDecoder jwtDecoder, RetroAuthorizationService retroAuthorizationService, 
-                         BrokerRelayProperties relayProperties, UserMappingAuthorizationService userMappingAuthorizationService) {
+    public WebsocketConfig(JwtDecoder jwtDecoder, RetroAuthorizationService retroAuthorizationService,
+                         BrokerRelayProperties relayProperties, UserMappingAuthorizationService userMappingAuthorizationService,
+                         ShareTokenService shareTokenService) {
         this.jwtDecoder = jwtDecoder;
         this.retroAuthorizationService = retroAuthorizationService;
         this.relayProperties = relayProperties;
         this.userMappingAuthorizationService = userMappingAuthorizationService;
-//        this.shareTokenService = shareTokenService;
+        this.shareTokenService = shareTokenService;
     }
 
     @Override
@@ -115,19 +116,21 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
                             // JWT authentication failed, continue to try share token
                         }
                     }
-                    
+
                     // Try share token authentication
                     String shareToken = accessor.getFirstNativeHeader("X-Share-Token");
                     if (shareToken != null && !shareToken.trim().isEmpty()) {
                         try {
-//                            var tokenEntity = shareTokenService.validateTokenWithoutUsage(shareToken);
-//                            ShareTokenAuthentication shareAuth = new ShareTokenAuthentication(
-//                                shareToken,
-//                                tokenEntity.getRetroId(),
-//                                true,
-//                                "anonymous_user_" + tokenEntity.getRetroId()
-//                            );
-//                            accessor.setUser(shareAuth);
+                            var maybeToken = shareTokenService.getShareToken(shareToken);
+                            if (maybeToken.isPresent()) {
+                                var tokenRecord = maybeToken.get();
+                                ShareTokenAuthentication shareAuth = new ShareTokenAuthentication(
+                                    shareToken,
+                                    tokenRecord.retroId(),
+                                    "anonymous_" + tokenRecord.retroId()
+                                );
+                                accessor.setUser(shareAuth);
+                            }
                         } catch (Exception e) {
                             // Share token authentication failed
                         }
