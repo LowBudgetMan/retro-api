@@ -56,7 +56,9 @@ public class SecurityConfig {
         ShareTokenAuthenticationFilter shareTokenFilter = new ShareTokenAuthenticationFilter(shareTokenService);
 
         http
-                .csrf(Customizer.withDefaults())
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers(request -> request.getHeader("X-Share-Token") != null)
+                )
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(authorize -> {
                     authorize.requestMatchers("/h2/**").permitAll();
