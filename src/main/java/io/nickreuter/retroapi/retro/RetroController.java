@@ -20,14 +20,14 @@ public class RetroController {
 
     @PostMapping
     @PreAuthorize("@userMappingAuthorizationService.isUserMemberOfTeam(authentication, #teamId)")
-    public ResponseEntity<Void> createRetro(@PathVariable("teamId") UUID teamId, @RequestBody CreateRetroRequest request) throws InvalidTemplateIdException {
+    public ResponseEntity<Void> createRetro(@PathVariable UUID teamId, @RequestBody CreateRetroRequest request) throws InvalidTemplateIdException {
         var retro = retroService.createRetro(teamId, request.retroTemplateId());
         return ResponseEntity.created(URI.create("/api/teams/%s/retros/%s".formatted(teamId, retro.getId()))).build();
     }
 
     @GetMapping
     @PreAuthorize("@userMappingAuthorizationService.isUserMemberOfTeam(authentication, #teamId)")
-    public List<RetroListItem> getRetros(@PathVariable("teamId") UUID teamId) {
+    public List<RetroListItem> getRetros(@PathVariable UUID teamId) {
         return retroService.getRetros(teamId)
                 .stream()
                 .map(RetroListItem::from)
@@ -36,13 +36,13 @@ public class RetroController {
 
     @GetMapping("/{retroId}")
     @PreAuthorize("@retroAuthorizationService.isUserAllowedInRetro(authentication, #retroId)")
-    public Retro getRetro(@PathVariable("retroId") UUID retroId) {
+    public Retro getRetro(@PathVariable UUID retroId) {
         return retroService.getRetro(retroId).orElseThrow();
     }
 
     @PutMapping("/{retroId}/finished")
-    @PreAuthorize("@retroAuthorizationService.isUserAllowedInRetro(authentication, #retroId)")
-    public ResponseEntity<Void> updateFinished(@PathVariable("retroId") UUID retroId, @RequestBody UpdateRetroFinishedRequest request) throws RetroNotFoundException {
+    @PreAuthorize("@userMappingAuthorizationService.isUserMemberOfTeam(authentication, #teamId)")
+    public ResponseEntity<Void> updateFinished(@PathVariable UUID teamId, @PathVariable UUID retroId, @RequestBody UpdateRetroFinishedRequest request) throws RetroNotFoundException {
         retroService.setFinished(retroId, request.finished());
         return ResponseEntity.noContent().build();
     }
