@@ -3,6 +3,8 @@ package io.nickreuter.retroapi.configuration;
 import io.nickreuter.retroapi.configuration.environment.CorsConfig;
 import io.nickreuter.retroapi.configuration.jwt.AllTypeJwtDecoderFactory;
 import io.nickreuter.retroapi.configuration.jwt.UniversalJwtDecoder;
+import io.nickreuter.retroapi.retro.anonymousparticipant.ShareTokenService;
+import io.nickreuter.retroapi.share.authentication.ShareTokenAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -12,6 +14,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -25,10 +28,12 @@ public class SecurityConfig {
 
     private final CorsConfig corsConfig;
     private final AllTypeJwtDecoderFactory decoderFactory;
+    private final ShareTokenService shareTokenService;
 
-    public SecurityConfig(CorsConfig corsConfig, AllTypeJwtDecoderFactory decoderFactory) {
+    public SecurityConfig(CorsConfig corsConfig, AllTypeJwtDecoderFactory decoderFactory, ShareTokenService shareTokenService) {
         this.corsConfig = corsConfig;
         this.decoderFactory = decoderFactory;
+        this.shareTokenService = shareTokenService;
     }
 
     @Bean
@@ -48,26 +53,31 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        ShareTokenAuthenticationFilter shareTokenFilter = new ShareTokenAuthenticationFilter(shareTokenService);
+
         http
-                .csrf(Customizer.withDefaults())
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers(request -> request.getHeader("X-Share-Token") != null)
+                )
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(authorize -> {
                     authorize.requestMatchers("/h2/**").permitAll();
                     authorize.requestMatchers("/api/configuration").permitAll();
                     authorize.requestMatchers("/api/websocket/**").permitAll();
                     authorize.requestMatchers("/api/websocket").permitAll();
+                    authorize.requestMatchers("/api/share/**").permitAll();
                     authorize.anyRequest().authenticated();
                 })
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(jwt -> {
                     jwt.jwtAuthenticationConverter(jwtAuthenticationConverter());
-                }));
+                }))
+                .addFilterBefore(shareTokenFilter, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 
     @Bean
     public JwtDecoder jwtDecoder() {
-        // Create a simple custom JWT decoder that uses our AllTypeJwtDecoderFactory
-        // This decoder will handle all JWT types (JWT, at+jwt, etc.) automatically
         return new UniversalJwtDecoder(decoderFactory);
     }
 

@@ -222,10 +222,10 @@ class RetroControllerTest {
     }
 
     @Test
-    void updateFinished_WhenUserNotAllowedInRetro_Throws403() throws Exception {
+    void updateFinished_WhenUserNotMemberOfTeam_Throws403() throws Exception {
         var teamId = UUID.randomUUID();
         var retroId = UUID.randomUUID();
-        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), retroId)).thenReturn(false);
+        when(userMappingAuthorizationService.isUserMemberOfTeam(createAuthentication(), teamId)).thenReturn(false);
         mockMvc.perform(put("/api/teams/%s/retros/%s/finished".formatted(teamId, retroId))
                         .with(jwt())
                         .with(csrf())
@@ -238,7 +238,7 @@ class RetroControllerTest {
     void updateFinished_WhenRetroNotFound_ReturnsNotFound() throws Exception {
         var teamId = UUID.randomUUID();
         var retroId = UUID.randomUUID();
-        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), retroId)).thenReturn(true);
+        when(userMappingAuthorizationService.isUserMemberOfTeam(createAuthentication(), teamId)).thenReturn(true);
         doThrow(RetroNotFoundException.class).when(retroService).setFinished(retroId, true);
         mockMvc.perform(put("/api/teams/%s/retros/%s/finished".formatted(teamId, retroId))
                         .with(jwt())
