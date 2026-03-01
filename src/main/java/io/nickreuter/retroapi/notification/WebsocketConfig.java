@@ -86,12 +86,12 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
     @Bean
     public AuthorizationManager<Message<?>> messageAuthorizationManager(MessageMatcherDelegatingAuthorizationManager.Builder messages) {
         messages
+                .simpTypeMatchers(UNSUBSCRIBE, DISCONNECT).permitAll()
                 .nullDestMatcher().authenticated()
                 .simpSubscribeDestMatchers("/topic/*.thoughts").access(this::isAuthorizedRetroSubscription)
                 .simpSubscribeDestMatchers("/topic/*.finished").access(this::isAuthorizedRetroSubscription)
                 .simpSubscribeDestMatchers("/topic/*.action-items").access((this::isAuthorizedTeamSubscription))
                 .simpTypeMatchers(MESSAGE, SUBSCRIBE).denyAll()
-                .simpTypeMatchers(UNSUBSCRIBE, DISCONNECT).permitAll()
                 .anyMessage().denyAll();
         return messages.build();
     }
