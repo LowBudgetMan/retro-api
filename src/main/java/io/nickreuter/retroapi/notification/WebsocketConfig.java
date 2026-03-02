@@ -21,6 +21,7 @@ import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.config.annotation.web.socket.EnableWebSocketSecurity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.messaging.access.intercept.MessageAuthorizationContext;
 import org.springframework.security.messaging.access.intercept.MessageMatcherDelegatingAuthorizationManager;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -103,6 +104,15 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
             public Message<?> preSend(@NonNull Message<?> message, @NonNull MessageChannel channel) {
                 StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
                 if (accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
+                    // Store share token in session attributes if present (needed for subscription authorization)
+                    String shareToken = accessor.getFirstNativeHeader("X-Share-Token");
+                    if (shareToken != null && !shareToken.trim().isEmpty()) {
+                        var sessionAttributes = accessor.getSessionAttributes();
+                        if (sessionAttributes != null) {
+                            sessionAttributes.put("shareToken", shareToken);
+                        }
+                    }
+
                     // Try JWT authentication first
                     String authHeader = accessor.getFirstNativeHeader("Authorization");
                     if (authHeader != null && authHeader.startsWith("Bearer ")) {
@@ -117,8 +127,7 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
                         }
                     }
 
-                    // Try share token authentication
-                    String shareToken = accessor.getFirstNativeHeader("X-Share-Token");
+                    // Try share token authentication (unauthenticated users with share link)
                     if (shareToken != null && !shareToken.trim().isEmpty()) {
                         try {
                             var maybeToken = shareTokenService.getShareToken(shareToken);
@@ -130,6 +139,7 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
                                     "anonymous_" + tokenRecord.retroId()
                                 );
                                 accessor.setUser(shareAuth);
+                                SecurityContextHolder.getContext().setAuthentication(shareAuth);
                             }
                         } catch (Exception e) {
                             // Share token authentication failed
@@ -149,9 +159,25 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private AuthorizationDecision isAuthorizedRetroSubscription(Supplier<Authentication> authentication, MessageAuthorizationContext<?> object) {
         var ids = getIdFromTopic(object, "^/topic/(?<retroId>.*)\\..*");
-        return ids.find()
-                ? new AuthorizationDecision(retroAuthorizationService.isUserAllowedInRetro(authentication.get(), UUID.fromString(ids.group("retroId"))))
-                : new AuthorizationDecision(false);
+        if (!ids.find()) {
+            return new AuthorizationDecision(false);
+        }
+        var retroId = UUID.fromString(ids.group("retroId"));
+        // Check share token from session attributes first (avoids HttpServletRequest access in WebSocket context)
+        var accessor = StompHeaderAccessor.wrap(object.getMessage());
+        var sessionAttributes = accessor.getSessionAttributes();
+        if (sessionAttributes != null) {
+            var shareToken = (String) sessionAttributes.get("shareToken");
+            if (shareToken != null) {
+                var isValid = shareTokenService.getShareToken(shareToken)
+                        .map(token -> token.retroId().equals(retroId))
+                        .orElse(false);
+                if (isValid) {
+                    return new AuthorizationDecision(true);
+                }
+            }
+        }
+        return new AuthorizationDecision(retroAuthorizationService.isUserAllowedInRetro(authentication.get(), retroId));
     }
 
     private AuthorizationDecision isAuthorizedTeamSubscription(Supplier<Authentication> authentication, MessageAuthorizationContext<?> object) {
