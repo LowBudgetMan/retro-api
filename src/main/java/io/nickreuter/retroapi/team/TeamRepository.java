@@ -9,6 +9,5 @@ import java.util.UUID;
 
 @Repository
 public interface TeamRepository extends JpaRepository<TeamEntity, UUID> {
-    boolean existsByName(String name);
     List<TeamEntity> findAllByIdInOrderByNameAsc(Set<UUID> ids);
 }

@@ -1,7 +1,6 @@
 package io.nickreuter.retroapi.team;
 
 import io.nickreuter.retroapi.team.exception.BadInviteException;
-import io.nickreuter.retroapi.team.exception.TeamAlreadyExistsException;
 import io.nickreuter.retroapi.team.invite.InviteEntity;
 import io.nickreuter.retroapi.team.invite.InviteService;
 import io.nickreuter.retroapi.team.usermapping.UserMappingEntity;
@@ -28,8 +27,7 @@ public class TeamService {
         this.inviteService = inviteService;
     }
 
-    public TeamEntity createTeam(String name, String userId) throws TeamAlreadyExistsException {
-        if (teamRepository.existsByName(name)) throw new TeamAlreadyExistsException();
+    public TeamEntity createTeam(String name, String userId) {
         var team = teamRepository.save(new TeamEntity(name));
         userMappingService.addUserToTeam(userId, team.getId());
         return team;
