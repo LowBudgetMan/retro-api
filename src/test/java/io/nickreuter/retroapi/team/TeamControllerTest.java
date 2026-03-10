@@ -2,7 +2,6 @@ package io.nickreuter.retroapi.team;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.nickreuter.retroapi.team.exception.BadInviteException;
-import io.nickreuter.retroapi.team.exception.TeamAlreadyExistsException;
 import io.nickreuter.retroapi.team.usermapping.UserMappingAuthorizationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,17 +81,6 @@ class TeamControllerTest {
                         .content(objectMapper.writeValueAsString(new CreateTeamRequest("Team name")))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    void createTeam_WhenTeamAlreadyExists_Throws409() throws Exception {
-        var teamName = "Team name";
-        doThrow(TeamAlreadyExistsException.class).when(service).createTeam(teamName, "user");
-        mockMvc.perform(post("/api/teams")
-                        .with(jwt())
-                        .content(objectMapper.writeValueAsString(new CreateTeamRequest(teamName)))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isConflict());
     }
 
     @Test

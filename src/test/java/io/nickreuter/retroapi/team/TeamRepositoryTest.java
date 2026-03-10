@@ -8,24 +8,11 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest
 class TeamRepositoryTest {
     @Autowired
     private TeamRepository subject;
-
-    @Test
-    public void existsByName_WhenTeamNameDoesNotExist_ReturnsFalse() {
-        assertFalse(subject.existsByName("name"));
-    }
-
-    @Test
-    public void existsByName_WhenTeamNameExists_ReturnsTrue() {
-        subject.save(new TeamEntity("name"));
-        assertTrue(subject.existsByName("name"));
-    }
 
     @Test
     public void findAllByIdInOrderByNameAsc_WhenTeamsExist_ReturnsTeamsInNameOrderAscending() {

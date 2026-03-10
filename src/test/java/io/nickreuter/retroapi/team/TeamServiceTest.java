@@ -1,7 +1,6 @@
 package io.nickreuter.retroapi.team;
 
 import io.nickreuter.retroapi.team.exception.BadInviteException;
-import io.nickreuter.retroapi.team.exception.TeamAlreadyExistsException;
 import io.nickreuter.retroapi.team.invite.InviteEntity;
 import io.nickreuter.retroapi.team.invite.InviteService;
 import io.nickreuter.retroapi.team.usermapping.UserMappingEntity;
@@ -23,9 +22,8 @@ class TeamServiceTest {
     private final TeamService service = new TeamService(teamRepository, userMappingService, inviteService);
 
     @Test
-    void createTeam_ShouldReturnCreatedTeam() throws TeamAlreadyExistsException {
+    void createTeam_ShouldReturnCreatedTeam() {
         var expected = new TeamEntity(UUID.randomUUID(), "expected name", Instant.now());
-        when(teamRepository.existsByName("expected name")).thenReturn(false);
         when(teamRepository.save(ArgumentMatchers.argThat((TeamEntity team) ->
                 team.getId() == null &&
                 Objects.equals(team.getName(), "expected name") &&
@@ -36,16 +34,8 @@ class TeamServiceTest {
     }
 
     @Test
-    void createTeam_WhenTeamAlreadyExists_ShouldThrowException() {
-        when(teamRepository.existsByName("team already exists")).thenReturn(true);
-        assertThatExceptionOfType(TeamAlreadyExistsException.class).isThrownBy(() -> service.createTeam("team already exists", "user ID"));
-        verify(teamRepository, times(0)).save(any());
-    }
-
-    @Test
-    void createTeam_ShouldAddCreatingUserToTeam() throws TeamAlreadyExistsException {
+    void createTeam_ShouldAddCreatingUserToTeam() {
         var expected = new TeamEntity(UUID.randomUUID(), "expected team name", Instant.now());
-        when(teamRepository.existsByName("expected team name")).thenReturn(false);
         when(teamRepository.save(any())).thenReturn(expected);
         var actual = service.createTeam("expected team name", "User ID");
         assertThat(actual).isEqualTo(expected);
