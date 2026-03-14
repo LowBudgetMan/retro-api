@@ -93,7 +93,7 @@ class RetroServiceTest {
 
         var argCaptor = ArgumentCaptor.forClass(RetroFinishedEvent.class);
         verify(applicationEventPublisher).publishEvent(argCaptor.capture());
-        assertThat(argCaptor.getValue().getRoute()).isEqualTo("/topic/%s.finished".formatted(retroId));
+        assertThat(argCaptor.getValue().getRoute()).isEqualTo("/topic/retros.%s.events".formatted(retroId));
         assertThat(argCaptor.getValue().getEventType()).isEqualTo(EventType.UPDATE);
         assertThat(argCaptor.getValue().getPayload()).isEqualTo(true);
     }

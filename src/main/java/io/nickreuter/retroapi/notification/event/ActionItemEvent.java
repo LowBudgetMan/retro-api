@@ -6,7 +6,7 @@ import io.nickreuter.retroapi.team.actionitem.ActionItemEntity;
 import java.util.UUID;
 
 public class ActionItemEvent extends BaseEvent{
-    private static final String ROUTE_STRING = "/topic/%s.action-items";
+    private static final String ROUTE_STRING = "/topic/teams.%s.action-items";
     private final UUID teamId;
 
     public ActionItemEvent(Object source, EventType eventType, ActionItemEntity payload, UUID teamId) {

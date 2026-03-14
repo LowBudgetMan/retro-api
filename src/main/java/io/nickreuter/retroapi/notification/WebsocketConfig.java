@@ -89,9 +89,9 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
         messages
                 .simpTypeMatchers(UNSUBSCRIBE, DISCONNECT).permitAll()
                 .nullDestMatcher().authenticated()
-                .simpSubscribeDestMatchers("/topic/*.thoughts").access(this::isAuthorizedRetroSubscription)
-                .simpSubscribeDestMatchers("/topic/*.finished").access(this::isAuthorizedRetroSubscription)
-                .simpSubscribeDestMatchers("/topic/*.action-items").access((this::isAuthorizedTeamSubscription))
+                .simpSubscribeDestMatchers("/topic/retros.*.thoughts").access(this::isAuthorizedRetroSubscription)
+                .simpSubscribeDestMatchers("/topic/retros.*.events").access(this::isAuthorizedRetroSubscription)
+                .simpSubscribeDestMatchers("/topic/teams.*.action-items").access(this::isAuthorizedTeamSubscription)
                 .simpTypeMatchers(MESSAGE, SUBSCRIBE).denyAll()
                 .anyMessage().denyAll();
         return messages.build();
@@ -158,7 +158,7 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
     }
 
     private AuthorizationDecision isAuthorizedRetroSubscription(Supplier<Authentication> authentication, MessageAuthorizationContext<?> object) {
-        var ids = getIdFromTopic(object, "^/topic/(?<retroId>.*)\\..*");
+        var ids = getIdFromTopic(object, "^/topic/retros\\.(?<retroId>[^.]+)\\..*");
         if (!ids.find()) {
             return new AuthorizationDecision(false);
         }
@@ -181,7 +181,7 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
     }
 
     private AuthorizationDecision isAuthorizedTeamSubscription(Supplier<Authentication> authentication, MessageAuthorizationContext<?> object) {
-        var ids = getIdFromTopic(object, "^/topic/(?<teamId>.*)\\..*$");
+        var ids = getIdFromTopic(object, "^/topic/teams\\.(?<teamId>[^.]+)\\..*$");
         AuthorizationDecision isAuthorized = ids.find()
                 // TODO: Add error handling for when this fails because the UUID is too big
                 ? new AuthorizationDecision(userMappingAuthorizationService.isUserMemberOfTeam(authentication.get(), UUID.fromString(ids.group("teamId"))))
