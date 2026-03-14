@@ -8,8 +8,8 @@ public class RetroFinishedEvent extends BaseEvent {
     private static final String ROUTE_STRING = "/topic/retros.%s.events";
     private final UUID retroId;
 
-    public RetroFinishedEvent(Object source, EventType eventType, boolean isFinished, UUID retroId) {
-        super(source, eventType, isFinished);
+    public RetroFinishedEvent(Object source, boolean isFinished, UUID retroId) {
+        super(source, EventType.RETRO_FINISHED, isFinished);
         this.retroId = retroId;
     }
 
