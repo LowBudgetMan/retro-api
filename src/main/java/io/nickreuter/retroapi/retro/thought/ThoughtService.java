@@ -1,6 +1,6 @@
 package io.nickreuter.retroapi.retro.thought;
 
-import io.nickreuter.retroapi.notification.ActionType;
+import io.nickreuter.retroapi.notification.EventType;
 import io.nickreuter.retroapi.notification.event.ThoughtEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ public class ThoughtService {
 
     public ThoughtEntity createThought(UUID retroId, String message, String category) {
         var savedThought = thoughtRepository.save(ThoughtEntity.from(message, category, retroId));
-        applicationEventPublisher.publishEvent(new ThoughtEvent(this, ActionType.CREATE, savedThought, retroId));
+        applicationEventPublisher.publishEvent(new ThoughtEvent(this, EventType.CREATE, savedThought, retroId));
         return savedThought;
     }
 
@@ -32,34 +32,34 @@ public class ThoughtService {
     public void addVote(UUID thoughtId) {
         thoughtRepository.incrementVotes(thoughtId);
         var thought = thoughtRepository.findById(thoughtId).orElseThrow();
-        applicationEventPublisher.publishEvent(new ThoughtEvent(this, ActionType.UPDATE, thought, thought.getRetroId()));
+        applicationEventPublisher.publishEvent(new ThoughtEvent(this, EventType.UPDATE, thought, thought.getRetroId()));
     }
 
     public void setCompleted(UUID thoughtId, boolean completed) {
         var thought = thoughtRepository.findById(thoughtId).orElseThrow();
         thought.setCompleted(completed);
         var updatedThought = thoughtRepository.save(thought);
-        applicationEventPublisher.publishEvent(new ThoughtEvent(this, ActionType.UPDATE, updatedThought, updatedThought.getRetroId()));
+        applicationEventPublisher.publishEvent(new ThoughtEvent(this, EventType.UPDATE, updatedThought, updatedThought.getRetroId()));
     }
 
     public void setCategory(UUID thoughtId, String category) {
         var thought = thoughtRepository.findById(thoughtId).orElseThrow();
         thought.setCategory(category);
         var updatedThought = thoughtRepository.save(thought);
-        applicationEventPublisher.publishEvent(new ThoughtEvent(this, ActionType.UPDATE, updatedThought, updatedThought.getRetroId()));
+        applicationEventPublisher.publishEvent(new ThoughtEvent(this, EventType.UPDATE, updatedThought, updatedThought.getRetroId()));
     }
 
     public void setMessage(UUID thoughtId, String message) {
         var thought = thoughtRepository.findById(thoughtId).orElseThrow();
         thought.setMessage(message);
         var updatedThought = thoughtRepository.save(thought);
-        applicationEventPublisher.publishEvent(new ThoughtEvent(this, ActionType.UPDATE, updatedThought, updatedThought.getRetroId()));
+        applicationEventPublisher.publishEvent(new ThoughtEvent(this, EventType.UPDATE, updatedThought, updatedThought.getRetroId()));
     }
 
     public void deleteThought(UUID thoughtId) {
         var thought = thoughtRepository.findById(thoughtId).orElseThrow();
         thoughtRepository.deleteById(thoughtId);
-        applicationEventPublisher.publishEvent(new ThoughtEvent(this, ActionType.DELETE, thought, thought.getRetroId()));
+        applicationEventPublisher.publishEvent(new ThoughtEvent(this, EventType.DELETE, thought, thought.getRetroId()));
     }
 
     public List<ThoughtEntity> getThoughtsForRetro(UUID retroId) {

@@ -1,6 +1,6 @@
 package io.nickreuter.retroapi.retro;
 
-import io.nickreuter.retroapi.notification.ActionType;
+import io.nickreuter.retroapi.notification.EventType;
 import io.nickreuter.retroapi.notification.event.RetroFinishedEvent;
 import io.nickreuter.retroapi.retro.template.Template;
 import org.springframework.context.ApplicationEventPublisher;
@@ -53,6 +53,6 @@ public class RetroService {
         var retro = retroRepository.findById(retroId).orElseThrow(RetroNotFoundException::new);
         retro.setFinished(finished);
         retroRepository.save(retro);
-        applicationEventPublisher.publishEvent(new RetroFinishedEvent(this, ActionType.UPDATE, finished, retroId));
+        applicationEventPublisher.publishEvent(new RetroFinishedEvent(this, EventType.UPDATE, finished, retroId));
     }
 }

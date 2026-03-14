@@ -1,6 +1,6 @@
 package io.nickreuter.retroapi.notification.event;
 
-import io.nickreuter.retroapi.notification.ActionType;
+import io.nickreuter.retroapi.notification.EventType;
 import io.nickreuter.retroapi.retro.thought.ThoughtEntity;
 
 import java.util.UUID;
@@ -9,8 +9,8 @@ public class ThoughtEvent extends BaseEvent {
     private static final String ROUTE_STRING = "/topic/%s.thoughts";
     private final UUID retroId;
 
-    public ThoughtEvent(Object source, ActionType actionType, ThoughtEntity payload, UUID retroId) {
-        super(source, actionType, payload);
+    public ThoughtEvent(Object source, EventType eventType, ThoughtEntity payload, UUID retroId) {
+        super(source, eventType, payload);
         this.retroId = retroId;
     }
 

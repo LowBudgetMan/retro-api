@@ -1,6 +1,6 @@
 package io.nickreuter.retroapi.notification;
 
-public enum ActionType {
+public enum EventType {
     CREATE,
     UPDATE,
     DELETE

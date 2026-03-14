@@ -18,7 +18,7 @@ class WebsocketNotificationServiceTest {
     @Test
     void onApplicationEvent_WhenEventEmitted_SendMessageToWebSocket() throws Exception {
         var retroId = UUID.randomUUID();
-        var event = new ThoughtEvent(this, ActionType.CREATE, null, retroId);
+        var event = new ThoughtEvent(this, EventType.CREATE, null, retroId);
         when(objectMapper.writeValueAsString(any())).thenReturn("value");
 
         subject.onApplicationEvent(event);
@@ -29,7 +29,7 @@ class WebsocketNotificationServiceTest {
     @Test
     void onApplicationEvent_WhenEventSerializationFails_DoesNotSendMessage() throws Exception {
         var retroId = UUID.randomUUID();
-        var event = new ThoughtEvent(this, ActionType.CREATE, null, retroId);
+        var event = new ThoughtEvent(this, EventType.CREATE, null, retroId);
         when(objectMapper.writeValueAsString(any())).thenThrow(JsonProcessingException.class);
 
         subject.onApplicationEvent(event);

@@ -1,6 +1,6 @@
 package io.nickreuter.retroapi.notification.event;
 
-import io.nickreuter.retroapi.notification.ActionType;
+import io.nickreuter.retroapi.notification.EventType;
 
 import java.util.UUID;
 
@@ -8,8 +8,8 @@ public class RetroFinishedEvent extends BaseEvent {
     private static final String ROUTE_STRING = "/topic/%s.finished";
     private final UUID retroId;
 
-    public RetroFinishedEvent(Object source, ActionType actionType, boolean isFinished, UUID retroId) {
-        super(source, actionType, isFinished);
+    public RetroFinishedEvent(Object source, EventType eventType, boolean isFinished, UUID retroId) {
+        super(source, eventType, isFinished);
         this.retroId = retroId;
     }
 
