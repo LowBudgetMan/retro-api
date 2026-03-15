@@ -1,15 +1,16 @@
-package io.nickreuter.retroapi.notification.event;
+package io.nickreuter.retroapi.retro.event;
 
 import io.nickreuter.retroapi.notification.EventType;
+import io.nickreuter.retroapi.notification.event.BaseEvent;
 
 import java.util.UUID;
 
-public class RetroFinishedEvent extends BaseEvent {
+public class RetroTimerStartEvent extends BaseEvent {
     private static final String ROUTE_STRING = "/topic/retros.%s.events";
     private final UUID retroId;
 
-    public RetroFinishedEvent(Object source, boolean isFinished, UUID retroId) {
-        super(source, EventType.RETRO_FINISHED, isFinished);
+    public RetroTimerStartEvent(Object source, Object payload, UUID retroId) {
+        super(source, EventType.TIMER_START, payload);
         this.retroId = retroId;
     }
 

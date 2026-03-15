@@ -1,6 +1,6 @@
 package io.nickreuter.retroapi.team.actionitem;
 
-import io.nickreuter.retroapi.notification.ActionType;
+import io.nickreuter.retroapi.notification.EventType;
 import io.nickreuter.retroapi.notification.event.ActionItemEvent;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -62,8 +62,8 @@ class ActionItemServiceTest {
 
         var argCaptor = ArgumentCaptor.forClass(ActionItemEvent.class);
         verify(applicationEventPublisher).publishEvent(argCaptor.capture());
-        assertThat(argCaptor.getValue().getRoute()).isEqualTo("/topic/%s.action-items".formatted(teamId));
-        assertThat(argCaptor.getValue().getActionType()).isEqualTo(ActionType.CREATE);
+        assertThat(argCaptor.getValue().getRoute()).isEqualTo("/topic/teams.%s.action-items".formatted(teamId));
+        assertThat(argCaptor.getValue().getEventType()).isEqualTo(EventType.CREATE);
         assertThat(argCaptor.getValue().getPayload()).isEqualTo(expected);
     }
 
@@ -102,8 +102,8 @@ class ActionItemServiceTest {
 
         var argCaptor = ArgumentCaptor.forClass(ActionItemEvent.class);
         verify(applicationEventPublisher).publishEvent(argCaptor.capture());
-        assertThat(argCaptor.getValue().getRoute()).isEqualTo("/topic/%s.action-items".formatted(teamId));
-        assertThat(argCaptor.getValue().getActionType()).isEqualTo(ActionType.UPDATE);
+        assertThat(argCaptor.getValue().getRoute()).isEqualTo("/topic/teams.%s.action-items".formatted(teamId));
+        assertThat(argCaptor.getValue().getEventType()).isEqualTo(EventType.UPDATE);
         assertThat(argCaptor.getValue().getPayload()).isEqualTo(expected);
     }
 
@@ -142,8 +142,8 @@ class ActionItemServiceTest {
 
         var argCaptor = ArgumentCaptor.forClass(ActionItemEvent.class);
         verify(applicationEventPublisher).publishEvent(argCaptor.capture());
-        assertThat(argCaptor.getValue().getRoute()).isEqualTo("/topic/%s.action-items".formatted(teamId));
-        assertThat(argCaptor.getValue().getActionType()).isEqualTo(ActionType.UPDATE);
+        assertThat(argCaptor.getValue().getRoute()).isEqualTo("/topic/teams.%s.action-items".formatted(teamId));
+        assertThat(argCaptor.getValue().getEventType()).isEqualTo(EventType.UPDATE);
         assertThat(argCaptor.getValue().getPayload()).isEqualTo(expected);
     }
 
@@ -182,8 +182,8 @@ class ActionItemServiceTest {
 
         var argCaptor = ArgumentCaptor.forClass(ActionItemEvent.class);
         verify(applicationEventPublisher).publishEvent(argCaptor.capture());
-        assertThat(argCaptor.getValue().getRoute()).isEqualTo("/topic/%s.action-items".formatted(teamId));
-        assertThat(argCaptor.getValue().getActionType()).isEqualTo(ActionType.UPDATE);
+        assertThat(argCaptor.getValue().getRoute()).isEqualTo("/topic/teams.%s.action-items".formatted(teamId));
+        assertThat(argCaptor.getValue().getEventType()).isEqualTo(EventType.UPDATE);
         assertThat(argCaptor.getValue().getPayload()).isEqualTo(expected);
     }
 
@@ -209,8 +209,8 @@ class ActionItemServiceTest {
 
         var argCaptor = ArgumentCaptor.forClass(ActionItemEvent.class);
         verify(applicationEventPublisher).publishEvent(argCaptor.capture());
-        assertThat(argCaptor.getValue().getRoute()).isEqualTo("/topic/%s.action-items".formatted(teamId));
-        assertThat(argCaptor.getValue().getActionType()).isEqualTo(ActionType.DELETE);
+        assertThat(argCaptor.getValue().getRoute()).isEqualTo("/topic/teams.%s.action-items".formatted(teamId));
+        assertThat(argCaptor.getValue().getEventType()).isEqualTo(EventType.DELETE);
         assertThat(argCaptor.getValue().getPayload()).isEqualTo(savedActionItem);
     }
 

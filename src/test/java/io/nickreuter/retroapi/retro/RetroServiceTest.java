@@ -1,6 +1,6 @@
 package io.nickreuter.retroapi.retro;
 
-import io.nickreuter.retroapi.notification.ActionType;
+import io.nickreuter.retroapi.notification.EventType;
 import io.nickreuter.retroapi.notification.event.RetroFinishedEvent;
 import io.nickreuter.retroapi.retro.template.Category;
 import io.nickreuter.retroapi.retro.template.Template;
@@ -93,8 +93,8 @@ class RetroServiceTest {
 
         var argCaptor = ArgumentCaptor.forClass(RetroFinishedEvent.class);
         verify(applicationEventPublisher).publishEvent(argCaptor.capture());
-        assertThat(argCaptor.getValue().getRoute()).isEqualTo("/topic/%s.finished".formatted(retroId));
-        assertThat(argCaptor.getValue().getActionType()).isEqualTo(ActionType.UPDATE);
+        assertThat(argCaptor.getValue().getRoute()).isEqualTo("/topic/retros.%s.events".formatted(retroId));
+        assertThat(argCaptor.getValue().getEventType()).isEqualTo(EventType.RETRO_FINISHED);
         assertThat(argCaptor.getValue().getPayload()).isEqualTo(true);
     }
 

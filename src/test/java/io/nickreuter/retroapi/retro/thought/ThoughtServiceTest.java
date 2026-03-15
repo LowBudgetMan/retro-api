@@ -1,6 +1,6 @@
 package io.nickreuter.retroapi.retro.thought;
 
-import io.nickreuter.retroapi.notification.ActionType;
+import io.nickreuter.retroapi.notification.EventType;
 import io.nickreuter.retroapi.notification.event.ThoughtEvent;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -61,8 +61,8 @@ class ThoughtServiceTest {
 
         var argCaptor = ArgumentCaptor.forClass(ThoughtEvent.class);
         verify(applicationEventPublisher).publishEvent(argCaptor.capture());
-        assertThat(argCaptor.getValue().getRoute()).isEqualTo("/topic/%s.thoughts".formatted(retroId));
-        assertThat(argCaptor.getValue().getActionType()).isEqualTo(ActionType.CREATE);
+        assertThat(argCaptor.getValue().getRoute()).isEqualTo("/topic/retros.%s.thoughts".formatted(retroId));
+        assertThat(argCaptor.getValue().getEventType()).isEqualTo(EventType.CREATE);
         assertThat(argCaptor.getValue().getPayload()).isEqualTo(expected);
     }
 
@@ -104,8 +104,8 @@ class ThoughtServiceTest {
 
         var argCaptor = ArgumentCaptor.forClass(ThoughtEvent.class);
         verify(applicationEventPublisher).publishEvent(argCaptor.capture());
-        assertThat(argCaptor.getValue().getRoute()).isEqualTo("/topic/%s.thoughts".formatted(expected.getRetroId()));
-        assertThat(argCaptor.getValue().getActionType()).isEqualTo(ActionType.UPDATE);
+        assertThat(argCaptor.getValue().getRoute()).isEqualTo("/topic/retros.%s.thoughts".formatted(expected.getRetroId()));
+        assertThat(argCaptor.getValue().getEventType()).isEqualTo(EventType.UPDATE);
         assertThat(argCaptor.getValue().getPayload()).isEqualTo(expected);
     }
 
@@ -135,8 +135,8 @@ class ThoughtServiceTest {
 
         var argCaptor = ArgumentCaptor.forClass(ThoughtEvent.class);
         verify(applicationEventPublisher).publishEvent(argCaptor.capture());
-        assertThat(argCaptor.getValue().getRoute()).isEqualTo("/topic/%s.thoughts".formatted(expected.getRetroId()));
-        assertThat(argCaptor.getValue().getActionType()).isEqualTo(ActionType.UPDATE);
+        assertThat(argCaptor.getValue().getRoute()).isEqualTo("/topic/retros.%s.thoughts".formatted(expected.getRetroId()));
+        assertThat(argCaptor.getValue().getEventType()).isEqualTo(EventType.UPDATE);
         assertThat(argCaptor.getValue().getPayload()).isEqualTo(expected);
     }
 
@@ -167,8 +167,8 @@ class ThoughtServiceTest {
 
         var argCaptor = ArgumentCaptor.forClass(ThoughtEvent.class);
         verify(applicationEventPublisher).publishEvent(argCaptor.capture());
-        assertThat(argCaptor.getValue().getRoute()).isEqualTo("/topic/%s.thoughts".formatted(expected.getRetroId()));
-        assertThat(argCaptor.getValue().getActionType()).isEqualTo(ActionType.UPDATE);
+        assertThat(argCaptor.getValue().getRoute()).isEqualTo("/topic/retros.%s.thoughts".formatted(expected.getRetroId()));
+        assertThat(argCaptor.getValue().getEventType()).isEqualTo(EventType.UPDATE);
         assertThat(argCaptor.getValue().getPayload()).isEqualTo(expected);
     }
 
@@ -199,8 +199,8 @@ class ThoughtServiceTest {
 
         var argCaptor = ArgumentCaptor.forClass(ThoughtEvent.class);
         verify(applicationEventPublisher).publishEvent(argCaptor.capture());
-        assertThat(argCaptor.getValue().getRoute()).isEqualTo("/topic/%s.thoughts".formatted(expected.getRetroId()));
-        assertThat(argCaptor.getValue().getActionType()).isEqualTo(ActionType.UPDATE);
+        assertThat(argCaptor.getValue().getRoute()).isEqualTo("/topic/retros.%s.thoughts".formatted(expected.getRetroId()));
+        assertThat(argCaptor.getValue().getEventType()).isEqualTo(EventType.UPDATE);
         assertThat(argCaptor.getValue().getPayload()).isEqualTo(expected);
     }
 
@@ -225,8 +225,8 @@ class ThoughtServiceTest {
 
         var argCaptor = ArgumentCaptor.forClass(ThoughtEvent.class);
         verify(applicationEventPublisher).publishEvent(argCaptor.capture());
-        assertThat(argCaptor.getValue().getRoute()).isEqualTo("/topic/%s.thoughts".formatted(savedThought.getRetroId()));
-        assertThat(argCaptor.getValue().getActionType()).isEqualTo(ActionType.DELETE);
+        assertThat(argCaptor.getValue().getRoute()).isEqualTo("/topic/retros.%s.thoughts".formatted(savedThought.getRetroId()));
+        assertThat(argCaptor.getValue().getEventType()).isEqualTo(EventType.DELETE);
         assertThat(argCaptor.getValue().getPayload()).isEqualTo(savedThought);
     }
 }
