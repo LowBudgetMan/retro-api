@@ -30,14 +30,14 @@ public class RetroEventController {
     }
 
     @PostMapping("/focus")
-    @PreAuthorize("@userMappingAuthorizationService.isUserMemberOfTeam(authentication, #teamId)")
+    @PreAuthorize("@retroAuthorizationService.isUserAllowedInRetro(authentication, #retroId)")
     public ResponseEntity<Void> focusThought(@PathVariable UUID teamId, @PathVariable UUID retroId, @RequestBody FocusRequest request) {
         retroEventService.publishFocus(retroId, request.thoughtId());
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/focus-clear")
-    @PreAuthorize("@userMappingAuthorizationService.isUserMemberOfTeam(authentication, #teamId)")
+    @PreAuthorize("@retroAuthorizationService.isUserAllowedInRetro(authentication, #retroId)")
     public ResponseEntity<Void> clearFocus(@PathVariable UUID teamId, @PathVariable UUID retroId) {
         retroEventService.publishFocusClear(retroId);
         return ResponseEntity.ok().build();
