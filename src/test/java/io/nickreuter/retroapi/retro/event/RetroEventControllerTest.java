@@ -1,6 +1,7 @@
 package io.nickreuter.retroapi.retro.event;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.nickreuter.retroapi.retro.RetroAuthorizationService;
 import io.nickreuter.retroapi.team.usermapping.UserMappingAuthorizationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,8 @@ class RetroEventControllerTest {
     private RetroEventService retroEventService;
     @MockitoBean
     private UserMappingAuthorizationService userMappingAuthorizationService;
+    @MockitoBean
+    private RetroAuthorizationService retroAuthorizationService;
 
     @Autowired
     private MockMvc mockMvc;
@@ -110,7 +113,7 @@ class RetroEventControllerTest {
         var teamId = UUID.randomUUID();
         var retroId = UUID.randomUUID();
         var thoughtId = UUID.randomUUID();
-        when(userMappingAuthorizationService.isUserMemberOfTeam(createAuthentication(), teamId)).thenReturn(true);
+        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), retroId)).thenReturn(true);
         mockMvc.perform(post((BASE_URL + "/focus").formatted(teamId, retroId))
                         .with(jwt())
                         .with(csrf())
@@ -131,10 +134,11 @@ class RetroEventControllerTest {
     }
 
     @Test
-    void focusThought_WhenNotMember_Returns403() throws Exception {
+    void focusThought_WhenNotAllowedInRetro_Returns403() throws Exception {
         var teamId = UUID.randomUUID();
-        when(userMappingAuthorizationService.isUserMemberOfTeam(createAuthentication(), teamId)).thenReturn(false);
-        mockMvc.perform(post((BASE_URL + "/focus").formatted(teamId, UUID.randomUUID()))
+        var retroId = UUID.randomUUID();
+        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), retroId)).thenReturn(false);
+        mockMvc.perform(post((BASE_URL + "/focus").formatted(teamId, retroId))
                         .with(jwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -147,7 +151,7 @@ class RetroEventControllerTest {
     void clearFocus_Returns200() throws Exception {
         var teamId = UUID.randomUUID();
         var retroId = UUID.randomUUID();
-        when(userMappingAuthorizationService.isUserMemberOfTeam(createAuthentication(), teamId)).thenReturn(true);
+        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), retroId)).thenReturn(true);
         mockMvc.perform(post((BASE_URL + "/focus-clear").formatted(teamId, retroId))
                         .with(jwt())
                         .with(csrf()))
@@ -164,10 +168,11 @@ class RetroEventControllerTest {
     }
 
     @Test
-    void clearFocus_WhenNotMember_Returns403() throws Exception {
+    void clearFocus_WhenNotAllowedInRetro_Returns403() throws Exception {
         var teamId = UUID.randomUUID();
-        when(userMappingAuthorizationService.isUserMemberOfTeam(createAuthentication(), teamId)).thenReturn(false);
-        mockMvc.perform(post((BASE_URL + "/focus-clear").formatted(teamId, UUID.randomUUID()))
+        var retroId = UUID.randomUUID();
+        when(retroAuthorizationService.isUserAllowedInRetro(createAuthentication(), retroId)).thenReturn(false);
+        mockMvc.perform(post((BASE_URL + "/focus-clear").formatted(teamId, retroId))
                         .with(jwt())
                         .with(csrf()))
                 .andExpect(status().isForbidden());
