@@ -27,6 +27,7 @@ import org.springframework.security.messaging.access.intercept.MessageMatcherDel
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
@@ -80,7 +81,11 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
                     .setClientLogin(relayProperties.relayUsername())
                     .setClientPasscode(relayProperties.relayPassword());
         } else {
-            registry.enableSimpleBroker("/topic");
+            var taskScheduler = new ThreadPoolTaskScheduler();
+            taskScheduler.initialize();
+            registry.enableSimpleBroker("/topic")
+                    .setHeartbeatValue(new long[]{10000, 10000})
+                    .setTaskScheduler(taskScheduler);
         }
     }
 
