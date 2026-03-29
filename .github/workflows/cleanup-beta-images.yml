@@ -1,0 +1,40 @@
+name: Cleanup Beta Images
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+jobs:
+  cleanup:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - name: Set lowercase owner name
+        run: echo "OWNER_LC=${OWNER,,}" >> "${GITHUB_ENV}"
+        env:
+          OWNER: ${{ github.repository_owner }}
+
+      - name: Delete beta images for merged PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Get all commit SHAs from the merged PR
+          COMMITS=$(gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/commits \
+            --paginate --jq '.[].sha' | cut -c1-7)
+
+          # Get all package versions
+          VERSIONS=$(gh api /users/${{ env.OWNER_LC }}/packages/container/retro-api/versions \
+            --paginate --jq '.[] | {id: .id, tags: .metadata.container.tags}' 2>/dev/null || echo "")
+
+          for SHORT_SHA in $COMMITS; do
+            TAG="beta-${SHORT_SHA}"
+            # Find version ID for this tag
+            VERSION_ID=$(echo "$VERSIONS" | jq -r "select(.tags[] == \"${TAG}\") | .id" 2>/dev/null || true)
+            if [ -n "$VERSION_ID" ] && [ "$VERSION_ID" != "null" ]; then
+              echo "Deleting image with tag ${TAG} (version ${VERSION_ID})"
+              gh api --method DELETE /users/${{ env.OWNER_LC }}/packages/container/retro-api/versions/${VERSION_ID} || true
+            fi
+          done
