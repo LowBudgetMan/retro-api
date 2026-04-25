@@ -161,4 +161,16 @@
             </column>
         </createTable>
     </changeSet>
+    <changeSet id="add-archived-column-for-action-items" author="lowbudgetman">
+        <preConditions>
+            <not>
+                <columnExists tableName="action_item" columnName="archived" />
+            </not>
+        </preConditions>
+        <addColumn tableName="action_item">
+            <column name="archived" type="boolean" defaultValue="false">
+                <constraints nullable="false" />
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

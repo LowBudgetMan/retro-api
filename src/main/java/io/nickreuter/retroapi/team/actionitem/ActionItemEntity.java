@@ -23,12 +23,13 @@ public class ActionItemEntity {
     private UUID id;
     private String action;
     private boolean completed;
+    private boolean archived;
     private UUID teamId;
     private String assignee;
     @CreationTimestamp
     private Instant createdAt;
 
     public static ActionItemEntity from(String action, String assignee, UUID teamId) {
-        return new ActionItemEntity(null, action, false, teamId, assignee, null);
+        return new ActionItemEntity(null, action, false, false, teamId, assignee, null);
     }
 }
