@@ -59,4 +59,8 @@ public class ActionItemService {
     public Optional<ActionItemEntity> getActionItem(UUID actionItemId) {
         return actionItemRepository.findById(actionItemId);
     }
+
+    public void archiveCompletedActionItems(UUID teamId) {
+        actionItemRepository.archiveCompletedActionItemsForTeam(teamId);
+    }
 }

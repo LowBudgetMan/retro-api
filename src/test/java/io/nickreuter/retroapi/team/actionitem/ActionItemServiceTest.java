@@ -224,4 +224,11 @@ class ActionItemServiceTest {
 
         assertThat(actual).contains(expected);
     }
+
+    @Test
+    void archiveCompletedActionItems_ArchivesCompletedActionItemsForTeam() {
+        var teamId = UUID.randomUUID();
+        subject.archiveCompletedActionItems(teamId);
+        verify(actionItemRepository).archiveCompletedActionItemsForTeam(teamId);
+    }
 }

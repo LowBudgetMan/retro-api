@@ -2,13 +2,11 @@ package io.nickreuter.retroapi.retro.anonymousparticipant;
 
 import io.nickreuter.retroapi.notification.event.RetroFinishedEvent;
 import org.junit.jupiter.api.Test;
-import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
 import static org.mockito.Mockito.*;
 
-@Service
 class ShareTokenRetroFinishedEventListenerTest {
     private final ShareTokenService mockShareTokenService = mock(ShareTokenService.class);
     private final ShareTokenRetroFinishedEventListener subject = new ShareTokenRetroFinishedEventListener(mockShareTokenService);
