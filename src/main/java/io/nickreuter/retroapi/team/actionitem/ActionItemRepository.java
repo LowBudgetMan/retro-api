@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @Repository
 public interface ActionItemRepository extends JpaRepository<ActionItemEntity, UUID> {
-    List<ActionItemEntity> findAllByTeamId(UUID teamId);
+    List<ActionItemEntity> findAllByTeamIdAndArchived(UUID teamId, boolean isArchived);
 
     @Modifying
     @Transactional

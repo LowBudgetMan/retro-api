@@ -20,7 +20,7 @@ public class ActionItemService {
     }
 
     public List<ActionItemEntity> getActionItemsForTeam(UUID teamId) {
-        return actionItemRepository.findAllByTeamId(teamId);
+        return actionItemRepository.findAllByTeamIdAndArchived(teamId, false);
     }
 
     public ActionItemEntity createActionItem(String action, String assignee, UUID teamId) {

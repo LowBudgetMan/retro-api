@@ -22,10 +22,10 @@ class ActionItemServiceTest {
     private final ActionItemService subject = new ActionItemService(actionItemRepository, applicationEventPublisher);
 
     @Test
-    void getActionItemsForTeam_ReturnsActionItemsFromRepositoryForTeam() {
+    void getActionItemsForTeam_ReturnsNonArchivedActionItemsFromRepositoryForTeam() {
         var teamId = UUID.randomUUID();
         var expected = List.of(new ActionItemEntity());
-        when(actionItemRepository.findAllByTeamId(teamId)).thenReturn(expected);
+        when(actionItemRepository.findAllByTeamIdAndArchived(teamId, false)).thenReturn(expected);
 
         assertThat(subject.getActionItemsForTeam(teamId)).isEqualTo(expected);
     }
