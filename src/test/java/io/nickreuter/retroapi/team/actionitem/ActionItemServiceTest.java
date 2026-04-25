@@ -35,7 +35,7 @@ class ActionItemServiceTest {
         var action = "This is an action";
         var assignee = "Assign E.";
         var teamId = UUID.randomUUID();
-        var expected = new ActionItemEntity(UUID.randomUUID(), action, false, teamId, assignee, Instant.now());
+        var expected = new ActionItemEntity(UUID.randomUUID(), action, false, false, teamId, assignee, Instant.now());
         when(actionItemRepository.save(argThat((entity) ->
                 entity.getId() == null &&
                 Objects.equals(entity.getAction(), action) &&
@@ -55,7 +55,7 @@ class ActionItemServiceTest {
         var action = "This is an action";
         var assignee = "Assign E.";
         var teamId = UUID.randomUUID();
-        var expected = new ActionItemEntity(UUID.randomUUID(), action, false, teamId, assignee, Instant.now());
+        var expected = new ActionItemEntity(UUID.randomUUID(), action, false, false, teamId, assignee, Instant.now());
         when(actionItemRepository.save(any())).thenReturn(expected);
 
         subject.createActionItem(action, assignee, teamId);
@@ -71,8 +71,8 @@ class ActionItemServiceTest {
     void setAction_SavesActionItemInRepository() {
         var id = UUID.randomUUID();
         var action = "This is an action";
-        var savedActionItem = new ActionItemEntity(id, "old action", false, UUID.randomUUID(), "assignee", Instant.now());
-        var expected = new ActionItemEntity(id, action, false, savedActionItem.getTeamId(), "assignee", savedActionItem.getCreatedAt());
+        var savedActionItem = new ActionItemEntity(id, "old action", false, false, UUID.randomUUID(), "assignee", Instant.now());
+        var expected = new ActionItemEntity(id, action, false, false, savedActionItem.getTeamId(), "assignee", savedActionItem.getCreatedAt());
         when(actionItemRepository.findById(id)).thenReturn(Optional.of(savedActionItem));
         when(actionItemRepository.save(any())).thenReturn(expected);
 
@@ -93,8 +93,8 @@ class ActionItemServiceTest {
         var id = UUID.randomUUID();
         var teamId = UUID.randomUUID();
         var action = "This is an action";
-        var savedActionItem = new ActionItemEntity(id, "old action", false, teamId, "assignee", Instant.now());
-        var expected = new ActionItemEntity(id, action, false, savedActionItem.getTeamId(), "assignee", savedActionItem.getCreatedAt());
+        var savedActionItem = new ActionItemEntity(id, "old action", false, false, teamId, "assignee", Instant.now());
+        var expected = new ActionItemEntity(id, action, false, false, savedActionItem.getTeamId(), "assignee", savedActionItem.getCreatedAt());
         when(actionItemRepository.findById(id)).thenReturn(Optional.of(savedActionItem));
         when(actionItemRepository.save(any())).thenReturn(expected);
 
@@ -111,8 +111,8 @@ class ActionItemServiceTest {
     void setAssignee_SavesActionItemInRepository() {
         var id = UUID.randomUUID();
         var assignee = "new assignee";
-        var savedActionItem = new ActionItemEntity(id, "action", false, UUID.randomUUID(), "old assignee", Instant.now());
-        var expected = new ActionItemEntity(id, "action", false, savedActionItem.getTeamId(), assignee, savedActionItem.getCreatedAt());
+        var savedActionItem = new ActionItemEntity(id, "action", false, false, UUID.randomUUID(), "old assignee", Instant.now());
+        var expected = new ActionItemEntity(id, "action", false, false, savedActionItem.getTeamId(), assignee, savedActionItem.getCreatedAt());
         when(actionItemRepository.findById(id)).thenReturn(Optional.of(savedActionItem));
         when(actionItemRepository.save(any())).thenReturn(expected);
 
@@ -133,8 +133,8 @@ class ActionItemServiceTest {
         var id = UUID.randomUUID();
         var teamId = UUID.randomUUID();
         var assignee = "new assignee";
-        var savedActionItem = new ActionItemEntity(id, "action", false, teamId, "old assignee", Instant.now());
-        var expected = new ActionItemEntity(id, "action", false, savedActionItem.getTeamId(), assignee, savedActionItem.getCreatedAt());
+        var savedActionItem = new ActionItemEntity(id, "action", false, false, teamId, "old assignee", Instant.now());
+        var expected = new ActionItemEntity(id, "action", false, false, savedActionItem.getTeamId(), assignee, savedActionItem.getCreatedAt());
         when(actionItemRepository.findById(id)).thenReturn(Optional.of(savedActionItem));
         when(actionItemRepository.save(any())).thenReturn(expected);
 
@@ -151,8 +151,8 @@ class ActionItemServiceTest {
     void setCompleted_SavesActionItemInRepository() {
         var id = UUID.randomUUID();
         var completed = true;
-        var savedActionItem = new ActionItemEntity(id, "action", false, UUID.randomUUID(), "assignee", Instant.now());
-        var expected = new ActionItemEntity(id, "action", completed, savedActionItem.getTeamId(), "assignee", savedActionItem.getCreatedAt());
+        var savedActionItem = new ActionItemEntity(id, "action", false, false, UUID.randomUUID(), "assignee", Instant.now());
+        var expected = new ActionItemEntity(id, "action", completed, false, savedActionItem.getTeamId(), "assignee", savedActionItem.getCreatedAt());
         when(actionItemRepository.findById(id)).thenReturn(Optional.of(savedActionItem));
         when(actionItemRepository.save(any())).thenReturn(expected);
 
@@ -173,8 +173,8 @@ class ActionItemServiceTest {
         var id = UUID.randomUUID();
         var teamId = UUID.randomUUID();
         var completed = true;
-        var savedActionItem = new ActionItemEntity(id, "action", false, teamId, "assignee", Instant.now());
-        var expected = new ActionItemEntity(id, "action", completed, savedActionItem.getTeamId(), "assignee", savedActionItem.getCreatedAt());
+        var savedActionItem = new ActionItemEntity(id, "action", false, false, teamId, "assignee", Instant.now());
+        var expected = new ActionItemEntity(id, "action", completed, false, savedActionItem.getTeamId(), "assignee", savedActionItem.getCreatedAt());
         when(actionItemRepository.findById(id)).thenReturn(Optional.of(savedActionItem));
         when(actionItemRepository.save(any())).thenReturn(expected);
 
@@ -190,7 +190,7 @@ class ActionItemServiceTest {
     @Test
     void deleteActionItem_RemovesActionItemInRepository() {
         var id = UUID.randomUUID();
-        var savedActionItem = new ActionItemEntity(id, "action", false, UUID.randomUUID(), "assignee", Instant.now());
+        var savedActionItem = new ActionItemEntity(id, "action", false, false, UUID.randomUUID(), "assignee", Instant.now());
         when(actionItemRepository.findById(id)).thenReturn(Optional.of(savedActionItem));
 
         subject.deleteActionItem(id);
@@ -202,7 +202,7 @@ class ActionItemServiceTest {
     void deleteActionItem_PublishesEvent() {
         var id = UUID.randomUUID();
         var teamId = UUID.randomUUID();
-        var savedActionItem = new ActionItemEntity(id, "action", false, teamId, "assignee", Instant.now());
+        var savedActionItem = new ActionItemEntity(id, "action", false, false, teamId, "assignee", Instant.now());
         when(actionItemRepository.findById(id)).thenReturn(Optional.of(savedActionItem));
 
         subject.deleteActionItem(id);
@@ -217,7 +217,7 @@ class ActionItemServiceTest {
     @Test
     void getActionItem_ReturnsActionItemInRepository() {
         var id = UUID.randomUUID();
-        var expected = new ActionItemEntity(id, "action", false, UUID.randomUUID(), "assignee", Instant.now());
+        var expected = new ActionItemEntity(id, "action", false, false, UUID.randomUUID(), "assignee", Instant.now());
         when(actionItemRepository.findById(id)).thenReturn(Optional.of(expected));
 
         var actual = subject.getActionItem(id);

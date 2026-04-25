@@ -44,7 +44,7 @@ class ActionItemControllerTest {
     @Test
     void getActionItems_ReturnsListOfActionItems() throws Exception {
         var teamId = UUID.randomUUID();
-        var expectedActionItems = List.of(new ActionItemEntity(UUID.randomUUID(), "action", false, teamId, "assignee", Instant.now()));
+        var expectedActionItems = List.of(new ActionItemEntity(UUID.randomUUID(), "action", false, false, teamId, "assignee", Instant.now()));
         when(userMappingAuthorizationService.isUserMemberOfTeam(createAuthentication(), teamId)).thenReturn(true);
         when(actionItemService.getActionItemsForTeam(teamId)).thenReturn(expectedActionItems);
 
@@ -86,7 +86,7 @@ class ActionItemControllerTest {
         var teamId = UUID.randomUUID();
         var actionItemId = UUID.randomUUID();
         when(userMappingAuthorizationService.isUserMemberOfTeam(createAuthentication(), teamId)).thenReturn(true);
-        when(actionItemService.createActionItem("action", "assignee", teamId)).thenReturn(new ActionItemEntity(actionItemId, "action", false, teamId, "assignee", Instant.now()));
+        when(actionItemService.createActionItem("action", "assignee", teamId)).thenReturn(new ActionItemEntity(actionItemId, "action", false, false, teamId, "assignee", Instant.now()));
         mockMvc.perform(post("/api/teams/%s/action-items".formatted(teamId))
                         .with(jwt())
                         .with(csrf())

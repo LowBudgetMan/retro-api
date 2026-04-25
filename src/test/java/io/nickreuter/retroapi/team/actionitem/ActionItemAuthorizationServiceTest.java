@@ -31,7 +31,7 @@ class ActionItemAuthorizationServiceTest {
         var authentication = mock(Authentication.class);
         var actionItemId = UUID.randomUUID();
         var teamId = UUID.randomUUID();
-        var actionItem = new ActionItemEntity(actionItemId, "action", false, teamId, "assignee", Instant.now());
+        var actionItem = new ActionItemEntity(actionItemId, "action", false, false, teamId, "assignee", Instant.now());
         when(actionItemService.getActionItem(actionItemId)).thenReturn(Optional.of(actionItem));
         when(userMappingAuthorizationService.isUserMemberOfTeam(authentication, teamId)).thenReturn(false);
 
@@ -43,7 +43,7 @@ class ActionItemAuthorizationServiceTest {
         var authentication = mock(Authentication.class);
         var actionItemId = UUID.randomUUID();
         var teamId = UUID.randomUUID();
-        var actionItem = new ActionItemEntity(actionItemId, "action", false, teamId, "assignee", Instant.now());
+        var actionItem = new ActionItemEntity(actionItemId, "action", false, false, teamId, "assignee", Instant.now());
         when(actionItemService.getActionItem(actionItemId)).thenReturn(Optional.of(actionItem));
         when(userMappingAuthorizationService.isUserMemberOfTeam(authentication, teamId)).thenReturn(true);
 
