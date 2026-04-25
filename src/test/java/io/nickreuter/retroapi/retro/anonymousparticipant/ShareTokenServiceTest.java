@@ -85,4 +85,11 @@ class ShareTokenServiceTest {
         var actual = subject.getShareTokensForRetro(retroId);
         assertThat(actual).containsExactlyElementsOf(expected);
     }
+
+    @Test
+    void clearShareTokensForRetro_RemovesShareLinksForRetro() {
+        var retroId = UUID.randomUUID();
+        subject.clearShareTokensForRetro(retroId);
+        verify(mockShareTokenRepository).deleteAllByRetroId(retroId);
+    }
 }

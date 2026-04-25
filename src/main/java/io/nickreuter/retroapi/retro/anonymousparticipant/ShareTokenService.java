@@ -41,4 +41,8 @@ public class ShareTokenService {
         secureRandom.nextBytes(randomBytes);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
     }
+
+    public void clearShareTokensForRetro(UUID retroId) {
+        shareTokenRepository.deleteAllByRetroId(retroId);
+    }
 }

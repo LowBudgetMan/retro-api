@@ -48,7 +48,6 @@ public class RetroService {
     }
 
     public void setFinished(UUID retroId, boolean finished) throws RetroNotFoundException {
-        // TODO: Figure out how publishing events in spring works so the completed action items can be archived and the share links purged
         var retro = retroRepository.findById(retroId).orElseThrow(RetroNotFoundException::new);
         retro.setFinished(finished);
         retroRepository.save(retro);
