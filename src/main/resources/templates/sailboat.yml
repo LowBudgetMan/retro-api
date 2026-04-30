@@ -3,25 +3,25 @@ description: Useful on a more infrequent basis, and is meant to get participants
 categories:
   - name: "Wind in our sails"
     position: 1
-    lightBackgroundColor: "#2ecc71"
+    lightBackgroundColor: "#F4D797"
     lightTextColor: "#ffffff"
-    darkBackgroundColor: "#27ae60"
+    darkBackgroundColor: "#FFCE61"
     darkTextColor: "#ffffff"
   - name: "Anchor dragging us down"
     position: 2
-    lightBackgroundColor: "#3498db"
+    lightBackgroundColor: "#B5728E"
     lightTextColor: "#ffffff"
-    darkBackgroundColor: "#2980b9"
+    darkBackgroundColor: "#50366F"
     darkTextColor: "#ffffff"
   - name: "Hazards ahead"
     position: 3
-    lightBackgroundColor: "#3498db"
+    lightBackgroundColor: "#DA7F7D"
     lightTextColor: "#ffffff"
-    darkBackgroundColor: "#2980b9"
+    darkBackgroundColor: "#BF3475"
     darkTextColor: "#ffffff"
   - name: "What we are moving towards"
     position: 4
-    lightBackgroundColor: "#3498db"
+    lightBackgroundColor: "#EBB58A"
     lightTextColor: "#ffffff"
-    darkBackgroundColor: "#2980b9"
+    darkBackgroundColor: "#EE6C45"
     darkTextColor: "#ffffff"
