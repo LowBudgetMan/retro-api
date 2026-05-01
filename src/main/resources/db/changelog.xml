@@ -173,4 +173,39 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet id="add-api-token-table" author="lowbudgetman">
+        <preConditions>
+            <not>
+                <tableExists tableName="api_token"/>
+            </not>
+        </preConditions>
+        <createTable tableName="api_token">
+            <column name="id" type="uuid" autoIncrement="1">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="team_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="FK_API_TOKEN_TEAM" references="team(id)"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="token_hash" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="token_prefix" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="scopes" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by_user_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expires_at" type="datetime"/>
+            <column name="last_used_at" type="datetime"/>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>
