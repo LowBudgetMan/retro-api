@@ -20,12 +20,13 @@ public class ApiTokenService {
     public static final Set<String> VALID_SCOPES = Set.of("read", "write");
     private static final int TOKEN_BYTES = 32;
     private static final int PREFIX_DISPLAY_LENGTH = 14;
-    private static final SecureRandom RANDOM = new SecureRandom();
 
     private final ApiTokenRepository repository;
+    private final SecureRandom random;
 
-    public ApiTokenService(ApiTokenRepository repository) {
+    public ApiTokenService(ApiTokenRepository repository, SecureRandom random) {
         this.repository = repository;
+        this.random = random;
     }
 
     public record CreatedToken(ApiTokenEntity entity, String token) {}
@@ -62,9 +63,9 @@ public class ApiTokenService {
         repository.deleteById(tokenId);
     }
 
-    private static String generateToken() {
+    private String generateToken() {
         var bytes = new byte[TOKEN_BYTES];
-        RANDOM.nextBytes(bytes);
+        random.nextBytes(bytes);
         return TOKEN_PREFIX + Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
     }
 

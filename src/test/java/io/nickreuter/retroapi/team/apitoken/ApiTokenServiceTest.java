@@ -3,6 +3,7 @@ package io.nickreuter.retroapi.team.apitoken;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -16,7 +17,8 @@ import static org.mockito.Mockito.*;
 
 class ApiTokenServiceTest {
     private final ApiTokenRepository repository = mock(ApiTokenRepository.class);
-    private final ApiTokenService subject = new ApiTokenService(repository);
+    private final SecureRandom random = new SecureRandom();
+    private final ApiTokenService subject = new ApiTokenService(repository, random);
 
     @Test
     void createToken_GeneratesTokenWithExpectedPrefix() {
