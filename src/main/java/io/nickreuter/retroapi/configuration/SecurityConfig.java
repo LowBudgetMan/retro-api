@@ -5,6 +5,9 @@ import io.nickreuter.retroapi.configuration.jwt.AllTypeJwtDecoderFactory;
 import io.nickreuter.retroapi.configuration.jwt.UniversalJwtDecoder;
 import io.nickreuter.retroapi.retro.anonymousparticipant.ShareTokenService;
 import io.nickreuter.retroapi.share.authentication.ShareTokenAuthenticationFilter;
+import io.nickreuter.retroapi.team.apitoken.ApiTokenService;
+import io.nickreuter.retroapi.team.apitoken.authentication.ApiTokenAuthenticationFilter;
+import io.nickreuter.retroapi.team.apitoken.authentication.PrefixSkippingBearerTokenResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -29,11 +32,14 @@ public class SecurityConfig {
     private final CorsConfig corsConfig;
     private final AllTypeJwtDecoderFactory decoderFactory;
     private final ShareTokenService shareTokenService;
+    private final ApiTokenService apiTokenService;
 
-    public SecurityConfig(CorsConfig corsConfig, AllTypeJwtDecoderFactory decoderFactory, ShareTokenService shareTokenService) {
+    public SecurityConfig(CorsConfig corsConfig, AllTypeJwtDecoderFactory decoderFactory,
+                          ShareTokenService shareTokenService, ApiTokenService apiTokenService) {
         this.corsConfig = corsConfig;
         this.decoderFactory = decoderFactory;
         this.shareTokenService = shareTokenService;
+        this.apiTokenService = apiTokenService;
     }
 
     @Bean
@@ -54,10 +60,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         ShareTokenAuthenticationFilter shareTokenFilter = new ShareTokenAuthenticationFilter(shareTokenService);
+        ApiTokenAuthenticationFilter apiTokenFilter = new ApiTokenAuthenticationFilter(apiTokenService);
 
         http
                 .csrf(csrf -> csrf
                         .ignoringRequestMatchers(request -> request.getHeader("X-Share-Token") != null)
+                        .ignoringRequestMatchers(request -> {
+                            var auth = request.getHeader("Authorization");
+                            return auth != null && auth.startsWith("Bearer " + ApiTokenService.TOKEN_PREFIX);
+                        })
                 )
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(authorize -> {
@@ -68,9 +79,10 @@ public class SecurityConfig {
                     authorize.requestMatchers("/api/share/**").permitAll();
                     authorize.anyRequest().authenticated();
                 })
-                .oauth2ResourceServer((oauth2) -> oauth2.jwt(jwt -> {
-                    jwt.jwtAuthenticationConverter(jwtAuthenticationConverter());
-                }))
+                .oauth2ResourceServer((oauth2) -> oauth2
+                        .bearerTokenResolver(new PrefixSkippingBearerTokenResolver())
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))
+                .addFilterBefore(apiTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(shareTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
