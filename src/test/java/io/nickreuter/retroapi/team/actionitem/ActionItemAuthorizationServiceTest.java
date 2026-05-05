@@ -1,11 +1,13 @@
 package io.nickreuter.retroapi.team.actionitem;
 
+import io.nickreuter.retroapi.team.apitoken.authentication.ApiTokenAuthentication;
 import io.nickreuter.retroapi.team.usermapping.UserMappingAuthorizationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.Authentication;
 
 import java.time.Instant;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,5 +50,38 @@ class ActionItemAuthorizationServiceTest {
         when(userMappingAuthorizationService.isUserMemberOfTeam(authentication, teamId)).thenReturn(true);
 
         assertThat(subject.canUserModifyActionItem(authentication, actionItemId)).isTrue();
+    }
+
+    @Test
+    void canUserModifyActionItem_WhenApiTokenForRightTeamWithWriteScope_ReturnsTrue() {
+        var actionItemId = UUID.randomUUID();
+        var teamId = UUID.randomUUID();
+        var actionItem = new ActionItemEntity(actionItemId, "action", false, false, teamId, "assignee", Instant.now());
+        var auth = new ApiTokenAuthentication(UUID.randomUUID(), teamId, Set.of("write"));
+        when(actionItemService.getActionItem(actionItemId)).thenReturn(Optional.of(actionItem));
+
+        assertThat(subject.canUserModifyActionItem(auth, actionItemId)).isTrue();
+    }
+
+    @Test
+    void canUserModifyActionItem_WhenApiTokenForWrongTeam_ReturnsFalse() {
+        var actionItemId = UUID.randomUUID();
+        var teamId = UUID.randomUUID();
+        var actionItem = new ActionItemEntity(actionItemId, "action", false, false, teamId, "assignee", Instant.now());
+        var auth = new ApiTokenAuthentication(UUID.randomUUID(), UUID.randomUUID(), Set.of("write"));
+        when(actionItemService.getActionItem(actionItemId)).thenReturn(Optional.of(actionItem));
+
+        assertThat(subject.canUserModifyActionItem(auth, actionItemId)).isFalse();
+    }
+
+    @Test
+    void canUserModifyActionItem_WhenApiTokenForRightTeamButNoWriteScope_ReturnsFalse() {
+        var actionItemId = UUID.randomUUID();
+        var teamId = UUID.randomUUID();
+        var actionItem = new ActionItemEntity(actionItemId, "action", false, false, teamId, "assignee", Instant.now());
+        var auth = new ApiTokenAuthentication(UUID.randomUUID(), teamId, Set.of("read"));
+        when(actionItemService.getActionItem(actionItemId)).thenReturn(Optional.of(actionItem));
+
+        assertThat(subject.canUserModifyActionItem(auth, actionItemId)).isFalse();
     }
 }

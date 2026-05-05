@@ -1,5 +1,6 @@
 package io.nickreuter.retroapi.team.actionitem;
 
+import io.nickreuter.retroapi.team.apitoken.authentication.ApiTokenAuthentication;
 import io.nickreuter.retroapi.team.usermapping.UserMappingAuthorizationService;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,12 @@ public class ActionItemAuthorizationService {
     }
 
     public boolean canUserModifyActionItem(Authentication authentication, UUID actionItemId) {
-        var actionItem = actionItemService.getActionItem(actionItemId);
-        return actionItem.isPresent() && userMappingAuthorizationService.isUserMemberOfTeam(authentication, actionItem.get().getTeamId());
+        var maybe = actionItemService.getActionItem(actionItemId);
+        if (maybe.isEmpty()) return false;
+        var teamId = maybe.get().getTeamId();
+        if (authentication instanceof ApiTokenAuthentication tokenAuth) {
+            return tokenAuth.getTeamId().equals(teamId) && tokenAuth.getScopes().contains("write");
+        }
+        return userMappingAuthorizationService.isUserMemberOfTeam(authentication, teamId);
     }
 }

@@ -18,13 +18,13 @@ public class ActionItemController {
     }
 
     @GetMapping
-    @PreAuthorize("@userMappingAuthorizationService.isUserMemberOfTeam(authentication, #teamId)")
+    @PreAuthorize("@teamApiAuthorizationService.canRead(authentication, #teamId)")
     public ResponseEntity<List<ActionItemEntity>> getActionItems(@PathVariable("teamId") UUID teamId) {
         return ResponseEntity.ok(actionItemService.getActionItemsForTeam(teamId));
     }
 
     @PostMapping
-    @PreAuthorize("@userMappingAuthorizationService.isUserMemberOfTeam(authentication, #teamId)")
+    @PreAuthorize("@teamApiAuthorizationService.canWrite(authentication, #teamId)")
     public ResponseEntity<Void> createActionItem(@PathVariable("teamId") UUID teamId, @RequestBody CreateActionItemRequest request) {
         var actionItem = actionItemService.createActionItem(request.action(), request.assignee(), teamId);
         return ResponseEntity.created(URI.create("/api/teams/%s/action-items/%s".formatted(teamId, actionItem.getId()))).build();

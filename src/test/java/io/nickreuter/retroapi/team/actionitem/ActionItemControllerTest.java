@@ -1,6 +1,7 @@
 package io.nickreuter.retroapi.team.actionitem;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.nickreuter.retroapi.team.apitoken.TeamApiAuthorizationService;
 import io.nickreuter.retroapi.team.usermapping.UserMappingAuthorizationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,8 @@ class ActionItemControllerTest {
     @MockitoBean
     private UserMappingAuthorizationService userMappingAuthorizationService;
     @MockitoBean
+    private TeamApiAuthorizationService teamApiAuthorizationService;
+    @MockitoBean
     private ActionItemService actionItemService;
     @MockitoBean
     private ActionItemAuthorizationService actionItemAuthorizationService;
@@ -45,7 +48,7 @@ class ActionItemControllerTest {
     void getActionItems_ReturnsListOfActionItems() throws Exception {
         var teamId = UUID.randomUUID();
         var expectedActionItems = List.of(new ActionItemEntity(UUID.randomUUID(), "action", false, false, teamId, "assignee", Instant.now()));
-        when(userMappingAuthorizationService.isUserMemberOfTeam(createAuthentication(), teamId)).thenReturn(true);
+        when(teamApiAuthorizationService.canRead(createAuthentication(), teamId)).thenReturn(true);
         when(actionItemService.getActionItemsForTeam(teamId)).thenReturn(expectedActionItems);
 
         mockMvc.perform(get("/api/teams/%s/action-items".formatted(teamId))
@@ -73,7 +76,7 @@ class ActionItemControllerTest {
     @Test
     void getActionItems_WhenUserNotMemberOfTeam_Returns403() throws Exception {
         var teamId = UUID.randomUUID();
-        when(userMappingAuthorizationService.isUserMemberOfTeam(createAuthentication(), teamId)).thenReturn(false);
+        when(teamApiAuthorizationService.canRead(createAuthentication(), teamId)).thenReturn(false);
 
         mockMvc.perform(get("/api/teams/%s/action-items".formatted(teamId))
                         .with(jwt())
@@ -85,7 +88,7 @@ class ActionItemControllerTest {
     void createActionItem_Returns201() throws Exception {
         var teamId = UUID.randomUUID();
         var actionItemId = UUID.randomUUID();
-        when(userMappingAuthorizationService.isUserMemberOfTeam(createAuthentication(), teamId)).thenReturn(true);
+        when(teamApiAuthorizationService.canWrite(createAuthentication(), teamId)).thenReturn(true);
         when(actionItemService.createActionItem("action", "assignee", teamId)).thenReturn(new ActionItemEntity(actionItemId, "action", false, false, teamId, "assignee", Instant.now()));
         mockMvc.perform(post("/api/teams/%s/action-items".formatted(teamId))
                         .with(jwt())
@@ -110,7 +113,7 @@ class ActionItemControllerTest {
     @Test
     void createActionItem_WhenUserNotMemberOfTeam_Throws403() throws Exception {
         var teamId = UUID.randomUUID();
-        when(userMappingAuthorizationService.isUserMemberOfTeam(createAuthentication(), teamId)).thenReturn(false);
+        when(teamApiAuthorizationService.canWrite(createAuthentication(), teamId)).thenReturn(false);
         mockMvc.perform(post("/api/teams/%s/action-items".formatted(teamId))
                         .with(jwt())
                         .with(csrf())
