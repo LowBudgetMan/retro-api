@@ -26,7 +26,7 @@ public class RetroController {
     }
 
     @GetMapping
-    @PreAuthorize("@userMappingAuthorizationService.isUserMemberOfTeam(authentication, #teamId)")
+    @PreAuthorize("@teamApiAuthorizationService.canRead(authentication, #teamId)")
     public List<RetroListItem> getRetros(@PathVariable UUID teamId) {
         return retroService.getRetros(teamId)
                 .stream()

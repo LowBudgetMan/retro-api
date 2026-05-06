@@ -3,6 +3,7 @@ package io.nickreuter.retroapi.retro;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.nickreuter.retroapi.retro.template.Template;
 import io.nickreuter.retroapi.retro.thought.ThoughtEntity;
+import io.nickreuter.retroapi.team.apitoken.TeamApiAuthorizationService;
 import io.nickreuter.retroapi.team.usermapping.UserMappingAuthorizationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,8 @@ class RetroControllerTest {
     private RetroService retroService;
     @MockitoBean
     private UserMappingAuthorizationService userMappingAuthorizationService;
+    @MockitoBean
+    private TeamApiAuthorizationService teamApiAuthorizationService;
     @MockitoBean
     private RetroAuthorizationService retroAuthorizationService;
 
@@ -99,7 +102,7 @@ class RetroControllerTest {
         var teamId = UUID.randomUUID();
         var retro1 = new RetroEntity(UUID.randomUUID(), teamId, false, "template-id", Set.of(), Instant.now());
         var retro2 = new RetroEntity(UUID.randomUUID(), teamId, false, "template-id", Set.of(), Instant.now());
-        when(userMappingAuthorizationService.isUserMemberOfTeam(createAuthentication(), teamId)).thenReturn(true);
+        when(teamApiAuthorizationService.canRead(createAuthentication(), teamId)).thenReturn(true);
         when(retroService.getRetros(teamId)).thenReturn(List.of(retro1, retro2));
         mockMvc.perform(get("/api/teams/%s/retros".formatted(teamId))
                     .with(jwt())
@@ -128,7 +131,7 @@ class RetroControllerTest {
     @Test
     void getRetros_WhenUserNotOnTeam_Throws403() throws Exception {
         var teamId = UUID.randomUUID();
-        when(userMappingAuthorizationService.isUserMemberOfTeam(createAuthentication(), teamId)).thenReturn(false);
+        when(teamApiAuthorizationService.canRead(createAuthentication(), teamId)).thenReturn(false);
         mockMvc.perform(get("/api/teams/%s/retros".formatted(teamId))
                         .with(jwt())
                         .with(csrf()))

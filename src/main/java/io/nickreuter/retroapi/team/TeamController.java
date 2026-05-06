@@ -35,7 +35,7 @@ public class TeamController {
     }
 
     @GetMapping("/{teamId}")
-    @PreAuthorize("@userMappingAuthorizationService.isUserMemberOfTeam(authentication, #teamId)")
+    @PreAuthorize("@teamApiAuthorizationService.canRead(authentication, #teamId)")
     public TeamEntity getTeam(@PathVariable UUID teamId) throws TeamNotFoundException {
         return teamService.getTeam(teamId).orElseThrow(TeamNotFoundException::new);
     }

@@ -2,6 +2,7 @@ package io.nickreuter.retroapi.retro;
 
 import io.nickreuter.retroapi.retro.anonymousparticipant.ShareToken;
 import io.nickreuter.retroapi.retro.anonymousparticipant.ShareTokenService;
+import io.nickreuter.retroapi.team.apitoken.authentication.ApiTokenAuthentication;
 import io.nickreuter.retroapi.team.usermapping.UserMappingAuthorizationService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
@@ -88,5 +89,35 @@ class RetroAuthorizationServiceTest {
         when(httpServletRequest.getHeader("X-Share-Token")).thenReturn(null);
 
         assertThat(retroAuthorizationService.isUserAllowedInRetro(authentication, retroId)).isFalse();
+    }
+
+    @Test
+    void isUserAllowedInRetro_WhenApiTokenForRetrosTeamWithReadScope_ReturnsTrue() {
+        var teamId = UUID.randomUUID();
+        var retroId = UUID.randomUUID();
+        when(retroService.getRetro(retroId)).thenReturn(Optional.of(new Retro(retroId, teamId, false, null, Set.of(), Instant.now())));
+        var auth = new ApiTokenAuthentication(UUID.randomUUID(), teamId, Set.of("read"));
+
+        assertThat(retroAuthorizationService.isUserAllowedInRetro(auth, retroId)).isTrue();
+    }
+
+    @Test
+    void isUserAllowedInRetro_WhenApiTokenForWrongTeam_ReturnsFalse() {
+        var teamId = UUID.randomUUID();
+        var retroId = UUID.randomUUID();
+        when(retroService.getRetro(retroId)).thenReturn(Optional.of(new Retro(retroId, teamId, false, null, Set.of(), Instant.now())));
+        var auth = new ApiTokenAuthentication(UUID.randomUUID(), UUID.randomUUID(), Set.of("read"));
+
+        assertThat(retroAuthorizationService.isUserAllowedInRetro(auth, retroId)).isFalse();
+    }
+
+    @Test
+    void isUserAllowedInRetro_WhenApiTokenWithoutReadScope_ReturnsFalse() {
+        var teamId = UUID.randomUUID();
+        var retroId = UUID.randomUUID();
+        when(retroService.getRetro(retroId)).thenReturn(Optional.of(new Retro(retroId, teamId, false, null, Set.of(), Instant.now())));
+        var auth = new ApiTokenAuthentication(UUID.randomUUID(), teamId, Set.of("write"));
+
+        assertThat(retroAuthorizationService.isUserAllowedInRetro(auth, retroId)).isFalse();
     }
 }

@@ -1,6 +1,7 @@
 package io.nickreuter.retroapi.team;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.nickreuter.retroapi.team.apitoken.TeamApiAuthorizationService;
 import io.nickreuter.retroapi.team.exception.BadInviteException;
 import io.nickreuter.retroapi.team.usermapping.UserMappingAuthorizationService;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,8 @@ class TeamControllerTest {
     private TeamService service;
     @MockitoBean
     private UserMappingAuthorizationService userMappingAuthorizationService;
+    @MockitoBean
+    private TeamApiAuthorizationService teamApiAuthorizationService;
 
     @Autowired
     private MockMvc mockMvc;
@@ -112,7 +115,7 @@ class TeamControllerTest {
     void getTeam_WhenTeamExists_ReturnsTeam() throws Exception {
         var teamId = UUID.randomUUID();
         var authentication = createAuthentication();
-        when(userMappingAuthorizationService.isUserMemberOfTeam(authentication, teamId)).thenReturn(true);
+        when(teamApiAuthorizationService.canRead(authentication, teamId)).thenReturn(true);
         when(service.getTeam(teamId)).thenReturn(Optional.of(new TeamEntity(teamId, "Team 1", Instant.ofEpochMilli(20000000))));
         mockMvc.perform(get("/api/teams/%s".formatted(teamId))
                 .with(jwt())
@@ -127,7 +130,7 @@ class TeamControllerTest {
     void getTeam_WhenUserNotOnTeam_Returns403() throws Exception {
         var teamId = UUID.randomUUID();
         var authentication = createAuthentication();
-        when(userMappingAuthorizationService.isUserMemberOfTeam(authentication, teamId)).thenReturn(false);
+        when(teamApiAuthorizationService.canRead(authentication, teamId)).thenReturn(false);
         mockMvc.perform(get("/api/teams/%s".formatted(teamId))
                         .with(jwt()))
                 .andExpect(status().isForbidden());
@@ -146,7 +149,7 @@ class TeamControllerTest {
     void getTeam_WhenTeamDoesNotExist_Returns404() throws Exception {
         var teamId = UUID.randomUUID();
         var authentication = createAuthentication();
-        when(userMappingAuthorizationService.isUserMemberOfTeam(authentication, teamId)).thenReturn(true);
+        when(teamApiAuthorizationService.canRead(authentication, teamId)).thenReturn(true);
         when(service.getTeam(teamId)).thenReturn(Optional.empty());
         mockMvc.perform(get("/api/teams/%s".formatted(teamId))
                         .with(jwt())

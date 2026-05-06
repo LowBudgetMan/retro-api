@@ -2,6 +2,7 @@ package io.nickreuter.retroapi.retro;
 
 import io.nickreuter.retroapi.retro.anonymousparticipant.ShareTokenService;
 import io.nickreuter.retroapi.share.authentication.ShareTokenAuthentication;
+import io.nickreuter.retroapi.team.apitoken.authentication.ApiTokenAuthentication;
 import io.nickreuter.retroapi.team.usermapping.UserMappingAuthorizationService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.core.Authentication;
@@ -28,6 +29,11 @@ public class RetroAuthorizationService {
         var retro = retroService.getRetro(retroId);
         if (retro.isEmpty()) {
             return false;
+        }
+
+        // Handle API token authentication (external integrations)
+        if (authentication instanceof ApiTokenAuthentication tokenAuth) {
+            return tokenAuth.getTeamId().equals(retro.get().teamId()) && tokenAuth.getScopes().contains("read");
         }
 
         // Handle share token authentication (anonymous users)
