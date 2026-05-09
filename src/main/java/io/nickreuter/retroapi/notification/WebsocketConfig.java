@@ -189,7 +189,12 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
         if (!ids.find()) {
             return new AuthorizationDecision(false);
         }
-        var retroId = UUID.fromString(ids.group("retroId"));
+        UUID retroId;
+        try {
+            retroId = UUID.fromString(ids.group("retroId"));
+        } catch (IllegalArgumentException e) {
+            return new AuthorizationDecision(false);
+        }
         // Check share token from session attributes first (avoids HttpServletRequest access in WebSocket context)
         var accessor = StompHeaderAccessor.wrap(object.getMessage());
         var sessionAttributes = accessor.getSessionAttributes();
@@ -209,11 +214,20 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private AuthorizationDecision isAuthorizedTeamSubscription(Supplier<Authentication> authentication, MessageAuthorizationContext<?> object) {
         var ids = getIdFromTopic(object, "^/topic/teams\\.(?<teamId>[^.]+)\\..*$");
-        AuthorizationDecision isAuthorized = ids.find()
-                // TODO: Add error handling for when this fails because the UUID is too big
-                ? new AuthorizationDecision(userMappingAuthorizationService.isUserMemberOfTeam(authentication.get(), UUID.fromString(ids.group("teamId"))))
-                : new AuthorizationDecision(false);
-        return isAuthorized;
+        if (!ids.find()) {
+            return new AuthorizationDecision(false);
+        }
+        UUID teamId;
+        try {
+            teamId = UUID.fromString(ids.group("teamId"));
+        } catch (IllegalArgumentException e) {
+            return new AuthorizationDecision(false);
+        }
+        var auth = authentication.get();
+        if (auth instanceof ApiTokenAuthentication tokenAuth) {
+            return new AuthorizationDecision(tokenAuth.getTeamId().equals(teamId) && tokenAuth.getScopes().contains("read"));
+        }
+        return new AuthorizationDecision(userMappingAuthorizationService.isUserMemberOfTeam(auth, teamId));
     }
 
     private Matcher getIdFromTopic(MessageAuthorizationContext<?> object, String regex) {
