@@ -1,5 +1,7 @@
 package io.nickreuter.retroapi.retro.thought;
 
+import io.nickreuter.retroapi.retro.RetroNotActiveException;
+import io.nickreuter.retroapi.retro.RetroNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -63,5 +65,15 @@ public class ThoughtController {
     public ResponseEntity<Void> deleteThought(@PathVariable UUID teamId, @PathVariable UUID retroId, @PathVariable UUID thoughtId) {
         thoughtService.deleteThought(thoughtId);
         return ResponseEntity.noContent().build();
+    }
+
+    @ExceptionHandler({RetroNotActiveException.class})
+    public ResponseEntity<Void> handleRetroNotActive() {
+        return ResponseEntity.badRequest().build();
+    }
+
+    @ExceptionHandler({RetroNotFoundException.class})
+    public ResponseEntity<Void> handleRetroNotFound() {
+        return ResponseEntity.notFound().build();
     }
 }
