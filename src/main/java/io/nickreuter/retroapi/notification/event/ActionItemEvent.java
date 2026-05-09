@@ -18,4 +18,9 @@ public class ActionItemEvent extends BaseEvent{
     public String getRoute() {
         return String.format(ROUTE_STRING, teamId);
     }
+
+    @Override
+    public UUID getTeamId() {
+        return teamId;
+    }
 }

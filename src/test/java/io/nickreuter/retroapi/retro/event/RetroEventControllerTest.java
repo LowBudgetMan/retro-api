@@ -51,7 +51,7 @@ class RetroEventControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new TimerStartRequest(300))))
                 .andExpect(status().isOk());
-        verify(retroEventService).publishTimerStart(retroId, 300);
+        verify(retroEventService).publishTimerStart(retroId, 300, teamId);
     }
 
     @Test
@@ -86,7 +86,7 @@ class RetroEventControllerTest {
                         .with(jwt())
                         .with(csrf()))
                 .andExpect(status().isOk());
-        verify(retroEventService).publishTimerStop(retroId);
+        verify(retroEventService).publishTimerStop(retroId, teamId);
     }
 
     @Test
@@ -120,7 +120,7 @@ class RetroEventControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new FocusRequest(thoughtId))))
                 .andExpect(status().isOk());
-        verify(retroEventService).publishFocus(retroId, thoughtId);
+        verify(retroEventService).publishFocus(retroId, thoughtId, teamId);
     }
 
     @Test
@@ -156,7 +156,7 @@ class RetroEventControllerTest {
                         .with(jwt())
                         .with(csrf()))
                 .andExpect(status().isOk());
-        verify(retroEventService).publishFocusClear(retroId);
+        verify(retroEventService).publishFocusClear(retroId, teamId);
     }
 
     @Test
@@ -190,7 +190,7 @@ class RetroEventControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new SortRequest("votes", "desc"))))
                 .andExpect(status().isOk());
-        verify(retroEventService).publishSort(retroId, "votes", "desc");
+        verify(retroEventService).publishSort(retroId, "votes", "desc", teamId);
     }
 
     @Test
@@ -227,7 +227,7 @@ class RetroEventControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new PhaseRequest("voting"))))
                 .andExpect(status().isOk());
-        verify(retroEventService).publishPhase(retroId, "voting");
+        verify(retroEventService).publishPhase(retroId, "voting", teamId);
     }
 
     @Test

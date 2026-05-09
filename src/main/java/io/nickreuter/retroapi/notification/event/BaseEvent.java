@@ -4,6 +4,8 @@ import io.nickreuter.retroapi.notification.EventType;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 
+import java.util.UUID;
+
 @Getter
 public abstract class BaseEvent extends ApplicationEvent {
     private final EventType eventType;
@@ -16,4 +18,5 @@ public abstract class BaseEvent extends ApplicationEvent {
     }
 
     public abstract String getRoute();
+    public abstract UUID getTeamId();
 }

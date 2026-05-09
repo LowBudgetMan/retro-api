@@ -2,14 +2,18 @@ package io.nickreuter.retroapi.retro.thought;
 
 import io.nickreuter.retroapi.notification.EventType;
 import io.nickreuter.retroapi.notification.event.ThoughtEvent;
+import io.nickreuter.retroapi.retro.RetroEntity;
+import io.nickreuter.retroapi.retro.RetroRepository;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.springframework.context.ApplicationEventPublisher;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -17,8 +21,9 @@ import static org.mockito.Mockito.*;
 
 class ThoughtServiceTest {
     private final ThoughtRepository thoughtRepository = mock(ThoughtRepository.class);
+    private final RetroRepository retroRepository = mock(RetroRepository.class);
     private final ApplicationEventPublisher applicationEventPublisher = mock(ApplicationEventPublisher.class);
-    private final ThoughtService subject = new ThoughtService(thoughtRepository, applicationEventPublisher);
+    private final ThoughtService subject = new ThoughtService(thoughtRepository, retroRepository, applicationEventPublisher);
 
     @Test
     void createThought_SavesThoughtInRepository() {
@@ -35,6 +40,7 @@ class ThoughtServiceTest {
                 entity.getRetroId() == retroId &&
                 entity.getCreatedAt() == null))
         ).thenReturn(expected);
+        when(retroRepository.findById(retroId)).thenReturn(Optional.of(new RetroEntity(UUID.randomUUID(), UUID.randomUUID(), false, "template", Set.of(), Instant.now())));
 
         var actual = subject.createThought(retroId, message, category);
 
@@ -56,6 +62,7 @@ class ThoughtServiceTest {
                         entity.getRetroId() == retroId &&
                         entity.getCreatedAt() == null))
         ).thenReturn(expected);
+        when(retroRepository.findById(retroId)).thenReturn(Optional.of(new RetroEntity(UUID.randomUUID(), UUID.randomUUID(), false, "template", Set.of(), Instant.now())));
 
         subject.createThought(retroId, message, category);
 
@@ -89,7 +96,9 @@ class ThoughtServiceTest {
     @Test
     void addVote_UpdatesVoteCount() {
         var thoughtId = UUID.randomUUID();
-        when(thoughtRepository.findById(thoughtId)).thenReturn(Optional.of(new ThoughtEntity(thoughtId, null, 2, false, "category", null, null)));
+        var retroId = UUID.randomUUID();
+        when(thoughtRepository.findById(thoughtId)).thenReturn(Optional.of(new ThoughtEntity(thoughtId, null, 2, false, "category", retroId, null)));
+        when(retroRepository.findById(retroId)).thenReturn(Optional.of(new RetroEntity(UUID.randomUUID(), UUID.randomUUID(), false, "template", Set.of(), Instant.now())));
         subject.addVote(thoughtId);
         verify(thoughtRepository).incrementVotes(thoughtId);
     }
@@ -97,8 +106,10 @@ class ThoughtServiceTest {
     @Test
     void addVote_WhenCountUpdated_PublishesEvent() {
         var thoughtId = UUID.randomUUID();
-        var expected = new ThoughtEntity(thoughtId, null, 2, false, "category", UUID.randomUUID(), null);
+        var retroId = UUID.randomUUID();
+        var expected = new ThoughtEntity(thoughtId, null, 2, false, "category", retroId, null);
         when(thoughtRepository.findById(thoughtId)).thenReturn(Optional.of(expected));
+        when(retroRepository.findById(retroId)).thenReturn(Optional.of(new RetroEntity(UUID.randomUUID(), UUID.randomUUID(), false, "template", Set.of(), Instant.now())));
 
         subject.addVote(thoughtId);
 
@@ -112,9 +123,11 @@ class ThoughtServiceTest {
     @Test
     void setCompleted_SavedTheUpdatedCompleted() {
         var thoughtId = UUID.randomUUID();
-        var savedThought = new ThoughtEntity(thoughtId, null, 2, false, "category", UUID.randomUUID(), null);
+        var retroId = UUID.randomUUID();
+        var savedThought = new ThoughtEntity(thoughtId, null, 2, false, "category", retroId, null);
         when(thoughtRepository.findById(thoughtId)).thenReturn(Optional.of(savedThought));
         when(thoughtRepository.save(any())).thenReturn(savedThought);
+        when(retroRepository.findById(retroId)).thenReturn(Optional.of(new RetroEntity(UUID.randomUUID(), UUID.randomUUID(), false, "template", Set.of(), Instant.now())));
 
         subject.setCompleted(thoughtId, true);
 
@@ -126,10 +139,12 @@ class ThoughtServiceTest {
     @Test
     void setCompleted_PublishesEvent() {
         var thoughtId = UUID.randomUUID();
-        var savedThought = new ThoughtEntity(thoughtId, null, 2, false, "category", UUID.randomUUID(), null);
-        var expected = new ThoughtEntity(thoughtId, null, 2, true, "category", UUID.randomUUID(), null);
+        var retroId = UUID.randomUUID();
+        var savedThought = new ThoughtEntity(thoughtId, null, 2, false, "category", retroId, null);
+        var expected = new ThoughtEntity(thoughtId, null, 2, true, "category", retroId, null);
         when(thoughtRepository.findById(thoughtId)).thenReturn(Optional.of(savedThought));
         when(thoughtRepository.save(any())).thenReturn(expected);
+        when(retroRepository.findById(retroId)).thenReturn(Optional.of(new RetroEntity(UUID.randomUUID(), UUID.randomUUID(), false, "template", Set.of(), Instant.now())));
 
         subject.setCompleted(thoughtId, true);
 
@@ -143,10 +158,12 @@ class ThoughtServiceTest {
     @Test
     void setCategory_SavesUpdatedCategoryToDatabase() {
         var thoughtId = UUID.randomUUID();
-        var savedThought = new ThoughtEntity(thoughtId, null, 2, false, "category", UUID.randomUUID(), null);
-        var expected = new ThoughtEntity(thoughtId, null, 2, true, "category2", UUID.randomUUID(), null);
+        var retroId = UUID.randomUUID();
+        var savedThought = new ThoughtEntity(thoughtId, null, 2, false, "category", retroId, null);
+        var expected = new ThoughtEntity(thoughtId, null, 2, true, "category2", retroId, null);
         when(thoughtRepository.findById(thoughtId)).thenReturn(Optional.of(savedThought));
         when(thoughtRepository.save(any())).thenReturn(expected);
+        when(retroRepository.findById(retroId)).thenReturn(Optional.of(new RetroEntity(UUID.randomUUID(), UUID.randomUUID(), false, "template", Set.of(), Instant.now())));
 
         subject.setCategory(thoughtId, "category2");
 
@@ -158,10 +175,12 @@ class ThoughtServiceTest {
     @Test
     void setCategory_PublishesEvent() {
         var thoughtId = UUID.randomUUID();
-        var savedThought = new ThoughtEntity(thoughtId, null, 2, false, "category", UUID.randomUUID(), null);
-        var expected = new ThoughtEntity(thoughtId, null, 2, false, "category2", UUID.randomUUID(), null);
+        var retroId = UUID.randomUUID();
+        var savedThought = new ThoughtEntity(thoughtId, null, 2, false, "category", retroId, null);
+        var expected = new ThoughtEntity(thoughtId, null, 2, false, "category2", retroId, null);
         when(thoughtRepository.findById(thoughtId)).thenReturn(Optional.of(savedThought));
         when(thoughtRepository.save(any())).thenReturn(expected);
+        when(retroRepository.findById(retroId)).thenReturn(Optional.of(new RetroEntity(UUID.randomUUID(), UUID.randomUUID(), false, "template", Set.of(), Instant.now())));
 
         subject.setCategory(thoughtId, "category2");
 
@@ -175,10 +194,12 @@ class ThoughtServiceTest {
     @Test
     void setMessage_SavesUpdatedMessageToDatabase() {
         var thoughtId = UUID.randomUUID();
-        var savedThought = new ThoughtEntity(thoughtId, "message", 2, false, "category", UUID.randomUUID(), null);
-        var expected = new ThoughtEntity(thoughtId, "message 2", 2, false, "category", UUID.randomUUID(), null);
+        var retroId = UUID.randomUUID();
+        var savedThought = new ThoughtEntity(thoughtId, "message", 2, false, "category", retroId, null);
+        var expected = new ThoughtEntity(thoughtId, "message 2", 2, false, "category", retroId, null);
         when(thoughtRepository.findById(thoughtId)).thenReturn(Optional.of(savedThought));
         when(thoughtRepository.save(any())).thenReturn(expected);
+        when(retroRepository.findById(retroId)).thenReturn(Optional.of(new RetroEntity(UUID.randomUUID(), UUID.randomUUID(), false, "template", Set.of(), Instant.now())));
 
         subject.setMessage(thoughtId, "message 2");
 
@@ -190,10 +211,12 @@ class ThoughtServiceTest {
     @Test
     void setMessage_PublishesEvent() {
         var thoughtId = UUID.randomUUID();
-        var savedThought = new ThoughtEntity(thoughtId, "message", 2, false, "category", UUID.randomUUID(), null);
-        var expected = new ThoughtEntity(thoughtId, "message 2", 2, false, "category", UUID.randomUUID(), null);
+        var retroId = UUID.randomUUID();
+        var savedThought = new ThoughtEntity(thoughtId, "message", 2, false, "category", retroId, null);
+        var expected = new ThoughtEntity(thoughtId, "message 2", 2, false, "category", retroId, null);
         when(thoughtRepository.findById(thoughtId)).thenReturn(Optional.of(savedThought));
         when(thoughtRepository.save(any())).thenReturn(expected);
+        when(retroRepository.findById(retroId)).thenReturn(Optional.of(new RetroEntity(UUID.randomUUID(), UUID.randomUUID(), false, "template", Set.of(), Instant.now())));
 
         subject.setMessage(thoughtId, "message 2");
 
@@ -207,8 +230,10 @@ class ThoughtServiceTest {
     @Test
     void deleteThought_RemovesThoughtFromDatabase() {
         var thoughtId = UUID.randomUUID();
-        var savedThought = new ThoughtEntity(thoughtId, "message", 2, false, "category", UUID.randomUUID(), null);
+        var retroId = UUID.randomUUID();
+        var savedThought = new ThoughtEntity(thoughtId, "message", 2, false, "category", retroId, null);
         when(thoughtRepository.findById(thoughtId)).thenReturn(Optional.of(savedThought));
+        when(retroRepository.findById(retroId)).thenReturn(Optional.of(new RetroEntity(UUID.randomUUID(), UUID.randomUUID(), false, "template", Set.of(), Instant.now())));
 
         subject.deleteThought(thoughtId);
 
@@ -218,8 +243,10 @@ class ThoughtServiceTest {
     @Test
     void deleteThought_PublishesEvent() {
         var thoughtId = UUID.randomUUID();
-        var savedThought = new ThoughtEntity(thoughtId, "message", 2, false, "category", UUID.randomUUID(), null);
+        var retroId = UUID.randomUUID();
+        var savedThought = new ThoughtEntity(thoughtId, "message", 2, false, "category", retroId, null);
         when(thoughtRepository.findById(thoughtId)).thenReturn(Optional.of(savedThought));
+        when(retroRepository.findById(retroId)).thenReturn(Optional.of(new RetroEntity(UUID.randomUUID(), UUID.randomUUID(), false, "template", Set.of(), Instant.now())));
 
         subject.deleteThought(thoughtId);
 

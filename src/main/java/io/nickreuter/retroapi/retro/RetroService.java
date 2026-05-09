@@ -51,6 +51,6 @@ public class RetroService {
         var retro = retroRepository.findById(retroId).orElseThrow(RetroNotFoundException::new);
         retro.setFinished(finished);
         retroRepository.save(retro);
-        applicationEventPublisher.publishEvent(new RetroFinishedEvent(this, finished, retroId));
+        applicationEventPublisher.publishEvent(new RetroFinishedEvent(this, finished, retroId, retro.getTeamId()));
     }
 }

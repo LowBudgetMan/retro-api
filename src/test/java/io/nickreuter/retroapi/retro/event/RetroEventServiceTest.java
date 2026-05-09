@@ -23,7 +23,8 @@ class RetroEventServiceTest {
     @Test
     void publishTimerStart_PublishesRetroTimerStartEvent() {
         var retroId = UUID.randomUUID();
-        retroEventService.publishTimerStart(retroId, 300);
+        var teamId = UUID.randomUUID();
+        retroEventService.publishTimerStart(retroId, 300, teamId);
         verify(applicationEventPublisher).publishEvent(argThat(event ->
                 event instanceof RetroTimerStartEvent e &&
                 e.getRoute().equals("/topic/retros.%s.events".formatted(retroId))
@@ -33,7 +34,8 @@ class RetroEventServiceTest {
     @Test
     void publishTimerStop_PublishesRetroTimerStopEvent() {
         var retroId = UUID.randomUUID();
-        retroEventService.publishTimerStop(retroId);
+        var teamId = UUID.randomUUID();
+        retroEventService.publishTimerStop(retroId, teamId);
         verify(applicationEventPublisher).publishEvent(argThat(event ->
                 event instanceof RetroTimerStopEvent e &&
                 e.getRoute().equals("/topic/retros.%s.events".formatted(retroId))
@@ -44,7 +46,8 @@ class RetroEventServiceTest {
     void publishFocus_PublishesRetroFocusEvent() {
         var retroId = UUID.randomUUID();
         var thoughtId = UUID.randomUUID();
-        retroEventService.publishFocus(retroId, thoughtId);
+        var teamId = UUID.randomUUID();
+        retroEventService.publishFocus(retroId, thoughtId, teamId);
         verify(applicationEventPublisher).publishEvent(argThat(event ->
                 event instanceof RetroFocusEvent e &&
                 e.getRoute().equals("/topic/retros.%s.events".formatted(retroId))
@@ -54,7 +57,8 @@ class RetroEventServiceTest {
     @Test
     void publishFocusClear_PublishesRetroFocusClearEvent() {
         var retroId = UUID.randomUUID();
-        retroEventService.publishFocusClear(retroId);
+        var teamId = UUID.randomUUID();
+        retroEventService.publishFocusClear(retroId, teamId);
         verify(applicationEventPublisher).publishEvent(argThat(event ->
                 event instanceof RetroFocusClearEvent e &&
                 e.getRoute().equals("/topic/retros.%s.events".formatted(retroId))
@@ -64,7 +68,8 @@ class RetroEventServiceTest {
     @Test
     void publishSort_PublishesRetroSortEvent() {
         var retroId = UUID.randomUUID();
-        retroEventService.publishSort(retroId, "votes", "desc");
+        var teamId = UUID.randomUUID();
+        retroEventService.publishSort(retroId, "votes", "desc", teamId);
         verify(applicationEventPublisher).publishEvent(argThat(event ->
                 event instanceof RetroSortEvent e &&
                 e.getRoute().equals("/topic/retros.%s.events".formatted(retroId))
@@ -74,7 +79,8 @@ class RetroEventServiceTest {
     @Test
     void publishPhase_PublishesRetroPhaseEvent() {
         var retroId = UUID.randomUUID();
-        retroEventService.publishPhase(retroId, "voting");
+        var teamId = UUID.randomUUID();
+        retroEventService.publishPhase(retroId, "voting", teamId);
         verify(applicationEventPublisher).publishEvent(argThat(event ->
                 event instanceof RetroPhaseEvent e &&
                 e.getRoute().equals("/topic/retros.%s.events".formatted(retroId))

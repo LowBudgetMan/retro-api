@@ -22,7 +22,7 @@ class ActionItemRetroFinishedEventListenerTest {
     @Test
     void onApplicationEvent_ShouldCallClearShareTokensForRetro() {
         var expectedRetro = new Retro(UUID.randomUUID(), UUID.randomUUID(), true, new Template("id", "name", "description", List.of()), new HashSet<>(), Instant.now());
-        var expectedEvent = new RetroFinishedEvent("", true, expectedRetro.id());
+        var expectedEvent = new RetroFinishedEvent("", true, expectedRetro.id(), expectedRetro.teamId());
         when(mockRetroService.getRetro(expectedRetro.id())).thenReturn(Optional.of(expectedRetro));
         subject.onApplicationEvent(expectedEvent);
         verify(mockActionItemService).archiveCompletedActionItems(expectedRetro.teamId());
@@ -31,7 +31,7 @@ class ActionItemRetroFinishedEventListenerTest {
     @Test
     void onApplicationEvent_WhenRetroIsNotFinished_ShouldNotCallClearShareTokensForRetro() {
         var expectedRetro = new Retro(UUID.randomUUID(), UUID.randomUUID(), true, new Template("id", "name", "description", List.of()), new HashSet<>(), Instant.now());
-        var expectedEvent = new RetroFinishedEvent("", false, expectedRetro.id());
+        var expectedEvent = new RetroFinishedEvent("", false, expectedRetro.id(), expectedRetro.teamId());
         when(mockRetroService.getRetro(expectedRetro.id())).thenReturn(Optional.of(expectedRetro));
         subject.onApplicationEvent(expectedEvent);
         verifyNoInteractions(mockActionItemService);

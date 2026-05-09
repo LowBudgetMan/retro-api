@@ -18,42 +18,42 @@ public class RetroEventController {
     @PostMapping("/timer-start")
     @PreAuthorize("@userMappingAuthorizationService.isUserMemberOfTeam(authentication, #teamId)")
     public ResponseEntity<Void> startTimer(@PathVariable UUID teamId, @PathVariable UUID retroId, @RequestBody TimerStartRequest request) {
-        retroEventService.publishTimerStart(retroId, request.durationSeconds());
+        retroEventService.publishTimerStart(retroId, request.durationSeconds(), teamId);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/timer-stop")
     @PreAuthorize("@userMappingAuthorizationService.isUserMemberOfTeam(authentication, #teamId)")
     public ResponseEntity<Void> stopTimer(@PathVariable UUID teamId, @PathVariable UUID retroId) {
-        retroEventService.publishTimerStop(retroId);
+        retroEventService.publishTimerStop(retroId, teamId);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/focus")
     @PreAuthorize("@retroAuthorizationService.isUserAllowedInRetro(authentication, #retroId)")
     public ResponseEntity<Void> focusThought(@PathVariable UUID teamId, @PathVariable UUID retroId, @RequestBody FocusRequest request) {
-        retroEventService.publishFocus(retroId, request.thoughtId());
+        retroEventService.publishFocus(retroId, request.thoughtId(), teamId);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/focus-clear")
     @PreAuthorize("@retroAuthorizationService.isUserAllowedInRetro(authentication, #retroId)")
     public ResponseEntity<Void> clearFocus(@PathVariable UUID teamId, @PathVariable UUID retroId) {
-        retroEventService.publishFocusClear(retroId);
+        retroEventService.publishFocusClear(retroId, teamId);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/sort")
     @PreAuthorize("@userMappingAuthorizationService.isUserMemberOfTeam(authentication, #teamId)")
     public ResponseEntity<Void> sortColumn(@PathVariable UUID teamId, @PathVariable UUID retroId, @RequestBody SortRequest request) {
-        retroEventService.publishSort(retroId, request.column(), request.direction());
+        retroEventService.publishSort(retroId, request.column(), request.direction(), teamId);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/phase")
     @PreAuthorize("@userMappingAuthorizationService.isUserMemberOfTeam(authentication, #teamId)")
     public ResponseEntity<Void> changePhase(@PathVariable UUID teamId, @PathVariable UUID retroId, @RequestBody PhaseRequest request) {
-        retroEventService.publishPhase(retroId, request.phase());
+        retroEventService.publishPhase(retroId, request.phase(), teamId);
         return ResponseEntity.ok().build();
     }
 }

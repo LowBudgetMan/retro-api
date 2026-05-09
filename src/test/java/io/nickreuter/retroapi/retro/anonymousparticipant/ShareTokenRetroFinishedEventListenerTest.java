@@ -14,7 +14,7 @@ class ShareTokenRetroFinishedEventListenerTest {
     @Test
     void onApplicationEvent_ShouldCallClearShareTokensForRetro() {
         var retroId = UUID.randomUUID();
-        var expectedEvent = new RetroFinishedEvent("", true, retroId);
+        var expectedEvent = new RetroFinishedEvent("", true, retroId, UUID.randomUUID());
         subject.onApplicationEvent(expectedEvent);
         verify(mockShareTokenService).clearShareTokensForRetro(retroId);
     }
@@ -22,7 +22,7 @@ class ShareTokenRetroFinishedEventListenerTest {
     @Test
     void onApplicationEvent_WhenRetroIsNotFinished_ShouldNotCallClearShareTokensForRetro() {
         var retroId = UUID.randomUUID();
-        var expectedEvent = new RetroFinishedEvent("", false, retroId);
+        var expectedEvent = new RetroFinishedEvent("", false, retroId, UUID.randomUUID());
         subject.onApplicationEvent(expectedEvent);
         verifyNoInteractions(mockShareTokenService);
     }
