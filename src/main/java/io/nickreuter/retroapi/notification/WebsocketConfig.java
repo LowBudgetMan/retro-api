@@ -3,6 +3,8 @@ package io.nickreuter.retroapi.notification;
 import io.nickreuter.retroapi.retro.RetroAuthorizationService;
 import io.nickreuter.retroapi.retro.anonymousparticipant.ShareTokenService;
 import io.nickreuter.retroapi.share.authentication.ShareTokenAuthentication;
+import io.nickreuter.retroapi.team.apitoken.ApiTokenService;
+import io.nickreuter.retroapi.team.apitoken.authentication.ApiTokenAuthentication;
 import io.nickreuter.retroapi.team.usermapping.UserMappingAuthorizationService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,9 +35,12 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -51,15 +56,17 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
     private final BrokerRelayProperties relayProperties;
     private final UserMappingAuthorizationService userMappingAuthorizationService;
     private final ShareTokenService shareTokenService;
+    private final ApiTokenService apiTokenService;
 
     public WebsocketConfig(JwtDecoder jwtDecoder, RetroAuthorizationService retroAuthorizationService,
                          BrokerRelayProperties relayProperties, UserMappingAuthorizationService userMappingAuthorizationService,
-                         ShareTokenService shareTokenService) {
+                         ShareTokenService shareTokenService, ApiTokenService apiTokenService) {
         this.jwtDecoder = jwtDecoder;
         this.retroAuthorizationService = retroAuthorizationService;
         this.relayProperties = relayProperties;
         this.userMappingAuthorizationService = userMappingAuthorizationService;
         this.shareTokenService = shareTokenService;
+        this.apiTokenService = apiTokenService;
     }
 
     @Override
@@ -121,14 +128,29 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
                     // Try JWT authentication first
                     String authHeader = accessor.getFirstNativeHeader("Authorization");
                     if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                        try {
-                            var token = authHeader.substring(7);
-                            var provider = new JwtAuthenticationProvider(jwtDecoder);
-                            var authentication = provider.authenticate(new BearerTokenAuthenticationToken(token));
-                            accessor.setUser(authentication);
-                            return message;
-                        } catch (Exception e) {
-                            // JWT authentication failed, continue to try share token
+                        var token = authHeader.substring(7);
+                        if (token.startsWith(ApiTokenService.TOKEN_PREFIX)) {
+                            apiTokenService.findByTokenString(token).ifPresent(entity -> {
+                                Set<String> scopes = Arrays.stream(entity.getScopes().split(","))
+                                    .map(String::trim)
+                                    .filter(s -> !s.isEmpty())
+                                    .collect(Collectors.toSet());
+                                var auth = new ApiTokenAuthentication(entity.getId(), entity.getTeamId(), scopes);
+                                accessor.setUser(auth);
+                                apiTokenService.touchLastUsed(entity.getId());
+                            });
+                            if (accessor.getUser() != null) {
+                                return message;
+                            }
+                        } else {
+                            try {
+                                var provider = new JwtAuthenticationProvider(jwtDecoder);
+                                var authentication = provider.authenticate(new BearerTokenAuthenticationToken(token));
+                                accessor.setUser(authentication);
+                                return message;
+                            } catch (Exception e) {
+                                // JWT authentication failed, continue to try share token
+                            }
                         }
                     }
 
