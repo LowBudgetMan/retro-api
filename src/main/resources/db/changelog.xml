@@ -208,4 +208,41 @@
             <column name="last_used_at" type="datetime"/>
         </createTable>
     </changeSet>
+    <changeSet id="create-webhook-table" author="lowbudgetman">
+        <createTable tableName="webhook">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="team_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="fk_webhook_team" references="team(id)"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="url" type="varchar(2048)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="secret" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="event_types" type="varchar(1000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enabled" type="boolean" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="consecutive_failures" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_delivery_at" type="datetime"/>
+            <column name="last_failure_at" type="datetime"/>
+            <column name="last_failure_reason" type="varchar(1000)"/>
+            <column name="created_at" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by_user_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>
