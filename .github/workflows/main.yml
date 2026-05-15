@@ -132,3 +132,97 @@ jobs:
         run: |
           rm -f ~/.gradle/caches/modules-2/modules-2.lock
           rm -f ~/.gradle/caches/modules-2/gc.properties
+  build-native-image:
+    runs-on: ubuntu-latest
+    needs: [build]
+    permissions:
+      packages: write
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: cache gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: Set lowercase owner name
+        run: echo "OWNER_LC=${OWNER,,}" >> "${GITHUB_ENV}"
+        env:
+          OWNER: ${{ github.repository_owner }}
+      - name: Compute CalVer tag
+        if: github.event_name == 'push'
+        id: calver
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TODAY=$(date -u +%Y.%m.%d)
+
+          TAGS=$(gh api /users/${{ env.OWNER_LC }}/packages/container/retro-api/versions \
+            --paginate --jq '.[].metadata.container.tags[]' 2>/dev/null || echo "")
+
+          TODAYS_TAGS=$(echo "$TAGS" | grep "^${TODAY}" || true)
+
+          if [ -z "$TODAYS_TAGS" ]; then
+            echo "version=${TODAY}" >> "$GITHUB_OUTPUT"
+          else
+            MAX_SEQ=0
+            for tag in $TODAYS_TAGS; do
+              if [ "$tag" = "$TODAY" ]; then
+                MAX_SEQ=$((MAX_SEQ > 0 ? MAX_SEQ : 0))
+              else
+                SEQ=$(echo "$tag" | sed "s/^${TODAY}\.//")
+                if [ "$SEQ" -gt "$MAX_SEQ" ] 2>/dev/null; then
+                  MAX_SEQ=$SEQ
+                fi
+              fi
+            done
+            NEXT_SEQ=$((MAX_SEQ + 1))
+            echo "version=${TODAY}.${NEXT_SEQ}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Compute short SHA
+        id: sha
+        run: echo "short=$(echo '${{ github.event.pull_request.head.sha || github.sha }}' | cut -c1-7)" >> "$GITHUB_OUTPUT"
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ env.OWNER_LC }}/retro-api
+          tags: |
+            type=raw,value=${{ steps.calver.outputs.version || 'unused' }}-native,enable=${{ github.event_name == 'push' }}
+            type=raw,value=native,enable=${{ github.event_name == 'push' }}
+            type=raw,value=beta-${{ steps.sha.outputs.short }}-native,enable=${{ github.event_name == 'pull_request' }}
+
+      - name: Build native application image
+        run: |
+          PRIMARY_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -1)
+          ./gradlew bootBuildImage -PbuildNative --imageName "$PRIMARY_TAG"
+
+      - name: Tag and push image
+        run: |
+          PRIMARY_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -1)
+          echo "${{ steps.meta.outputs.tags }}" | while read -r TAG; do
+            if [ "$TAG" != "$PRIMARY_TAG" ]; then
+              docker tag "$PRIMARY_TAG" "$TAG"
+            fi
+            docker push "$TAG"
+          done
+      - name: cleanup gradle cache
+        run: |
+          rm -f ~/.gradle/caches/modules-2/modules-2.lock
+          rm -f ~/.gradle/caches/modules-2/gc.properties
