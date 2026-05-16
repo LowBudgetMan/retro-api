@@ -46,4 +46,5 @@ websocket:
   base-url: ws://localhost:${API_PORT:8080}
 jwt:
   issuer-overrides:
-    "http://localhost:${KEYCLOAK_PORT:8010}": "http://auth-server:8080"
+    - from: "http://localhost:8010"
+      to: "http://auth-server:8080"

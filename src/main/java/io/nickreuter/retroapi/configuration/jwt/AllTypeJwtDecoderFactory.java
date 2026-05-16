@@ -39,9 +39,9 @@ public class AllTypeJwtDecoderFactory {
     }
 
     public String resolveIssuerUrl(String issuerUri) {
-        for (var entry : overridesConfig.issuerOverrides().entrySet()) {
-            if (issuerUri.startsWith(entry.getKey())) {
-                return issuerUri.replace(entry.getKey(), entry.getValue());
+        for (var override : overridesConfig.issuerOverrides()) {
+            if (issuerUri.startsWith(override.from())) {
+                return issuerUri.replace(override.from(), override.to());
             }
         }
         return issuerUri;
@@ -49,14 +49,25 @@ public class AllTypeJwtDecoderFactory {
 
     private JwtDecoder createNewDecoder(String issuerUri) {
         String fetchUrl = resolveIssuerUrl(issuerUri);
+        boolean overridden = !fetchUrl.equals(issuerUri);
+
+        if (overridden) {
+            String jwksUri = fetchUrl + "/protocol/openid-connect/certs";
+            return NimbusJwtDecoder.withJwkSetUri(jwksUri)
+                    .jwtProcessorCustomizer(customizer -> {
+                        customizer.setJWSTypeVerifier(new DefaultJOSEObjectTypeVerifier<>(ALLOWED_JWT_TYPES));
+                    })
+                    .build();
+        }
+
         try {
-            return NimbusJwtDecoder.withIssuerLocation(fetchUrl)
+            return NimbusJwtDecoder.withIssuerLocation(issuerUri)
                     .jwtProcessorCustomizer(customizer -> {
                         customizer.setJWSTypeVerifier(new DefaultJOSEObjectTypeVerifier<>(ALLOWED_JWT_TYPES));
                     })
                     .build();
         } catch (Exception e) {
-            return createFallbackDecoder(fetchUrl);
+            return createFallbackDecoder(issuerUri);
         }
     }
 
