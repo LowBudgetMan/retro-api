@@ -34,11 +34,44 @@ jobs:
         run: |
           rm -f ~/.gradle/caches/modules-2/modules-2.lock
           rm -f ~/.gradle/caches/modules-2/gc.properties
+  build-infra-images:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set lowercase owner name
+        run: echo "OWNER_LC=${OWNER,,}" >> "${GITHUB_ENV}"
+        env:
+          OWNER: ${{ github.repository_owner }}
+      - name: Build and push RabbitMQ image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: RabbitMqDockerfile
+          push: true
+          tags: ghcr.io/${{ env.OWNER_LC }}/retro-rabbitmq:latest
+      - name: Build and push Keycloak image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: KeycloakDockerfile
+          push: true
+          tags: ghcr.io/${{ env.OWNER_LC }}/retro-keycloak:latest
   build-image:
     runs-on: ubuntu-latest
     needs: [build]
     permissions:
       packages: write
+    outputs:
+      image-tag: ${{ steps.primary-tag.outputs.tag }}
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK
@@ -113,6 +146,10 @@ jobs:
             type=raw,value=${{ steps.calver.outputs.version || 'unused' }},enable=${{ github.event_name == 'push' }}
             type=raw,value=latest,enable=${{ github.event_name == 'push' }}
             type=raw,value=beta-${{ steps.sha.outputs.short }},enable=${{ github.event_name == 'pull_request' }}
+
+      - name: Set primary tag output
+        id: primary-tag
+        run: echo "tag=$(echo "${{ steps.meta.outputs.tags }}" | head -1)" >> "$GITHUB_OUTPUT"
 
       - name: Build application image
         run: |
