@@ -58,4 +58,7 @@ bootBuildImage {
     launchCache {
         volume { name = 'retro-api-launch-cache' }
     }
+    environment = [
+        'BP_NATIVE_IMAGE_BUILD_ARGUMENTS': '--initialize-at-build-time=java.io.ProxyingConsole'
+    ]
 }
