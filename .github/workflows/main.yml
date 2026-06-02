@@ -143,6 +143,8 @@ jobs:
     needs: [build]
     permissions:
       packages: write
+    outputs:
+      image-tag: ${{ steps.primary-tag.outputs.tag }}
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK
@@ -214,6 +216,10 @@ jobs:
             type=raw,value=native,enable=${{ github.event_name == 'push' }}
             type=raw,value=beta-${{ steps.sha.outputs.short }}-native,enable=${{ github.event_name == 'pull_request' }}
 
+      - name: Set primary tag output
+        id: primary-tag
+        run: echo "tag=$(echo "${{ steps.meta.outputs.tags }}" | head -1)" >> "$GITHUB_OUTPUT"
+
       - name: Build native application image
         run: |
           PRIMARY_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -1)
@@ -263,7 +269,48 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: e2e-report
+          name: e2e-report-jvm
+          path: playwright-report/
+
+      - name: Dump logs on failure
+        if: failure()
+        run: docker compose logs
+
+      - name: Tear down
+        if: always()
+        run: docker compose down -v
+  e2e-native:
+    runs-on: ubuntu-latest
+    needs: [build-native-image]
+    steps:
+      - name: Checkout E2E repo
+        uses: actions/checkout@v4
+        with:
+          repository: LowBudgetMan/retro-tests
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Start E2E stack
+        run: |
+          RETRO_API_IMAGE=${{ needs.build-native-image.outputs.image-tag }} \
+          docker compose up -d --wait --wait-timeout 120
+
+      - name: Run E2E tests
+        run: |
+          docker run --network host \
+            -v ${{ github.workspace }}/playwright-report:/tests/playwright-report \
+            ghcr.io/lowbudgetman/retro-e2e:latest
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-report-native
           path: playwright-report/
 
       - name: Dump logs on failure
