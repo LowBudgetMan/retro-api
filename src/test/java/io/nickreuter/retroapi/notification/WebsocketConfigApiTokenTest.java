@@ -56,7 +56,7 @@ class WebsocketConfigApiTokenTest {
         void connect_WithValidApiToken_SetsApiTokenAuthentication() {
             var tokenId = UUID.randomUUID();
             var teamId = UUID.randomUUID();
-            var entity = new ApiTokenEntity(tokenId, teamId, "Test", "hash", "retro_pat_ab", "read,write", null, "user1", null, null);
+            var entity = new ApiTokenEntity(tokenId, teamId, "Test", "hash", "retro_pat_ab", "read,write", null);
             when(apiTokenService.findByTokenString("retro_pat_abcdefg")).thenReturn(Optional.of(entity));
 
             var accessor = StompHeaderAccessor.create(StompCommand.CONNECT);
@@ -71,7 +71,6 @@ class WebsocketConfigApiTokenTest {
             var auth = (ApiTokenAuthentication) accessor.getUser();
             assertThat(auth.getTeamId()).isEqualTo(teamId);
             assertThat(auth.getScopes()).containsExactlyInAnyOrder("read", "write");
-            verify(apiTokenService).touchLastUsed(tokenId);
         }
 
         @Test
@@ -86,7 +85,6 @@ class WebsocketConfigApiTokenTest {
             interceptor.preSend(message, mock(MessageChannel.class));
 
             assertThat(accessor.getUser()).isNull();
-            verify(apiTokenService, never()).touchLastUsed(any());
         }
 
         @Test

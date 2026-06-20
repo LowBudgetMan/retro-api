@@ -2,8 +2,6 @@ package io.nickreuter.retroapi.team.apitoken;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -29,14 +27,12 @@ public class ApiTokenController {
     @PostMapping
     @PreAuthorize("@userMappingAuthorizationService.isUserMemberOfTeam(authentication, #teamId)")
     public ResponseEntity<CreateApiTokenResponse> createToken(@PathVariable UUID teamId,
-                                                              @RequestBody CreateApiTokenRequest request,
-                                                              @AuthenticationPrincipal Jwt jwt) {
-        var created = apiTokenService.createToken(teamId, request.name(), request.scopes(), request.expiresAt(), jwt.getSubject());
+                                                              @RequestBody CreateApiTokenRequest request) {
+        var created = apiTokenService.createToken(teamId, request.name(), request.scopes());
         var entity = created.entity();
         var body = new CreateApiTokenResponse(
             entity.getId(), entity.getName(),
-            request.scopes(), entity.getExpiresAt(),
-            entity.getTokenPrefix(), created.token()
+            request.scopes(), entity.getTokenPrefix(), created.token()
         );
         return ResponseEntity.created(URI.create("/api/teams/%s/api-tokens/%s".formatted(teamId, entity.getId()))).body(body);
     }

@@ -21,7 +21,7 @@ class ApiTokenRepositoryTest {
     @Test
     void findByTokenHash_WhenTokenExists_ReturnsToken() {
         var team = teamRepository.save(new TeamEntity(null, "Team", Instant.now()));
-        var saved = subject.save(new ApiTokenEntity(null, team.getId(), "Slack", "hash-abc", "retro_pat_abcd", "read", null, "user-1", null, null));
+        var saved = subject.save(new ApiTokenEntity(null, team.getId(), "Slack", "hash-abc", "retro_pat_abcd", "read", null));
 
         assertThat(subject.findByTokenHash("hash-abc")).contains(saved);
     }
@@ -35,8 +35,8 @@ class ApiTokenRepositoryTest {
     void findAllByTeamId_ReturnsTokensForThatTeamOnly() {
         var teamA = teamRepository.save(new TeamEntity(null, "A", Instant.now()));
         var teamB = teamRepository.save(new TeamEntity(null, "B", Instant.now()));
-        var inA = subject.save(new ApiTokenEntity(null, teamA.getId(), "Token A", "hash-a", "retro_pat_aaaa", "read", null, "user-1", null, null));
-        subject.save(new ApiTokenEntity(null, teamB.getId(), "Token B", "hash-b", "retro_pat_bbbb", "read", null, "user-1", null, null));
+        var inA = subject.save(new ApiTokenEntity(null, teamA.getId(), "Token A", "hash-a", "retro_pat_aaaa", "read", null));
+        subject.save(new ApiTokenEntity(null, teamB.getId(), "Token B", "hash-b", "retro_pat_bbbb", "read", null));
 
         assertThat(subject.findAllByTeamId(teamA.getId())).containsExactly(inA);
     }

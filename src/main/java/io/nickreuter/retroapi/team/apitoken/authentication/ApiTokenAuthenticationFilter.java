@@ -38,7 +38,6 @@ public class ApiTokenAuthenticationFilter extends OncePerRequestFilter {
                             .collect(Collectors.toSet());
                         var auth = new ApiTokenAuthentication(entity.getId(), entity.getTeamId(), scopes);
                         SecurityContextHolder.getContext().setAuthentication(auth);
-                        apiTokenService.touchLastUsed(entity.getId());
                     });
                 }
             }

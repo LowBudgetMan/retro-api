@@ -28,7 +28,4 @@ public class ApiTokenEntity {
     private String scopes;
     @CreationTimestamp
     private Instant createdAt;
-    private String createdByUserId;
-    private Instant expiresAt;
-    private Instant lastUsedAt;
 }

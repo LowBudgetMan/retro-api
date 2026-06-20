@@ -25,7 +25,7 @@ class ApiTokenServiceTest {
         var teamId = UUID.randomUUID();
         when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        var result = subject.createToken(teamId, "Slack", Set.of("read"), null, "user-1");
+        var result = subject.createToken(teamId, "Slack", Set.of("read"));
 
         assertThat(result.token()).startsWith("retro_pat_");
         assertThat(result.token()).hasSize(53);
@@ -37,7 +37,7 @@ class ApiTokenServiceTest {
         var captor = ArgumentCaptor.forClass(ApiTokenEntity.class);
         when(repository.save(captor.capture())).thenAnswer(inv -> inv.getArgument(0));
 
-        var result = subject.createToken(teamId, "Slack", Set.of("read"), null, "user-1");
+        var result = subject.createToken(teamId, "Slack", Set.of("read"));
 
         var saved = captor.getValue();
         assertThat(saved.getTokenHash()).isNotEqualTo(result.token());
@@ -46,8 +46,6 @@ class ApiTokenServiceTest {
         assertThat(saved.getTeamId()).isEqualTo(teamId);
         assertThat(saved.getName()).isEqualTo("Slack");
         assertThat(saved.getScopes()).isEqualTo("read");
-        assertThat(saved.getCreatedByUserId()).isEqualTo("user-1");
-        assertThat(saved.getExpiresAt()).isNull();
     }
 
     @Test
@@ -55,7 +53,7 @@ class ApiTokenServiceTest {
         var captor = ArgumentCaptor.forClass(ApiTokenEntity.class);
         when(repository.save(captor.capture())).thenAnswer(inv -> inv.getArgument(0));
 
-        subject.createToken(UUID.randomUUID(), "Bot", Set.of("read", "write"), null, "user-1");
+        subject.createToken(UUID.randomUUID(), "Bot", Set.of("read", "write"));
 
         var stored = captor.getValue().getScopes();
         assertThat(stored.split(",")).containsExactlyInAnyOrder("read", "write");
@@ -63,13 +61,13 @@ class ApiTokenServiceTest {
 
     @Test
     void createToken_WithUnknownScope_ThrowsInvalidScopeException() {
-        assertThatThrownBy(() -> subject.createToken(UUID.randomUUID(), "X", Set.of("admin"), null, "user-1"))
+        assertThatThrownBy(() -> subject.createToken(UUID.randomUUID(), "X", Set.of("admin")))
             .isInstanceOf(InvalidScopeException.class);
     }
 
     @Test
     void createToken_WithEmptyScopes_ThrowsInvalidScopeException() {
-        assertThatThrownBy(() -> subject.createToken(UUID.randomUUID(), "X", Set.of(), null, "user-1"))
+        assertThatThrownBy(() -> subject.createToken(UUID.randomUUID(), "X", Set.of()))
             .isInstanceOf(InvalidScopeException.class);
     }
 
@@ -77,32 +75,10 @@ class ApiTokenServiceTest {
     void findByTokenString_WhenHashMatches_ReturnsEntity() {
         var token = "retro_pat_test1234567890";
         var hash = ApiTokenService.hash(token);
-        var entity = new ApiTokenEntity(UUID.randomUUID(), UUID.randomUUID(), "n", hash, "retro_pat_test", "read", Instant.now(), "user-1", null, null);
+        var entity = new ApiTokenEntity(UUID.randomUUID(), UUID.randomUUID(), "n", hash, "retro_pat_test", "read", Instant.now());
         when(repository.findByTokenHash(hash)).thenReturn(Optional.of(entity));
 
         assertThat(subject.findByTokenString(token)).contains(entity);
-    }
-
-    @Test
-    void findByTokenString_WhenExpired_ReturnsEmpty() {
-        var token = "retro_pat_test1234567890";
-        var hash = ApiTokenService.hash(token);
-        var entity = new ApiTokenEntity(UUID.randomUUID(), UUID.randomUUID(), "n", hash, "retro_pat_test", "read", Instant.now(), "user-1", Instant.now().minusSeconds(60), null);
-        when(repository.findByTokenHash(hash)).thenReturn(Optional.of(entity));
-
-        assertThat(subject.findByTokenString(token)).isEmpty();
-    }
-
-    @Test
-    void touchLastUsed_UpdatesTimestamp() {
-        var entity = new ApiTokenEntity(UUID.randomUUID(), UUID.randomUUID(), "n", "h", "p", "read", Instant.now(), "user-1", null, null);
-        when(repository.findById(entity.getId())).thenReturn(Optional.of(entity));
-
-        subject.touchLastUsed(entity.getId());
-
-        var captor = ArgumentCaptor.forClass(ApiTokenEntity.class);
-        verify(repository).save(captor.capture());
-        assertThat(captor.getValue().getLastUsedAt()).isNotNull();
     }
 
     @Test

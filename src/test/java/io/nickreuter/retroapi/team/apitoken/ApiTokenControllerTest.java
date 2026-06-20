@@ -17,8 +17,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import static io.nickreuter.retroapi.team.TestAuthenticationCreationService.createAuthentication;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -39,7 +37,7 @@ class ApiTokenControllerTest {
     @Test
     void getTokens_WhenUserIsTeamMember_ReturnsList() throws Exception {
         var teamId = UUID.randomUUID();
-        var entity = new ApiTokenEntity(UUID.randomUUID(), teamId, "Slack", "h", "retro_pat_abcd", "read", Instant.now(), "u", null, null);
+        var entity = new ApiTokenEntity(UUID.randomUUID(), teamId, "Slack", "h", "retro_pat_abcd", "read", Instant.now());
         when(userMappingAuthorizationService.isUserMemberOfTeam(createAuthentication(), teamId)).thenReturn(true);
         when(apiTokenService.getTokensForTeam(teamId)).thenReturn(List.of(entity));
 
@@ -63,15 +61,15 @@ class ApiTokenControllerTest {
     @Test
     void createToken_ReturnsTokenOnce() throws Exception {
         var teamId = UUID.randomUUID();
-        var entity = new ApiTokenEntity(UUID.randomUUID(), teamId, "Slack", "h", "retro_pat_abcd", "read", Instant.now(), "u", null, null);
+        var entity = new ApiTokenEntity(UUID.randomUUID(), teamId, "Slack", "h", "retro_pat_abcd", "read", Instant.now());
         var created = new ApiTokenService.CreatedToken(entity, "retro_pat_fullsecretvalue");
         when(userMappingAuthorizationService.isUserMemberOfTeam(createAuthentication(), teamId)).thenReturn(true);
-        when(apiTokenService.createToken(eq(teamId), eq("Slack"), eq(Set.of("read")), eq(null), any())).thenReturn(created);
+        when(apiTokenService.createToken(teamId, "Slack", Set.of("read"))).thenReturn(created);
 
         mockMvc.perform(post("/api/teams/%s/api-tokens".formatted(teamId))
                 .with(jwt()).with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new CreateApiTokenRequest("Slack", Set.of("read"), null))))
+                .content(objectMapper.writeValueAsString(new CreateApiTokenRequest("Slack", Set.of("read")))))
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.token").value("retro_pat_fullsecretvalue"))
             .andExpect(jsonPath("$.tokenPrefix").value("retro_pat_abcd"))
@@ -86,7 +84,7 @@ class ApiTokenControllerTest {
         mockMvc.perform(post("/api/teams/%s/api-tokens".formatted(teamId))
                 .with(jwt()).with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new CreateApiTokenRequest("X", Set.of("read"), null))))
+                .content(objectMapper.writeValueAsString(new CreateApiTokenRequest("X", Set.of("read")))))
             .andExpect(status().isForbidden());
     }
 

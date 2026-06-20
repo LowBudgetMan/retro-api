@@ -137,7 +137,6 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
                                     .collect(Collectors.toSet());
                                 var auth = new ApiTokenAuthentication(entity.getId(), entity.getTeamId(), scopes);
                                 accessor.setUser(auth);
-                                apiTokenService.touchLastUsed(entity.getId());
                             });
                             if (accessor.getUser() != null) {
                                 return message;

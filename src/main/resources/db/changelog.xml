@@ -201,11 +201,6 @@
             <column name="created_at" type="datetime">
                 <constraints nullable="false"/>
             </column>
-            <column name="created_by_user_id" type="VARCHAR(255)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="expires_at" type="datetime"/>
-            <column name="last_used_at" type="datetime"/>
         </createTable>
     </changeSet>
     <changeSet id="create-webhook-table" author="lowbudgetman">

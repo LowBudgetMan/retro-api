@@ -32,7 +32,7 @@ class ApiTokenAuthenticationFilterTest {
         var token = "retro_pat_validtokenvalue";
         var tokenId = UUID.randomUUID();
         var teamId = UUID.randomUUID();
-        var entity = new ApiTokenEntity(tokenId, teamId, "n", "h", "p", "read,write", Instant.now(), "user-1", null, null);
+        var entity = new ApiTokenEntity(tokenId, teamId, "n", "h", "p", "read,write", Instant.now());
         when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
         when(apiTokenService.findByTokenString(token)).thenReturn(Optional.of(entity));
 
@@ -44,22 +44,6 @@ class ApiTokenAuthenticationFilterTest {
         assertThat(auth.getTeamId()).isEqualTo(teamId);
         assertThat(auth.getScopes()).containsExactlyInAnyOrder("read", "write");
         verify(chain).doFilter(request, response);
-    }
-
-    @Test
-    void doFilter_WithValidApiToken_TouchesLastUsed() throws Exception {
-        var request = mock(HttpServletRequest.class);
-        var response = mock(HttpServletResponse.class);
-        var chain = mock(FilterChain.class);
-        var token = "retro_pat_validtokenvalue";
-        var tokenId = UUID.randomUUID();
-        var entity = new ApiTokenEntity(tokenId, UUID.randomUUID(), "n", "h", "p", "read", Instant.now(), "user-1", null, null);
-        when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
-        when(apiTokenService.findByTokenString(token)).thenReturn(Optional.of(entity));
-
-        subject.doFilter(request, response, chain);
-
-        verify(apiTokenService).touchLastUsed(tokenId);
     }
 
     @Test

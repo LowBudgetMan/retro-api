@@ -6,7 +6,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.time.Instant;
 import java.util.Base64;
 import java.util.HexFormat;
 import java.util.List;
@@ -31,28 +30,20 @@ public class ApiTokenService {
 
     public record CreatedToken(ApiTokenEntity entity, String token) {}
 
-    public CreatedToken createToken(UUID teamId, String name, Set<String> scopes, Instant expiresAt, String createdByUserId) {
+    public CreatedToken createToken(UUID teamId, String name, Set<String> scopes) {
         if (scopes.isEmpty() || !VALID_SCOPES.containsAll(scopes)) {
             throw new InvalidScopeException("Scopes must be a non-empty subset of " + VALID_SCOPES);
         }
         var token = generateToken();
         var entity = new ApiTokenEntity(
             null, teamId, name, hash(token), token.substring(0, PREFIX_DISPLAY_LENGTH),
-            String.join(",", scopes), null, createdByUserId, expiresAt, null
+            String.join(",", scopes), null
         );
         return new CreatedToken(repository.save(entity), token);
     }
 
     public Optional<ApiTokenEntity> findByTokenString(String token) {
-        return repository.findByTokenHash(hash(token))
-            .filter(entity -> entity.getExpiresAt() == null || entity.getExpiresAt().isAfter(Instant.now()));
-    }
-
-    public void touchLastUsed(UUID tokenId) {
-        repository.findById(tokenId).ifPresent(entity -> {
-            entity.setLastUsedAt(Instant.now());
-            repository.save(entity);
-        });
+        return repository.findByTokenHash(hash(token));
     }
 
     public List<ApiTokenEntity> getTokensForTeam(UUID teamId) {
