@@ -46,7 +46,7 @@ public class WebhookDeliveryService implements ApplicationListener<BaseEvent> {
         var webhookEventType = EVENT_TYPE_MAP.get(event.getEventType());
         if (webhookEventType == null) return;
 
-        var webhooks = webhookService.getEnabledWebhooksForTeam(event.getTeamId());
+        var webhooks = webhookService.getWebhooksForTeam(event.getTeamId());
         for (var webhook : webhooks) {
             var subscribedTypes = Arrays.stream(webhook.getEventTypes().split(","))
                 .map(String::trim)
@@ -74,18 +74,16 @@ public class WebhookDeliveryService implements ApplicationListener<BaseEvent> {
                 .timeout(Duration.ofSeconds(10))
                 .build();
 
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                webhookService.recordSuccess(webhook.getId());
-            } else {
-                webhookService.recordFailure(webhook.getId(), "HTTP " + response.statusCode());
-            }
+            httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                .whenComplete((response, throwable) -> {
+                    if (throwable != null) {
+                        logger.warn("Failed to deliver webhook {} to {}: {}", webhook.getId(), webhook.getUrl(), throwable.getMessage());
+                    } else if (response.statusCode() < 200 || response.statusCode() >= 300) {
+                        logger.warn("Webhook {} to {} returned HTTP {}", webhook.getId(), webhook.getUrl(), response.statusCode());
+                    }
+                });
         } catch (JsonProcessingException e) {
             logger.error("Failed to serialize webhook payload for webhook {}", webhook.getId(), e);
-            webhookService.recordFailure(webhook.getId(), "Serialization error: " + e.getMessage());
-        } catch (Exception e) {
-            logger.error("Failed to deliver webhook {} to {}", webhook.getId(), webhook.getUrl(), e);
-            webhookService.recordFailure(webhook.getId(), e.getMessage());
         }
     }
 }

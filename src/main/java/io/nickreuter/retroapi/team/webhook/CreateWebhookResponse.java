@@ -5,10 +5,6 @@ import java.util.Set;
 import java.util.UUID;
 
 public record CreateWebhookResponse(
-    UUID id,
-    String name,
-    String url,
-    @JsonProperty("event_types") Set<String> eventTypes,
-    boolean enabled,
-    String secret
+    UUID id, String name, String url,
+    @JsonProperty("event_types") Set<String> eventTypes, String secret
 ) {}

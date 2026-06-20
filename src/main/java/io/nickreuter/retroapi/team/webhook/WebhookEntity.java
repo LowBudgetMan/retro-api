@@ -26,12 +26,6 @@ public class WebhookEntity {
     private String url;
     private String secret;
     private String eventTypes;
-    private boolean enabled;
-    private int consecutiveFailures;
-    private Instant lastDeliveryAt;
-    private Instant lastFailureAt;
-    private String lastFailureReason;
     @CreationTimestamp
     private Instant createdAt;
-    private String createdByUserId;
 }

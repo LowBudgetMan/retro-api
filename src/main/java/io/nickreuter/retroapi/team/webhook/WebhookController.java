@@ -2,8 +2,6 @@ package io.nickreuter.retroapi.team.webhook;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -29,13 +27,12 @@ public class WebhookController {
     @PostMapping
     @PreAuthorize("@userMappingAuthorizationService.isUserMemberOfTeam(authentication, #teamId)")
     public ResponseEntity<CreateWebhookResponse> createWebhook(@PathVariable UUID teamId,
-                                                                @RequestBody CreateWebhookRequest request,
-                                                                @AuthenticationPrincipal Jwt jwt) {
-        var created = webhookService.createWebhook(teamId, request.name(), request.url(), request.eventTypes(), jwt.getSubject());
+                                                                @RequestBody CreateWebhookRequest request) {
+        var created = webhookService.createWebhook(teamId, request.name(), request.url(), request.eventTypes());
         var entity = created.entity();
         var body = new CreateWebhookResponse(
             entity.getId(), entity.getName(), entity.getUrl(),
-            request.eventTypes(), entity.isEnabled(), created.secret()
+            request.eventTypes(), created.secret()
         );
         return ResponseEntity.created(URI.create("/api/teams/%s/webhooks/%s".formatted(teamId, entity.getId()))).body(body);
     }
@@ -44,7 +41,7 @@ public class WebhookController {
     @PreAuthorize("@userMappingAuthorizationService.isUserMemberOfTeam(authentication, #teamId)")
     public ResponseEntity<Void> updateWebhook(@PathVariable UUID teamId, @PathVariable UUID webhookId,
                                               @RequestBody UpdateWebhookRequest request) {
-        webhookService.updateWebhook(webhookId, request.name(), request.url(), request.eventTypes(), request.enabled());
+        webhookService.updateWebhook(webhookId, request.name(), request.url(), request.eventTypes());
         return ResponseEntity.noContent().build();
     }
 

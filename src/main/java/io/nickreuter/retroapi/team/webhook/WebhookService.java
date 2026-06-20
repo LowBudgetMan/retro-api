@@ -3,7 +3,6 @@ package io.nickreuter.retroapi.team.webhook;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
-import java.time.Instant;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Set;
@@ -26,7 +25,7 @@ public class WebhookService {
 
     public record CreatedWebhook(WebhookEntity entity, String secret) {}
 
-    public CreatedWebhook createWebhook(UUID teamId, String name, String url, Set<String> eventTypes, String createdByUserId) {
+    public CreatedWebhook createWebhook(UUID teamId, String name, String url, Set<String> eventTypes) {
         if (!url.startsWith("https://")) {
             throw new IllegalArgumentException("Webhook URL must use HTTPS");
         }
@@ -34,11 +33,7 @@ public class WebhookService {
             throw new InvalidEventTypeException("Event types must be a non-empty subset of " + VALID_EVENT_TYPES);
         }
         var secret = generateSecret();
-        var entity = new WebhookEntity(
-            null, teamId, name, url, secret,
-            String.join(",", eventTypes),
-            true, 0, null, null, null, null, createdByUserId
-        );
+        var entity = new WebhookEntity(null, teamId, name, url, secret, String.join(",", eventTypes), null);
         return new CreatedWebhook(repository.save(entity), secret);
     }
 
@@ -46,11 +41,7 @@ public class WebhookService {
         return repository.findAllByTeamId(teamId);
     }
 
-    public List<WebhookEntity> getEnabledWebhooksForTeam(UUID teamId) {
-        return repository.findAllByTeamIdAndEnabledTrue(teamId);
-    }
-
-    public void updateWebhook(UUID webhookId, String name, String url, Set<String> eventTypes, boolean enabled) {
+    public void updateWebhook(UUID webhookId, String name, String url, Set<String> eventTypes) {
         var entity = repository.findById(webhookId).orElseThrow();
         if (url != null && !url.startsWith("https://")) {
             throw new IllegalArgumentException("Webhook URL must use HTTPS");
@@ -61,33 +52,11 @@ public class WebhookService {
         if (name != null) entity.setName(name);
         if (url != null) entity.setUrl(url);
         if (eventTypes != null) entity.setEventTypes(String.join(",", eventTypes));
-        entity.setEnabled(enabled);
         repository.save(entity);
     }
 
     public void deleteWebhook(UUID webhookId) {
         repository.deleteById(webhookId);
-    }
-
-    public void recordSuccess(UUID webhookId) {
-        repository.findById(webhookId).ifPresent(entity -> {
-            entity.setConsecutiveFailures(0);
-            entity.setLastDeliveryAt(Instant.now());
-            repository.save(entity);
-        });
-    }
-
-    public void recordFailure(UUID webhookId, String reason) {
-        repository.findById(webhookId).ifPresent(entity -> {
-            entity.setConsecutiveFailures(entity.getConsecutiveFailures() + 1);
-            entity.setLastDeliveryAt(Instant.now());
-            entity.setLastFailureAt(Instant.now());
-            entity.setLastFailureReason(reason);
-            if (entity.getConsecutiveFailures() >= 5) {
-                entity.setEnabled(false);
-            }
-            repository.save(entity);
-        });
     }
 
     private String generateSecret() {

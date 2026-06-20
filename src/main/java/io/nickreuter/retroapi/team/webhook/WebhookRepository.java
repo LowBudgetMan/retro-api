@@ -7,5 +7,4 @@ import java.util.UUID;
 
 public interface WebhookRepository extends JpaRepository<WebhookEntity, UUID> {
     List<WebhookEntity> findAllByTeamId(UUID teamId);
-    List<WebhookEntity> findAllByTeamIdAndEnabledTrue(UUID teamId);
 }

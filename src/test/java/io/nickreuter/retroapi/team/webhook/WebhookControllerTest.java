@@ -17,8 +17,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import static io.nickreuter.retroapi.team.TestAuthenticationCreationService.createAuthentication;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -39,7 +37,7 @@ class WebhookControllerTest {
     @Test
     void getWebhooks_WhenUserIsTeamMember_ReturnsList() throws Exception {
         var teamId = UUID.randomUUID();
-        var entity = new WebhookEntity(UUID.randomUUID(), teamId, "Slack", "https://hooks.slack.com", "secret", "action_item.created", true, 0, null, null, null, Instant.now(), "user1");
+        var entity = new WebhookEntity(UUID.randomUUID(), teamId, "Slack", "https://hooks.slack.com", "secret", "action_item.created", Instant.now());
         when(userMappingAuthorizationService.isUserMemberOfTeam(createAuthentication(), teamId)).thenReturn(true);
         when(webhookService.getWebhooksForTeam(teamId)).thenReturn(List.of(entity));
 
@@ -47,8 +45,7 @@ class WebhookControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].id").value(entity.getId().toString()))
             .andExpect(jsonPath("$[0].name").value("Slack"))
-            .andExpect(jsonPath("$[0].url").value("https://hooks.slack.com"))
-            .andExpect(jsonPath("$[0].enabled").value(true));
+            .andExpect(jsonPath("$[0].url").value("https://hooks.slack.com"));
     }
 
     @Test
@@ -63,10 +60,10 @@ class WebhookControllerTest {
     @Test
     void createWebhook_ReturnsSecretOnce() throws Exception {
         var teamId = UUID.randomUUID();
-        var entity = new WebhookEntity(UUID.randomUUID(), teamId, "Slack", "https://hooks.slack.com", "secret", "action_item.created", true, 0, null, null, null, Instant.now(), "user1");
+        var entity = new WebhookEntity(UUID.randomUUID(), teamId, "Slack", "https://hooks.slack.com", "secret", "action_item.created", Instant.now());
         var created = new WebhookService.CreatedWebhook(entity, "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890");
         when(userMappingAuthorizationService.isUserMemberOfTeam(createAuthentication(), teamId)).thenReturn(true);
-        when(webhookService.createWebhook(eq(teamId), eq("Slack"), eq("https://hooks.slack.com"), eq(Set.of("action_item.created")), any())).thenReturn(created);
+        when(webhookService.createWebhook(teamId, "Slack", "https://hooks.slack.com", Set.of("action_item.created"))).thenReturn(created);
 
         mockMvc.perform(post("/api/teams/%s/webhooks".formatted(teamId))
                 .with(jwt()).with(csrf())
@@ -98,10 +95,10 @@ class WebhookControllerTest {
         mockMvc.perform(put("/api/teams/%s/webhooks/%s".formatted(teamId, webhookId))
                 .with(jwt()).with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new UpdateWebhookRequest("New Name", null, null, true))))
+                .content(objectMapper.writeValueAsString(new UpdateWebhookRequest("New Name", null, null))))
             .andExpect(status().isNoContent());
 
-        verify(webhookService).updateWebhook(webhookId, "New Name", null, null, true);
+        verify(webhookService).updateWebhook(webhookId, "New Name", null, null);
     }
 
     @Test
