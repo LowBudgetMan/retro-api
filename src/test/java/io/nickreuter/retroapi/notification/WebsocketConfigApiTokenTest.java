@@ -74,11 +74,11 @@ class WebsocketConfigApiTokenTest {
         }
 
         @Test
-        void connect_WithExpiredApiToken_DoesNotSetAuth() {
-            when(apiTokenService.findByTokenString("retro_pat_expired")).thenReturn(Optional.empty());
+        void connect_WithUnknownApiToken_DoesNotSetAuth() {
+            when(apiTokenService.findByTokenString("retro_pat_unknown")).thenReturn(Optional.empty());
 
             var accessor = StompHeaderAccessor.create(StompCommand.CONNECT);
-            accessor.addNativeHeader("Authorization", "Bearer retro_pat_expired");
+            accessor.addNativeHeader("Authorization", "Bearer retro_pat_unknown");
             accessor.setSessionAttributes(new HashMap<>());
             var message = MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders());
 
