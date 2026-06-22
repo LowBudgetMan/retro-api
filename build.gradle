@@ -7,6 +7,16 @@ plugins {
 
 if (project.hasProperty('buildNative')) {
 	apply plugin: 'org.graalvm.buildtools.native'
+
+	// The OTLP metrics registry is gated by a @ConditionalOnProperty that Spring AOT
+	// evaluates at BUILD time. application.yml disables export by default (a runtime
+	// concern), which would otherwise prune the registry from the native image and make
+	// runtime opt-in (MANAGEMENT_OTLP_METRICS_EXPORT_ENABLED=true) impossible. Force the
+	// condition true during AOT so the registry is baked into the image; actual publishing
+	// stays gated at runtime by the same property (default false -> idle, no push, no spam).
+	tasks.named('processAot') {
+		systemProperty 'management.otlp.metrics.export.enabled', 'true'
+	}
 }
 
 group = 'io.nickreuter'
