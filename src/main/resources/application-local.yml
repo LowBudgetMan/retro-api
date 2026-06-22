@@ -22,3 +22,8 @@ web:
       - http://localhost:3000
 websocket:
   base-url: 'ws://localhost:8080'
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics
