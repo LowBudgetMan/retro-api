@@ -1,11 +1,11 @@
 package io.nickreuter.retroapi.team;
 
+import io.micrometer.core.annotation.Timed;
 import io.nickreuter.retroapi.team.exception.BadInviteException;
 import io.nickreuter.retroapi.team.invite.InviteEntity;
 import io.nickreuter.retroapi.team.invite.InviteService;
 import io.nickreuter.retroapi.team.usermapping.UserMappingEntity;
 import io.nickreuter.retroapi.team.usermapping.UserMappingService;
-import io.micrometer.core.annotation.Timed;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;

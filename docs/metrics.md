@@ -16,7 +16,9 @@ These meters are always recorded in-memory (whether or not export is on):
 - `retro.service` — timer for every `@Service` method under
   `io.nickreuter.retroapi`, tagged `class` and `method`. Methods annotated
   with `@Timed` are excluded here (they are recorded under their own name
-  instead, so they are never double-counted).
+  instead, so they are never double-counted). Note: like all Spring AOP, this
+  only times calls that enter the service from outside the bean — internal
+  `this.method()` self-invocations are not intercepted.
 - `@Timed("name")` timers — add `@Timed("your.metric.name")` to any
   Spring-managed bean method to record a named timer (optionally with extra
   tags). Example in the codebase: `TeamService.createTeam` →
