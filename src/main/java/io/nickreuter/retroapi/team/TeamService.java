@@ -5,6 +5,7 @@ import io.nickreuter.retroapi.team.invite.InviteEntity;
 import io.nickreuter.retroapi.team.invite.InviteService;
 import io.nickreuter.retroapi.team.usermapping.UserMappingEntity;
 import io.nickreuter.retroapi.team.usermapping.UserMappingService;
+import io.micrometer.core.annotation.Timed;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -27,6 +28,7 @@ public class TeamService {
         this.inviteService = inviteService;
     }
 
+    @Timed("retro.team.create")
     public TeamEntity createTeam(String name, String userId) {
         var team = teamRepository.save(new TeamEntity(name));
         userMappingService.addUserToTeam(userId, team.getId());
