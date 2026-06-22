@@ -14,7 +14,9 @@ These meters are always recorded in-memory (whether or not export is on):
   request/response latency. Percentile-histogram buckets are enabled, so a
   collector can compute latency distributions.
 - `retro.service` — timer for every `@Service` method under
-  `io.nickreuter.retroapi`, tagged `class` and `method`. Methods annotated
+  `io.nickreuter.retroapi`, tagged `class`, `method`, and `exception` (the
+  thrown exception's simple name, or `none` on success — so error latency can
+  be separated from success latency). Methods annotated
   with `@Timed` are excluded here (they are recorded under their own name
   instead, so they are never double-counted). Note: like all Spring AOP, this
   only times calls that enter the service from outside the bean — internal

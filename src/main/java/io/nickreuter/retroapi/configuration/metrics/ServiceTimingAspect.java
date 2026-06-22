@@ -24,12 +24,17 @@ public class ServiceTimingAspect {
     public Object timeServiceMethod(ProceedingJoinPoint joinPoint) throws Throwable {
         var signature = (MethodSignature) joinPoint.getSignature();
         var sample = Timer.start(registry);
+        String exception = "none";
         try {
             return joinPoint.proceed();
+        } catch (Throwable t) {
+            exception = t.getClass().getSimpleName();
+            throw t;
         } finally {
             sample.stop(Timer.builder("retro.service")
                     .tag("class", signature.getDeclaringType().getSimpleName())
                     .tag("method", signature.getName())
+                    .tag("exception", exception)
                     .register(registry));
         }
     }

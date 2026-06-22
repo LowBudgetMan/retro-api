@@ -7,6 +7,7 @@ import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 import org.springframework.stereotype.Service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ServiceTimingAspectTest {
 
@@ -16,6 +17,8 @@ class ServiceTimingAspectTest {
 
         @Timed("sample.custom")
         public String doTimedWork() { return "timed"; }
+
+        public void doFailingWork() { throw new IllegalStateException("boom"); }
     }
 
     private SampleService proxyFor(SimpleMeterRegistry registry) {
@@ -34,6 +37,21 @@ class ServiceTimingAspectTest {
         var timer = registry.get("retro.service")
                 .tag("class", "SampleService")
                 .tag("method", "doWork")
+                .tag("exception", "none")
+                .timer();
+        assertThat(timer.count()).isEqualTo(1);
+    }
+
+    @Test
+    void tagsThrownExceptionWithItsSimpleName() {
+        var registry = new SimpleMeterRegistry();
+        var proxy = proxyFor(registry);
+
+        assertThatThrownBy(proxy::doFailingWork).isInstanceOf(IllegalStateException.class);
+
+        var timer = registry.get("retro.service")
+                .tag("method", "doFailingWork")
+                .tag("exception", "IllegalStateException")
                 .timer();
         assertThat(timer.count()).isEqualTo(1);
     }
