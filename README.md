@@ -59,3 +59,22 @@ websocket:
 
 The API can be run locally using the gradle `./gradlew bootRun` task. To run with additional profile, pass the profiles 
 in as an argument `./gradlew bootRun --args='--spring.profiles.active=local'`.
+
+## Metrics (OTLP export)
+
+The API collects metrics with Micrometer (HTTP request/response latency, per-service-method timings, and any `@Timed` 
+timers) and can push them to any OTLP-compatible collector — bring your own (Telegraf/InfluxDB, an OpenTelemetry 
+Collector, Grafana Alloy, etc.). **Export is disabled by default**: if you set nothing, no metrics leave the process and 
+there is no log noise from failed pushes. No rebuild is required to enable it — this works the same for the JVM and 
+GraalVM native images.
+
+To enable export, set these environment variables (e.g. in your compose file or deployment):
+
+```
+MANAGEMENT_OTLP_METRICS_EXPORT_ENABLED=true
+MANAGEMENT_OTLP_METRICS_EXPORT_URL=http://<your-collector>:4318/v1/metrics
+MANAGEMENT_OTLP_METRICS_EXPORT_STEP=60s    # optional, push interval (default 60s)
+```
+
+`/actuator/health` is exposed publicly for healthchecks; the metrics HTTP endpoint is not exposed in production (only 
+under the `local` profile). See [`docs/metrics.md`](docs/metrics.md) for the full list of collected metrics and details.
