@@ -30,11 +30,11 @@ jobs:
             --paginate --jq '.[] | {id: .id, tags: .metadata.container.tags}' 2>/dev/null || echo "")
 
           for SHORT_SHA in $COMMITS; do
-            TAG="beta-${SHORT_SHA}"
-            # Find version ID for this tag
-            VERSION_ID=$(echo "$VERSIONS" | jq -r "select(.tags[] == \"${TAG}\") | .id" 2>/dev/null || true)
-            if [ -n "$VERSION_ID" ] && [ "$VERSION_ID" != "null" ]; then
-              echo "Deleting image with tag ${TAG} (version ${VERSION_ID})"
-              gh api --method DELETE /users/${{ env.OWNER_LC }}/packages/container/retro-api/versions/${VERSION_ID} || true
-            fi
+            for TAG in "beta-${SHORT_SHA}" "beta-${SHORT_SHA}-native"; do
+              VERSION_ID=$(echo "$VERSIONS" | jq -r "select(.tags[] == \"${TAG}\") | .id" 2>/dev/null || true)
+              if [ -n "$VERSION_ID" ] && [ "$VERSION_ID" != "null" ]; then
+                echo "Deleting image with tag ${TAG} (version ${VERSION_ID})"
+                gh api --method DELETE /users/${{ env.OWNER_LC }}/packages/container/retro-api/versions/${VERSION_ID} || true
+              fi
+            done
           done

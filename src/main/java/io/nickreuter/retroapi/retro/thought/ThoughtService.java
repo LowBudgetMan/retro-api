@@ -3,6 +3,7 @@ package io.nickreuter.retroapi.retro.thought;
 import io.nickreuter.retroapi.notification.EventType;
 import io.nickreuter.retroapi.notification.event.ThoughtEvent;
 import io.nickreuter.retroapi.retro.RetroRepository;
+import io.nickreuter.retroapi.retro.RequireActiveRetro;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,7 @@ public class ThoughtService {
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
+    @RequireActiveRetro(retroIdParam = "retroId")
     public ThoughtEntity createThought(UUID retroId, String message, String category) {
         var savedThought = thoughtRepository.save(ThoughtEntity.from(message, category, retroId));
         var teamId = retroRepository.findById(retroId).orElseThrow().getTeamId();
@@ -33,6 +35,7 @@ public class ThoughtService {
         return thoughtRepository.findById(thoughtId);
     }
 
+    @RequireActiveRetro(thoughtIdParam = "thoughtId")
     public void addVote(UUID thoughtId) {
         thoughtRepository.incrementVotes(thoughtId);
         var thought = thoughtRepository.findById(thoughtId).orElseThrow();
@@ -40,6 +43,7 @@ public class ThoughtService {
         applicationEventPublisher.publishEvent(new ThoughtEvent(this, EventType.UPDATE, thought, thought.getRetroId(), teamId));
     }
 
+    @RequireActiveRetro(thoughtIdParam = "thoughtId")
     public void setCompleted(UUID thoughtId, boolean completed) {
         var thought = thoughtRepository.findById(thoughtId).orElseThrow();
         thought.setCompleted(completed);
@@ -48,6 +52,7 @@ public class ThoughtService {
         applicationEventPublisher.publishEvent(new ThoughtEvent(this, EventType.UPDATE, updatedThought, updatedThought.getRetroId(), teamId));
     }
 
+    @RequireActiveRetro(thoughtIdParam = "thoughtId")
     public void setCategory(UUID thoughtId, String category) {
         var thought = thoughtRepository.findById(thoughtId).orElseThrow();
         thought.setCategory(category);
@@ -56,6 +61,7 @@ public class ThoughtService {
         applicationEventPublisher.publishEvent(new ThoughtEvent(this, EventType.UPDATE, updatedThought, updatedThought.getRetroId(), teamId));
     }
 
+    @RequireActiveRetro(thoughtIdParam = "thoughtId")
     public void setMessage(UUID thoughtId, String message) {
         var thought = thoughtRepository.findById(thoughtId).orElseThrow();
         thought.setMessage(message);
@@ -64,6 +70,7 @@ public class ThoughtService {
         applicationEventPublisher.publishEvent(new ThoughtEvent(this, EventType.UPDATE, updatedThought, updatedThought.getRetroId(), teamId));
     }
 
+    @RequireActiveRetro(thoughtIdParam = "thoughtId")
     public void deleteThought(UUID thoughtId) {
         var thought = thoughtRepository.findById(thoughtId).orElseThrow();
         thoughtRepository.deleteById(thoughtId);

@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:13
+    image: postgres:16
     environment:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: retroapi
@@ -11,12 +11,14 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   auth-server:
-    image: quay.io/keycloak/keycloak:22.0.0
+    image: quay.io/keycloak/keycloak:26.6.0
     environment:
-      KEYCLOAK_ADMIN: 'admin'
-      KEYCLOAK_ADMIN_PASSWORD: 'admin'
+      KC_BOOTSTRAP_ADMIN_USERNAME: 'admin'
+      KC_BOOTSTRAP_ADMIN_PASSWORD: 'admin'
+      KC_HOSTNAME: "http://localhost:${KEYCLOAK_PORT:-8010}"
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
     ports:
-      - '8010:8080'
+      - "${KEYCLOAK_PORT:-8010}:8080"
     volumes:
       - ./keycloak-realm-data:/opt/keycloak/data/import
     command: start-dev --import-realm
@@ -34,9 +36,9 @@ services:
       - '25672:25672'
 
   api:
-    image: ghcr.io/lowbudgetman/retro-api:latest
+    image: ${RETRO_API_IMAGE:-ghcr.io/lowbudgetman/retro-api:latest}
     ports:
-      - "8080:8080"
+      - "${API_PORT:-8080}:8080"
     environment:
       SPRING_PROFILES_ACTIVE: docker
     depends_on:

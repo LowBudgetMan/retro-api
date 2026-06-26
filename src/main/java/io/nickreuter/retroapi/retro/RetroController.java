@@ -56,4 +56,9 @@ public class RetroController {
     public ResponseEntity<Void> handleRetroNotFound() {
         return ResponseEntity.notFound().build();
     }
+
+    @ExceptionHandler({RetroNotActiveException.class})
+    public ResponseEntity<Void> handleRetroNotActive() {
+        return ResponseEntity.badRequest().build();
+    }
 }
