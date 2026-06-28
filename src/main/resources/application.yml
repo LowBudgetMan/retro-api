@@ -18,3 +18,21 @@ spring:
 web:
   cors:
     allowed-origins:
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  opentelemetry:
+    resource-attributes:
+      service.name: retro-api
+      deployment.environment: ${DEPLOYMENT_ENVIRONMENT:unknown}
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+  otlp:
+    metrics:
+      export:
+        enabled: false
+        step: 60s
