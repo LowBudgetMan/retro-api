@@ -74,7 +74,12 @@ To enable export, set these environment variables (e.g. in your compose file or 
 MANAGEMENT_OTLP_METRICS_EXPORT_ENABLED=true
 MANAGEMENT_OTLP_METRICS_EXPORT_URL=http://<your-collector>:4318/v1/metrics
 MANAGEMENT_OTLP_METRICS_EXPORT_STEP=60s    # optional, push interval (default 60s)
+DEPLOYMENT_ENVIRONMENT=production           # optional, tags all metrics with deployment.environment
 ```
+
+`DEPLOYMENT_ENVIRONMENT` is attached as the `deployment.environment` OTLP resource attribute (defaults to 
+`unknown`), so a single collector/backend can distinguish instances — e.g. dashboards can filter or switch between 
+`local`, `production`, etc. Set a distinct value per deployment.
 
 `/actuator/health` is exposed publicly for healthchecks; the metrics HTTP endpoint is not exposed in production (only 
 under the `local` profile). See [`docs/metrics.md`](docs/metrics.md) for the full list of collected metrics and details.
