@@ -49,6 +49,7 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
       - name: Login to GHCR
+        if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -126,6 +127,7 @@ jobs:
           ./gradlew bootBuildImage --imageName "$PRIMARY_TAG"
 
       - name: Tag and push image
+        if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
         run: |
           PRIMARY_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -1)
           echo "${{ steps.meta.outputs.tags }}" | while read -r TAG; do
@@ -153,6 +155,7 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
       - name: Login to GHCR
+        if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -226,6 +229,7 @@ jobs:
           ./gradlew bootBuildImage -PbuildNative --imageName "$PRIMARY_TAG"
 
       - name: Tag and push image
+        if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
         run: |
           PRIMARY_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -1)
           echo "${{ steps.meta.outputs.tags }}" | while read -r TAG; do
@@ -241,6 +245,7 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     needs: [build-image]
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
     steps:
       - name: Checkout E2E repo
         uses: actions/checkout@v4
@@ -282,6 +287,7 @@ jobs:
   e2e-native:
     runs-on: ubuntu-latest
     needs: [build-native-image]
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
     steps:
       - name: Checkout E2E repo
         uses: actions/checkout@v4
