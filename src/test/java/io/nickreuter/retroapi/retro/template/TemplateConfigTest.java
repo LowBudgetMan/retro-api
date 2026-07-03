@@ -28,16 +28,16 @@ class TemplateConfigTest {
                     "Happy, Confused, Sad",
                     "Description",
                     List.of(
-                        new Category("Happy", 1, "#ffffff", "#ffffff", "#ffffff", "#ffffff"),
-                        new Category("Confused", 2, "#ffffff", "#ffffff", "#ffffff", "#ffffff"),
-                        new Category("Sad", 3, "#ffffff", "#ffffff", "#ffffff", "#ffffff")
+                        new Category("Happy", "Happy description", 1, "#ffffff", "#ffffff", "#ffffff", "#ffffff"),
+                        new Category("Confused", "Confused description", 2, "#ffffff", "#ffffff", "#ffffff", "#ffffff"),
+                        new Category("Sad", "Sad description", 3, "#ffffff", "#ffffff", "#ffffff", "#ffffff")
                     )
                 ),
                 new Template(
                         "valid-1-column.yml",
                         "Happy",
                         "Description",
-                        List.of(new Category("Happy", 1, "#ffffff", "#ffffff", "#ffffff", "#ffffff"))
+                        List.of(new Category("Happy", "Happy description", 1, "#ffffff", "#ffffff", "#ffffff", "#ffffff"))
                 )
         );
     }
@@ -54,9 +54,9 @@ class TemplateConfigTest {
                         "Happy, Confused, Sad",
                         "Description",
                         List.of(
-                                new Category("Happy", 1, "#ffffff", "#ffffff", "#ffffff", "#ffffff"),
-                                new Category("Confused", 2, "#ffffff", "#ffffff", "#ffffff", "#ffffff"),
-                                new Category("Sad", 3, "#ffffff", "#ffffff", "#ffffff", "#ffffff")
+                                new Category("Happy", "Happy description", 1, "#ffffff", "#ffffff", "#ffffff", "#ffffff"),
+                                new Category("Confused", "Confused description", 2, "#ffffff", "#ffffff", "#ffffff", "#ffffff"),
+                                new Category("Sad", "Sad description", 3, "#ffffff", "#ffffff", "#ffffff", "#ffffff")
                         )
                 )
         );
