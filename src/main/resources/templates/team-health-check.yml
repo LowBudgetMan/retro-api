@@ -1,0 +1,48 @@
+name: Team Health Check
+description: >
+  The Team Health Check is meant to gauge the overall state of the team across several dimensions rather than
+  react to a single event. Team members reflect on how things feel right now in each area, surfacing both strengths
+  to protect and stresses to address. It works well on a recurring cadence to track how the team's health trends
+  over time.
+
+
+  Energy & Morale: How are we feeling? Are we motivated or running on empty?
+
+  Workload & Pace: Is our pace sustainable, or are we stretched too thin?
+
+  Collaboration & Communication: How well are we working together and sharing information?
+
+  Clarity & Direction: Do we know where we're going and why?
+
+  Growth & Learning: Are we developing our skills and growing as a team?
+categories:
+  - name: "Energy & Morale"
+    position: 1
+    lightBackgroundColor: "#2ecc71"
+    lightTextColor: "#ffffff"
+    darkBackgroundColor: "#27ae60"
+    darkTextColor: "#ffffff"
+  - name: "Workload & Pace"
+    position: 2
+    lightBackgroundColor: "#e67e22"
+    lightTextColor: "#ffffff"
+    darkBackgroundColor: "#d35400"
+    darkTextColor: "#ffffff"
+  - name: "Collaboration & Communication"
+    position: 3
+    lightBackgroundColor: "#3498db"
+    lightTextColor: "#ffffff"
+    darkBackgroundColor: "#2980b9"
+    darkTextColor: "#ffffff"
+  - name: "Clarity & Direction"
+    position: 4
+    lightBackgroundColor: "#9b59b6"
+    lightTextColor: "#ffffff"
+    darkBackgroundColor: "#8e44ad"
+    darkTextColor: "#ffffff"
+  - name: "Growth & Learning"
+    position: 5
+    lightBackgroundColor: "#1abc9c"
+    lightTextColor: "#ffffff"
+    darkBackgroundColor: "#16a085"
+    darkTextColor: "#ffffff"
