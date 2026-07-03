@@ -2,24 +2,28 @@ name: Sailboat
 description: Useful on a more infrequent basis, and is meant to get participants to take a step back and look at the project as a whole.
 categories:
   - name: "Wind in our sails"
+    description: "What's propelling us forward and helping us move faster?"
     position: 1
     lightBackgroundColor: "#F4D797"
     lightTextColor: "#ffffff"
     darkBackgroundColor: "#FFCE61"
     darkTextColor: "#ffffff"
   - name: "Anchor dragging us down"
+    description: "What's holding us back or slowing our progress?"
     position: 2
     lightBackgroundColor: "#B5728E"
     lightTextColor: "#ffffff"
     darkBackgroundColor: "#50366F"
     darkTextColor: "#ffffff"
   - name: "Hazards ahead"
+    description: "Risks or obstacles we can see coming that could threaten us."
     position: 3
     lightBackgroundColor: "#DA7F7D"
     lightTextColor: "#ffffff"
     darkBackgroundColor: "#BF3475"
     darkTextColor: "#ffffff"
   - name: "What we are moving towards"
+    description: "The goal or destination we're steering toward."
     position: 4
     lightBackgroundColor: "#EBB58A"
     lightTextColor: "#ffffff"
