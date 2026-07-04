@@ -17,30 +17,35 @@ description: >
   Growth & Learning: Are we developing our skills and growing as a team?
 categories:
   - name: "Energy & Morale"
+    description: "How are we feeling? Are we motivated or running on empty?"
     position: 1
     lightBackgroundColor: "#2ecc71"
     lightTextColor: "#ffffff"
     darkBackgroundColor: "#27ae60"
     darkTextColor: "#ffffff"
   - name: "Workload & Pace"
+    description: "Is our pace sustainable, or are we stretched too thin?"
     position: 2
     lightBackgroundColor: "#e67e22"
     lightTextColor: "#ffffff"
     darkBackgroundColor: "#d35400"
     darkTextColor: "#ffffff"
   - name: "Collaboration & Communication"
+    description: "How well are we working together and sharing information?"
     position: 3
     lightBackgroundColor: "#3498db"
     lightTextColor: "#ffffff"
     darkBackgroundColor: "#2980b9"
     darkTextColor: "#ffffff"
   - name: "Clarity & Direction"
+    description: "Do we know where we're going and why?"
     position: 4
     lightBackgroundColor: "#9b59b6"
     lightTextColor: "#ffffff"
     darkBackgroundColor: "#8e44ad"
     darkTextColor: "#ffffff"
   - name: "Growth & Learning"
+    description: "Are we developing our skills and growing as a team?"
     position: 5
     lightBackgroundColor: "#1abc9c"
     lightTextColor: "#ffffff"

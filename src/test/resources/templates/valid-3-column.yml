@@ -2,21 +2,23 @@ name: Happy, Confused, Sad
 description: Description
 categories:
   - name: "Happy"
+    description: "Happy description"
     position: 1
     lightBackgroundColor: "#ffffff"
     lightTextColor: "#ffffff"
     darkBackgroundColor: "#ffffff"
     darkTextColor: "#ffffff"
   - name: "Confused"
+    description: "Confused description"
     position: 2
     lightBackgroundColor: "#ffffff"
     lightTextColor: "#ffffff"
     darkBackgroundColor: "#ffffff"
     darkTextColor: "#ffffff"
   - name: "Sad"
+    description: "Sad description"
     position: 3
     lightBackgroundColor: "#ffffff"
     lightTextColor: "#ffffff"
     darkBackgroundColor: "#ffffff"
     darkTextColor: "#ffffff"
-

@@ -13,18 +13,21 @@ description: >
   Sad: What is something that saddened or angered you? How do we prevent that from happening again?
 categories:
   - name: "Happy"
+    description: "What made you feel happy? What could we do to continue it?"
     position: 1
     lightBackgroundColor: "#2ecc71"
     lightTextColor: "#ffffff"
     darkBackgroundColor: "#27ae60"
     darkTextColor: "#ffffff"
   - name: "Confused"
+    description: "What confused you? What could help clear it up?"
     position: 2
     lightBackgroundColor: "#3498db"
     lightTextColor: "#ffffff"
     darkBackgroundColor: "#2980b9"
     darkTextColor: "#ffffff"
   - name: "Sad"
+    description: "What saddened or frustrated you? How might we prevent it?"
     position: 3
     lightBackgroundColor: "#e74c3c"
     lightTextColor: "#ffffff"
