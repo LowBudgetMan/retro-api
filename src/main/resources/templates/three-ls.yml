@@ -12,18 +12,21 @@ description: >
   Lacked: What was missing? What did you need but didn't have?
 categories:
   - name: "Liked"
+    description: "What went well? What did you enjoy or want to keep doing?"
     position: 1
     lightBackgroundColor: "#3498db"
     lightTextColor: "#ffffff"
     darkBackgroundColor: "#2980b9"
     darkTextColor: "#ffffff"
   - name: "Learned"
+    description: "What new insights, skills, or information did you gain?"
     position: 2
     lightBackgroundColor: "#2ecc71"
     lightTextColor: "#ffffff"
     darkBackgroundColor: "#27ae60"
     darkTextColor: "#ffffff"
   - name: "Lacked"
+    description: "What was missing? What did you need but didn't have?"
     position: 3
     lightBackgroundColor: "#e74c3c"
     lightTextColor: "#ffffff"
