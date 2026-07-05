@@ -1,0 +1,65 @@
+name: Block AI attribution
+
+# Fails the PR if any commit credits an AI tool as an author, committer, or
+# co-author. Guards both the commit identity (author/committer name + email)
+# and `Co-authored-by:` trailers. See CONTRIBUTING for the policy: the human
+# author is the sole contributor; AI tools are never credited.
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  no-ai-attribution:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Scan PR commits for AI attribution
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+
+          # Case-insensitive substrings that must not appear in commit identity
+          # or in a Co-authored-by trailer. Extend as needed (e.g. |copilot).
+          PATTERN='anthropic|claude'
+
+          # Ensure the base commit is present, then list PR-only commits.
+          git fetch --no-tags --depth=1 origin "$BASE_SHA" 2>/dev/null || true
+          commits="$(git rev-list "$BASE_SHA..$HEAD_SHA")"
+
+          if [ -z "$commits" ]; then
+            echo "No commits to check."
+            exit 0
+          fi
+
+          fail=0
+          for c in $commits; do
+            # Author + committer identity (name and email).
+            identity="$(git show -s --format='author %an <%ae>%ncommitter %cn <%ce>' "$c")"
+            # Only Co-authored-by trailer lines — not the free-text body, so a
+            # commit that legitimately mentions Anthropic/Claude won't trip it.
+            coauthors="$(git show -s --format='%B' "$c" | grep -iE '^[[:space:]]*co-authored-by:' || true)"
+
+            hits="$(printf '%s\n%s\n' "$identity" "$coauthors" | grep -iE "$PATTERN" || true)"
+            if [ -n "$hits" ]; then
+              echo "::error::Commit $c credits an AI tool:"
+              printf '%s\n' "$hits" | sed 's/^/    /'
+              fail=1
+            fi
+          done
+
+          if [ "$fail" -ne 0 ]; then
+            echo "::error::Remove AI attribution (author/committer identity and Co-authored-by trailers) before merging — the human author is the sole contributor. See CONTRIBUTING."
+            exit 1
+          fi
+
+          echo "No AI attribution found in PR commits. ✅"
