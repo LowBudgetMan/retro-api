@@ -77,6 +77,7 @@ public class SecurityConfig {
                     authorize.requestMatchers("/api/websocket/**").permitAll();
                     authorize.requestMatchers("/api/websocket").permitAll();
                     authorize.requestMatchers("/api/share/**").permitAll();
+                    authorize.requestMatchers("/actuator/health/**").permitAll();
                     authorize.anyRequest().authenticated();
                 })
                 .oauth2ResourceServer((oauth2) -> oauth2

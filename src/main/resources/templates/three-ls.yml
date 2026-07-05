@@ -1,0 +1,31 @@
+name: 3 L's
+description: >
+  The 3 L's retro focuses on learning and growth. Team members reflect on what they Liked,
+  what they Learned, and what they Lacked over the period being reviewed. It works well for
+  teams that want to surface takeaways and gaps in a lightweight, forward-looking way.
+
+
+  Liked: What went well? What did you enjoy or want to keep doing?
+
+  Learned: What new insights, skills, or information did you gain?
+
+  Lacked: What was missing? What did you need but didn't have?
+categories:
+  - name: "Liked"
+    position: 1
+    lightBackgroundColor: "#3498db"
+    lightTextColor: "#ffffff"
+    darkBackgroundColor: "#2980b9"
+    darkTextColor: "#ffffff"
+  - name: "Learned"
+    position: 2
+    lightBackgroundColor: "#2ecc71"
+    lightTextColor: "#ffffff"
+    darkBackgroundColor: "#27ae60"
+    darkTextColor: "#ffffff"
+  - name: "Lacked"
+    position: 3
+    lightBackgroundColor: "#e74c3c"
+    lightTextColor: "#ffffff"
+    darkBackgroundColor: "#c0392b"
+    darkTextColor: "#ffffff"
