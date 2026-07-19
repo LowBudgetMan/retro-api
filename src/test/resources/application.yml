@@ -20,3 +20,6 @@ web:
     allowed-origins:
 websocket:
   base-url: "ws://localhost:8080"
+retro:
+  teams:
+    default-plan: FREE
