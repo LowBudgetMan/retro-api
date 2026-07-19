@@ -169,4 +169,29 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet id="add-team-subscription-table" author="lowbudgetman">
+        <preConditions>
+            <not>
+                <tableExists tableName="team_subscription" />
+            </not>
+        </preConditions>
+        <createTable tableName="team_subscription">
+            <column name="id" type="uuid" autoIncrement="1">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="team_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="FK_SUBSCRIPTION_TEAM" references="team(id)" />
+            </column>
+            <column name="plan" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="plan_status" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="datetime">
+                <constraints nullable="false" />
+            </column>
+            <column name="modified_at" type="datetime" />
+        </createTable>
+    </changeSet>
 </databaseChangeLog>
