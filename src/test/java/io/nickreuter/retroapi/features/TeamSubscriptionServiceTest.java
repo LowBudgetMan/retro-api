@@ -4,12 +4,13 @@ import io.nickreuter.retroapi.configuration.RetroTeamProperties;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.util.Date;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.assertArg;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 class TeamSubscriptionServiceTest {
     private final Plan defaultPlan = Plan.FREE;
@@ -58,6 +59,27 @@ class TeamSubscriptionServiceTest {
         ArgumentCaptor<TeamSubscriptionEntity> captor = ArgumentCaptor.forClass(TeamSubscriptionEntity.class);
         verify(mockSubscriptionRepo).save(captor.capture());
         assertThat(captor.getValue().getPlanStatus()).isEqualTo(PlanStatus.ACTIVE);
+    }
+
+    @Test
+    void getPlanForTeam_WhenTeamExists_ReturnsPlan() {
+        var teamId = UUID.randomUUID();
+        var savedSubscription = new TeamSubscriptionEntity(null, teamId, Plan.ENTERPRISE, PlanStatus.ACTIVE, new Date(), new Date());
+        when(mockSubscriptionRepo.findByTeamId(teamId)).thenReturn(Optional.of(savedSubscription));
+
+        var actual = subject.getPlanForTeam(teamId);
+
+        assertThat(actual.orElseThrow()).isEqualTo(savedSubscription.getPlan());
+    }
+
+    @Test
+    void getPlanForTeam_WhenTeamDoesNotExist_ReturnsEmptyOptional() {
+        var teamId = UUID.randomUUID();
+        when(mockSubscriptionRepo.findByTeamId(teamId)).thenReturn(Optional.empty());
+
+        var actual = subject.getPlanForTeam(teamId);
+
+        assertThat(actual).isEmpty();
     }
 
     private static TeamSubscriptionEntity checkSavedEntity(TeamSubscriptionEntity expectedSubscription) {
