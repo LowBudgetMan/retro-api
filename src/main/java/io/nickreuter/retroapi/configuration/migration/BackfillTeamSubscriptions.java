@@ -26,23 +26,24 @@ public class BackfillTeamSubscriptions implements CustomTaskChange {
     public void execute(Database database) throws CustomChangeException {
         var connection = (JdbcConnection) database.getConnection();
         try {
-            List<String> teamIds = new ArrayList<>();
+            List<UUID> teamIds = new ArrayList<>();
             try (Statement statement = connection.createStatement();
                  ResultSet rs = statement.executeQuery(
                          "SELECT t.id FROM team t WHERE NOT EXISTS " +
                          "(SELECT 1 FROM team_subscription ts WHERE ts.team_id = t.id)")) {
                 while (rs.next()) {
-                    teamIds.add(rs.getString(1));
+                    teamIds.add(UUID.fromString(rs.getString(1)));
                 }
             }
             try (PreparedStatement ps = connection.prepareStatement(
-                    "INSERT INTO team_subscription (id, team_id, plan, plan_status, created_at) " +
-                    "VALUES (?, ?, 'FREE', 'ACTIVE', ?)")) {
+                    "INSERT INTO team_subscription (id, team_id, plan, plan_status, created_at, modified_at) " +
+                    "VALUES (?, ?, 'FREE', 'ACTIVE', ?, ?)")) {
                 Timestamp now = Timestamp.from(Instant.now());
-                for (String teamId : teamIds) {
-                    ps.setString(1, UUID.randomUUID().toString());
-                    ps.setString(2, teamId);
+                for (UUID teamId : teamIds) {
+                    ps.setObject(1, UUID.randomUUID());
+                    ps.setObject(2, teamId);
                     ps.setTimestamp(3, now);
+                    ps.setTimestamp(4, now);
                     ps.addBatch();
                 }
                 ps.executeBatch();
