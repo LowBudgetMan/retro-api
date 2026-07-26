@@ -38,6 +38,8 @@ class LiquibaseNativeHints {
                 } catch (ClassNotFoundException ignored) {
                 }
             }
+
+            hints.reflection().registerType(io.nickreuter.retroapi.configuration.migration.BackfillTeamSubscriptions.class, CATEGORIES);
         }
     }
 }

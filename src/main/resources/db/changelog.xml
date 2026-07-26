@@ -194,4 +194,7 @@
             <column name="modified_at" type="datetime" />
         </createTable>
     </changeSet>
+    <changeSet id="add-default-subscription-for-existing-teams" author="lowbudgetman">
+        <customChange class="io.nickreuter.retroapi.configuration.migration.BackfillTeamSubscriptions"/>
+    </changeSet>
 </databaseChangeLog>
