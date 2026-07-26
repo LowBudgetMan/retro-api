@@ -1,10 +1,9 @@
-package io.nickreuter.retroapi.features;
+package io.nickreuter.retroapi.team.subscription;
 
 import io.nickreuter.retroapi.configuration.RetroTeamProperties;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 @Service

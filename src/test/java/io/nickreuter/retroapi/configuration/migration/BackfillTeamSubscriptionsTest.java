@@ -1,9 +1,9 @@
 package io.nickreuter.retroapi.configuration.migration;
 
-import io.nickreuter.retroapi.features.Plan;
-import io.nickreuter.retroapi.features.PlanStatus;
-import io.nickreuter.retroapi.features.TeamSubscriptionEntity;
-import io.nickreuter.retroapi.features.TeamSubscriptionRepository;
+import io.nickreuter.retroapi.team.subscription.Plan;
+import io.nickreuter.retroapi.team.subscription.PlanStatus;
+import io.nickreuter.retroapi.team.subscription.TeamSubscriptionEntity;
+import io.nickreuter.retroapi.team.subscription.TeamSubscriptionRepository;
 import io.nickreuter.retroapi.team.TeamEntity;
 import io.nickreuter.retroapi.team.TeamRepository;
 import jakarta.persistence.EntityManager;

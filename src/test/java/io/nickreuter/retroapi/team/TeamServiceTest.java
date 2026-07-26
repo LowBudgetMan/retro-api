@@ -1,5 +1,6 @@
 package io.nickreuter.retroapi.team;
 
+import io.nickreuter.retroapi.team.subscription.TeamSubscriptionService;
 import io.nickreuter.retroapi.team.exception.BadInviteException;
 import io.nickreuter.retroapi.team.invite.InviteEntity;
 import io.nickreuter.retroapi.team.invite.InviteService;
@@ -19,7 +20,8 @@ class TeamServiceTest {
     private final TeamRepository teamRepository = mock(TeamRepository.class);
     private final UserMappingService userMappingService = mock(UserMappingService.class);
     private final InviteService inviteService = mock(InviteService.class);
-    private final TeamService service = new TeamService(teamRepository, userMappingService, inviteService);
+    private final TeamSubscriptionService subscriptionService = mock(TeamSubscriptionService.class);
+    private final TeamService service = new TeamService(teamRepository, userMappingService, inviteService, subscriptionService);
 
     @Test
     void createTeam_ShouldReturnCreatedTeam() {
@@ -38,8 +40,15 @@ class TeamServiceTest {
         var expected = new TeamEntity(UUID.randomUUID(), "expected team name", Instant.now());
         when(teamRepository.save(any())).thenReturn(expected);
         var actual = service.createTeam("expected team name", "User ID");
-        assertThat(actual).isEqualTo(expected);
         verify(userMappingService).addUserToTeam("User ID", actual.getId());
+    }
+
+    @Test
+    void createTeam_ShouldAddDefaultSubscriptionForTeam() {
+        var expected = new TeamEntity(UUID.randomUUID(), "expected team name", Instant.now());
+        when(teamRepository.save(any())).thenReturn(expected);
+        var actual = service.createTeam("expected team name", "User ID");
+        verify(subscriptionService).createSubscriptionForTeam(actual.getId());
     }
 
     @Test

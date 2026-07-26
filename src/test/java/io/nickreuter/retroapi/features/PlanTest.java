@@ -1,10 +1,11 @@
 package io.nickreuter.retroapi.features;
 
+import io.nickreuter.retroapi.team.subscription.Plan;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
-import static io.nickreuter.retroapi.features.Feature.*;
+import static io.nickreuter.retroapi.team.subscription.Feature.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PlanTest {

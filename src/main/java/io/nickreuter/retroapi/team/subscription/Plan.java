@@ -1,9 +1,9 @@
-package io.nickreuter.retroapi.features;
+package io.nickreuter.retroapi.team.subscription;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import static io.nickreuter.retroapi.features.Feature.*;
+import static io.nickreuter.retroapi.team.subscription.Feature.*;
 
 public enum Plan {
     FREE(Set.of()),

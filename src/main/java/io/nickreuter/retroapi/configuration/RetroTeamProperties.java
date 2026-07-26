@@ -1,6 +1,6 @@
 package io.nickreuter.retroapi.configuration;
 
-import io.nickreuter.retroapi.features.Plan;
+import io.nickreuter.retroapi.team.subscription.Plan;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;

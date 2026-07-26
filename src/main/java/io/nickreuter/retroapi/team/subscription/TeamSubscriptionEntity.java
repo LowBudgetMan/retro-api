@@ -1,4 +1,4 @@
-package io.nickreuter.retroapi.features;
+package io.nickreuter.retroapi.team.subscription;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
