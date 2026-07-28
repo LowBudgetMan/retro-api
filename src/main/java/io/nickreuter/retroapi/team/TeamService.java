@@ -1,6 +1,7 @@
 package io.nickreuter.retroapi.team;
 
 import io.micrometer.core.annotation.Timed;
+import io.nickreuter.retroapi.team.subscription.TeamSubscriptionService;
 import io.nickreuter.retroapi.team.exception.BadInviteException;
 import io.nickreuter.retroapi.team.invite.InviteEntity;
 import io.nickreuter.retroapi.team.invite.InviteService;
@@ -21,17 +22,20 @@ public class TeamService {
     private final TeamRepository teamRepository;
     private final UserMappingService userMappingService;
     private final InviteService inviteService;
+    private final TeamSubscriptionService subscriptionService;
 
-    public TeamService(TeamRepository teamRepository, UserMappingService userMappingService, InviteService inviteService) {
+    public TeamService(TeamRepository teamRepository, UserMappingService userMappingService, InviteService inviteService, TeamSubscriptionService subscriptionService) {
         this.teamRepository = teamRepository;
         this.userMappingService = userMappingService;
         this.inviteService = inviteService;
+        this.subscriptionService = subscriptionService;
     }
 
     @Timed("retro.team.create")
     public TeamEntity createTeam(String name, String userId) {
         var team = teamRepository.save(new TeamEntity(name));
         userMappingService.addUserToTeam(userId, team.getId());
+        subscriptionService.createSubscriptionForTeam(team.getId());
         return team;
     }
 

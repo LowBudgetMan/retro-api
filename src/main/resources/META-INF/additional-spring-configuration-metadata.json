@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "name": "retro.teams.default-plan",
+      "type": "io.nickreuter.retroapi.team.subscription.Plan",
+      "description": "Default plan used when a new Team subscription is created or a subscription is not defined for a Team and a feature check is performed."
+  }
+] }

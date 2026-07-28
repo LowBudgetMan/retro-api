@@ -36,3 +36,6 @@ management:
       export:
         enabled: false
         step: 60s
+retro:
+  teams:
+    default-plan: FREE
