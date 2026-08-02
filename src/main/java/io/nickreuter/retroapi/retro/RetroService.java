@@ -2,8 +2,10 @@ package io.nickreuter.retroapi.retro;
 
 import io.nickreuter.retroapi.notification.event.RetroFinishedEvent;
 import io.nickreuter.retroapi.retro.template.Template;
+import io.nickreuter.retroapi.retro.thought.ThoughtRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -13,11 +15,13 @@ import java.util.UUID;
 @Service
 public class RetroService {
     private final RetroRepository retroRepository;
+    private final ThoughtRepository thoughtRepository;
     private final List<Template> templates;
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    public RetroService(RetroRepository retroRepository, List<Template> templates, ApplicationEventPublisher applicationEventPublisher) {
+    public RetroService(RetroRepository retroRepository, ThoughtRepository thoughtRepository, List<Template> templates, ApplicationEventPublisher applicationEventPublisher) {
         this.retroRepository = retroRepository;
+        this.thoughtRepository = thoughtRepository;
         this.templates = templates;
         this.applicationEventPublisher = applicationEventPublisher;
     }
@@ -52,5 +56,11 @@ public class RetroService {
         retro.setFinished(finished);
         retroRepository.save(retro);
         applicationEventPublisher.publishEvent(new RetroFinishedEvent(this, finished, retroId));
+    }
+
+    @Transactional
+    public void deleteRetro(UUID retroId) {
+        thoughtRepository.deleteByRetroId(retroId);
+        retroRepository.deleteById(retroId);
     }
 }
