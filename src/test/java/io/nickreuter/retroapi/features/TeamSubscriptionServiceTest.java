@@ -83,6 +83,41 @@ class TeamSubscriptionServiceTest {
         assertThat(actual).isEmpty();
     }
 
+    @Test
+    void getEffectivePlanForTeam_WhenStatusIsActive_ReturnsStoredPlan() {
+        var teamId = UUID.randomUUID();
+        when(mockSubscriptionRepo.findByTeamId(teamId)).thenReturn(Optional.of(
+                new TeamSubscriptionEntity(null, teamId, Plan.PRO, PlanStatus.ACTIVE, new Date(), new Date())));
+
+        assertThat(subject.getEffectivePlanForTeam(teamId)).isEqualTo(Plan.PRO);
+    }
+
+    @Test
+    void getEffectivePlanForTeam_WhenStatusIsTrial_ReturnsStoredPlan() {
+        var teamId = UUID.randomUUID();
+        when(mockSubscriptionRepo.findByTeamId(teamId)).thenReturn(Optional.of(
+                new TeamSubscriptionEntity(null, teamId, Plan.ENTERPRISE, PlanStatus.TRIAL, new Date(), new Date())));
+
+        assertThat(subject.getEffectivePlanForTeam(teamId)).isEqualTo(Plan.ENTERPRISE);
+    }
+
+    @Test
+    void getEffectivePlanForTeam_WhenStatusIsCancelled_ReturnsDefaultPlan() {
+        var teamId = UUID.randomUUID();
+        when(mockSubscriptionRepo.findByTeamId(teamId)).thenReturn(Optional.of(
+                new TeamSubscriptionEntity(null, teamId, Plan.PRO, PlanStatus.CANCELLED, new Date(), new Date())));
+
+        assertThat(subject.getEffectivePlanForTeam(teamId)).isEqualTo(defaultPlan);
+    }
+
+    @Test
+    void getEffectivePlanForTeam_WhenNoSubscriptionExists_ReturnsDefaultPlan() {
+        var teamId = UUID.randomUUID();
+        when(mockSubscriptionRepo.findByTeamId(teamId)).thenReturn(Optional.empty());
+
+        assertThat(subject.getEffectivePlanForTeam(teamId)).isEqualTo(defaultPlan);
+    }
+
     private static TeamSubscriptionEntity checkSavedEntity(TeamSubscriptionEntity expectedSubscription) {
         return assertArg(actual ->
                 assertThat(actual)
