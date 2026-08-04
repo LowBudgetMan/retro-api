@@ -3,9 +3,11 @@ package io.nickreuter.retroapi.team.actionitem;
 import io.nickreuter.retroapi.notification.event.RetroFinishedEvent;
 import io.nickreuter.retroapi.retro.RetroService;
 import org.springframework.context.ApplicationListener;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
 @Service
+@Order(100)
 public class ActionItemRetroFinishedEventListener implements ApplicationListener<RetroFinishedEvent> {
     private final RetroService retroService;
     private final ActionItemService actionItemService;
