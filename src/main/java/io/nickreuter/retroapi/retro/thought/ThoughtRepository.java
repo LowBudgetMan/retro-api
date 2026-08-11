@@ -17,4 +17,8 @@ public interface ThoughtRepository extends JpaRepository<ThoughtEntity, UUID> {
     @Modifying
     @Query("UPDATE thought thought set thought.votes = thought.votes + 1 where thought.id = :thoughtId")
     void incrementVotes(@Param("thoughtId") UUID thoughtId);
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM thought thought where thought.retroId = :retroId")
+    void deleteByRetroId(@Param("retroId") UUID retroId);
 }

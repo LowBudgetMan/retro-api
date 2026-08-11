@@ -27,4 +27,11 @@ public class TeamSubscriptionService {
     public Optional<Plan> getPlanForTeam(UUID teamId) {
         return teamSubscriptionRepository.findByTeamId(teamId).map(TeamSubscriptionEntity::getPlan);
     }
+
+    public Plan getEffectivePlanForTeam(UUID teamId) {
+        return teamSubscriptionRepository.findByTeamId(teamId)
+                .filter(subscription -> subscription.getPlanStatus() != PlanStatus.CANCELLED)
+                .map(TeamSubscriptionEntity::getPlan)
+                .orElse(defaultPlan);
+    }
 }

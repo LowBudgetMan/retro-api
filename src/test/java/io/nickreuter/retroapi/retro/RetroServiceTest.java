@@ -4,6 +4,7 @@ import io.nickreuter.retroapi.notification.EventType;
 import io.nickreuter.retroapi.notification.event.RetroFinishedEvent;
 import io.nickreuter.retroapi.retro.template.Category;
 import io.nickreuter.retroapi.retro.template.Template;
+import io.nickreuter.retroapi.retro.thought.ThoughtRepository;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
@@ -18,9 +19,10 @@ import static org.mockito.Mockito.*;
 
 class RetroServiceTest {
     private final RetroRepository retroRepository = mock(RetroRepository.class);
+    private final ThoughtRepository thoughtRepository = mock(ThoughtRepository.class);
     private final Template savedTemplate = new Template("template", "name", "description", List.of(new Category("column", 1, "", "", "", "")));
     private final ApplicationEventPublisher applicationEventPublisher = mock(ApplicationEventPublisher.class);
-    private final RetroService subject = new RetroService(retroRepository, List.of(savedTemplate), applicationEventPublisher);
+    private final RetroService subject = new RetroService(retroRepository, thoughtRepository, List.of(savedTemplate), applicationEventPublisher);
 
     @Test
     void createRetro_ReturnsCreatedRetro() throws InvalidTemplateIdException {
@@ -104,5 +106,16 @@ class RetroServiceTest {
         when(retroRepository.findById(retroId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> subject.setFinished(retroId, true)).isInstanceOf(RetroNotFoundException.class);
+    }
+
+    @Test
+    void deleteRetro_DeletesThoughtsThenRetro() {
+        var retroId = UUID.randomUUID();
+
+        subject.deleteRetro(retroId);
+
+        var inOrder = inOrder(thoughtRepository, retroRepository);
+        inOrder.verify(thoughtRepository).deleteByRetroId(retroId);
+        inOrder.verify(retroRepository).deleteById(retroId);
     }
 }

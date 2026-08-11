@@ -49,7 +49,7 @@ public class TeamController {
 
     @DeleteMapping("/{id}/users/{userId}")
     @PreAuthorize("@userMappingAuthorizationService.isUserMemberOfTeam(authentication, #teamId)")
-    public ResponseEntity<Void> removeUser(@PathVariable("id") UUID teamId, @PathVariable("userId") String userId) {
+    public ResponseEntity<Void> removeUser(@PathVariable("id") UUID teamId, @PathVariable String userId) {
         teamService.removeUser(teamId, userId);
         return ResponseEntity.ok().build();
     }
