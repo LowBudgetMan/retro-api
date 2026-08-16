@@ -36,7 +36,7 @@ services:
       - '25672:25672'
 
   api:
-    image: ${RETRO_API_IMAGE:-ghcr.io/lowbudgetman/retro-api:latest}
+    image: ${RETRO_API_IMAGE:-ghcr.io/bonfire-retro/retro-api:latest}
     ports:
       - "${API_PORT:-8080}:8080"
     environment:
