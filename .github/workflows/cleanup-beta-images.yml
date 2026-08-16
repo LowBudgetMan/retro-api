@@ -4,10 +4,21 @@ on:
   pull_request:
     types: [closed]
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number whose beta images should be cleaned up'
+        required: true
+        type: string
+      dry_run:
+        description: 'Only report what would be deleted'
+        required: false
+        type: boolean
+        default: true
 
 jobs:
   cleanup:
-    if: github.event.pull_request.merged == true
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -18,23 +29,71 @@ jobs:
           OWNER: ${{ github.repository_owner }}
 
       - name: Delete beta images for merged PR
+        shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PACKAGE: retro-api
+          PR_NUMBER: ${{ inputs.pr_number || github.event.pull_request.number }}
+          DRY_RUN: ${{ inputs.dry_run || false }}
         run: |
-          # Get all commit SHAs from the merged PR
-          COMMITS=$(gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/commits \
-            --paginate --jq '.[].sha' | cut -c1-7)
+          set -euo pipefail
 
-          # Get all package versions
-          VERSIONS=$(gh api /orgs/${{ env.OWNER_LC }}/packages/container/retro-api/versions \
-            --paginate --jq '.[] | {id: .id, tags: .metadata.container.tags}' 2>/dev/null || echo "")
+          echo "Package ${PACKAGE}, PR #${PR_NUMBER}, dry_run=${DRY_RUN}"
 
-          for SHORT_SHA in $COMMITS; do
-            for TAG in "beta-${SHORT_SHA}" "beta-${SHORT_SHA}-native"; do
-              VERSION_ID=$(echo "$VERSIONS" | jq -r "select(.tags[] == \"${TAG}\") | .id" 2>/dev/null || true)
-              if [ -n "$VERSION_ID" ] && [ "$VERSION_ID" != "null" ]; then
-                echo "Deleting image with tag ${TAG} (version ${VERSION_ID})"
-                gh api --method DELETE /orgs/${{ env.OWNER_LC }}/packages/container/retro-api/versions/${VERSION_ID} || true
-              fi
+          # Every beta tag this PR could have produced. Membership in this set
+          # is the sole licence to delete.
+          TARGETS=""
+          while read -r SHA; do
+            SHORT="${SHA:0:7}"
+            TARGETS="${TARGETS} beta-${SHORT} beta-${SHORT}-native"
+          done < <(gh api "repos/${REPO}/pulls/${PR_NUMBER}/commits" --paginate --jq '.[].sha')
+          echo "Beta tags for this PR:${TARGETS}"
+
+          # No 2>/dev/null here: failing to list versions must be loud. A
+          # swallowed error here once let this job silently do nothing.
+          VERSIONS="$(gh api "/orgs/${OWNER_LC}/packages/container/${PACKAGE}/versions" \
+            --paginate --jq '.[] | {id: .id, tags: (.metadata.container.tags // [])} | @json')"
+
+          deleted=0
+          skipped=0
+          while read -r LINE; do
+            [ -z "${LINE}" ] && continue
+            ID="$(jq -r '.id' <<<"${LINE}")"
+            TAGS=()
+            while IFS= read -r tag; do TAGS+=("${tag}"); done \
+              < <(jq -r '.tags[]?' <<<"${LINE}")
+            [ "${#TAGS[@]}" -eq 0 ] && continue
+
+            # Only consider versions carrying one of this PR's beta tags.
+            match=0
+            for t in "${TAGS[@]}"; do
+              case " ${TARGETS} " in *" ${t} "*) match=1 ;; esac
             done
-          done
+            [ "${match}" -eq 1 ] || continue
+
+            # SAFETY: the registry deletes whole *versions*, not tags. Builds are
+            # reproducible, so a beta image is often byte-identical to the released
+            # one, and GHCR then keeps a single version carrying beta-<sha>, latest
+            # and the CalVer tag together. Deleting on a beta match alone would take
+            # production's tags with it, so require every tag to belong to this PR.
+            extra=()
+            for t in "${TAGS[@]}"; do
+              case " ${TARGETS} " in *" ${t} "*) ;; *) extra+=("${t}") ;; esac
+            done
+            if [ "${#extra[@]}" -gt 0 ]; then
+              echo "::warning::Skipping version ${ID} — shared with non-beta tag(s): ${extra[*]}"
+              skipped=$((skipped + 1))
+              continue
+            fi
+
+            if [ "${DRY_RUN}" = "true" ]; then
+              echo "[dry-run] would delete version ${ID} (tags: ${TAGS[*]})"
+            else
+              echo "Deleting version ${ID} (tags: ${TAGS[*]})"
+              gh api --method DELETE "/orgs/${OWNER_LC}/packages/container/${PACKAGE}/versions/${ID}"
+              deleted=$((deleted + 1))
+            fi
+          done <<< "${VERSIONS}"
+
+          echo "Deleted ${deleted} version(s), skipped ${skipped} as shared."
