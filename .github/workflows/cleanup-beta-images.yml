@@ -26,7 +26,7 @@ jobs:
             --paginate --jq '.[].sha' | cut -c1-7)
 
           # Get all package versions
-          VERSIONS=$(gh api /users/${{ env.OWNER_LC }}/packages/container/retro-api/versions \
+          VERSIONS=$(gh api /orgs/${{ env.OWNER_LC }}/packages/container/retro-api/versions \
             --paginate --jq '.[] | {id: .id, tags: .metadata.container.tags}' 2>/dev/null || echo "")
 
           for SHORT_SHA in $COMMITS; do
@@ -34,7 +34,7 @@ jobs:
               VERSION_ID=$(echo "$VERSIONS" | jq -r "select(.tags[] == \"${TAG}\") | .id" 2>/dev/null || true)
               if [ -n "$VERSION_ID" ] && [ "$VERSION_ID" != "null" ]; then
                 echo "Deleting image with tag ${TAG} (version ${VERSION_ID})"
-                gh api --method DELETE /users/${{ env.OWNER_LC }}/packages/container/retro-api/versions/${VERSION_ID} || true
+                gh api --method DELETE /orgs/${{ env.OWNER_LC }}/packages/container/retro-api/versions/${VERSION_ID} || true
               fi
             done
           done
